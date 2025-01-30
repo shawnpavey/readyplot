@@ -1,3 +1,33 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "readyplot"
+version = "1.0.0"
+description = "Class-based plotter"
+readme = "README.md"
+dependencies = [
+      "matplotlib",
+      "numpy",
+      "pandas",
+      "os",
+      "seaborn",
+      "scipy",
+      "pathlib",
+      "setuptools"
+]
+authors = [
+    { name = "Shawn Pavey", email = "113555084+shawnpavey@users.noreply.github.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Public Domain",
+    "Operating System :: POSIX :: Linux"
+]
+
+requires-python = ">=3.6"
+
+[project.urls]
+Homepage = "https://github.com/shawnpavey/readyplot"
