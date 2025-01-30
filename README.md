@@ -13,12 +13,13 @@ pip install readyplot
 ````
 ## Usage
 ```{python}
-from readyplot.scatter_plotter import ScatterPlotter
-plotter = ScatterPlotter('box_strip',DF,MechVars[1],Var,'Surgery',colors=['c','m','g'],
-                                dodge=True,folder_name = folder_name,low_cap0=True,
+import readyplot
+whisk_plotter = readyplot.boxwhisker_plotter.BoxWhiskerPlotter('box_strip',DATA,'Group','Var1','Feature3',colors=['c','m','g'],
+                                dodge=True,folder_name = 'OUTPUT_FIGURES',low_cap0=True,
                                 handles_in_legend = 3,fig_width = 10,box_width = 0.9,
-                                custom_y_label =Var + ' (' + Units[MechVars.index(Var)]+')')  
-plotter.large_loop()
+                                custom_y_label ='Var1' + ' (' + Units[Vars.index('Var1')]+')')  
+whisk_plotter
+whisk_plotter.large_loop()
 ````
 
 ### Key Design Considerations:
