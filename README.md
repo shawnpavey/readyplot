@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 29 11:26:49 2025
-
-@author: paveyboys
-"""
-
 # My Plotting Package
 
 A class-based plotting package with defaults that easily provide scientific
