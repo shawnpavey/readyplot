@@ -14,12 +14,26 @@ pip install readyplot
 ## Usage
 ```{python}
 import readyplot
-whisk_plotter = readyplot.boxwhisker_plotter.BoxWhiskerPlotter('box_strip',DATA,'Group','Var1','Feature3',colors=['c','m','g'],
-                                dodge=True,folder_name = 'OUTPUT_FIGURES',low_cap0=True,
-                                handles_in_legend = 3,fig_width = 10,box_width = 0.9,
-                                custom_y_label ='Var1' + ' (' + Units[Vars.index('Var1')]+')')  
+x = ['A','A','A','B','B','B','B','B','B','B']
+y=[1,2,3,4,5,8,4,3,2,9]
+box_plotter = readyplot.boxwhisker_plotter.BoxWhiskerPlotter(x=x,y=y,xlab='Group',colors='c')
+box_plotter
+box_plotter.large_loop(save=True)
+
+
+#OR USING DATAFRAMES (PREFERED) AND MORE SETTINGS:
+import readyplot
+whisk_plotter = readyplot.boxwhisker_plotter.BoxWhiskerPlotter(
+    DFs=DATA,xlab='Group',ylab='Var1',zlab='Feature3',folder_name = 'OUTPUT_FIGURES',
+    colors=['c','m','g'],low_y_cap0=True,handles_in_legend = 3,fig_width = 7,fig_height = 5,box_width = 0.9,
+    custom_y_label ='Var1' + ' (' + Units[Vars.index('Var1')]+')')
 whisk_plotter
-whisk_plotter.large_loop()
+whisk_plotter.large_loop(save=True)
+
+#FOR SCATTER PLOTTING:
+#--> Use the exact same syntax
+
+
 ````
 
 ### Key Design Considerations:
