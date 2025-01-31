@@ -45,3 +45,13 @@ def min_maxer(mn,mx,cap0 = False):
         s_min = 0
 
     return s_min,s_max,bins
+
+def is_mostly_strings(column, threshold=0.8):
+    # Check if each element in the column is a string
+    string_count = column.apply(lambda x: isinstance(x, str)).sum()
+
+    # Calculate the proportion of strings
+    proportion_strings = string_count / len(column)
+
+    # Check if it exceeds the threshold
+    return proportion_strings >= threshold

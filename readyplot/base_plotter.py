@@ -17,44 +17,49 @@ from matplotlib import pyplot as plt
 import scipy.stats as stats
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker,min_maxer
+from .utils import numeric_checker, min_maxer, is_mostly_strings
+
 
 class BasePlotter:
-    def __init__(self,plot_type,DFs,xlab,ylab,
-                       hues=None,
-                       input_fig = None,
-                       input_ax = None,
-                       colors=['g','r','b','y','c','m','k','w'],
-                       markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                       def_font_sz = 16,
-                       def_line_w = 1.5,
-                       folder_name=None,
-                       dpi = 300,
-                       sns_palette = "deep",
-                       sns_style = "ticks",
-                       sns_context = "notebook",
-                       fontweight='bold',
-                       box_edges = ['bottom','left'],
-                       fig_width = 10,
-                       xtick_font_ratio = 1,
-                       ytick_font_ratio = 0.9,
-                       x_exp_location = 0,
-                       y_exp_location = 0,
-                       annote_x_start = 0.7,
-                       annote_y_start = 0.7,
-                       x_axis_sig_figs = 0,
-                       y_axis_sig_figs = 2,
-                       low_cap0 = False,
-                       dodge = False,
-                       handles_in_legend = 10,
-                       box_width = 0.6,
-                       custom_x_label = None,
-                       custom_y_label = None,
-                       title = None,
-                       **kwargs):
-        
-        self.plot_type = plot_type
-        
+    def __init__(self, DFs=None, x=None, y=None, z=None, xlab=None, ylab=None, zlab=None,
+                 input_fig = None,
+                 input_ax = None,
+                 colors=['g','r','b','y','c','m','k','w'],
+                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
+                 def_font_sz = 16,
+                 def_line_w = 1.5,
+                 folder_name=None,
+                 dpi = 300,
+                 sns_palette = "deep",
+                 sns_style = "ticks",
+                 sns_context = "notebook",
+                 fontweight='bold',
+                 box_edges = ['bottom','left'],
+                 fig_width = 10,
+                 fig_height = 10,
+                 xtick_font_ratio = 1,
+                 ytick_font_ratio = 0.9,
+                 x_exp_location = 0,
+                 y_exp_location = 0,
+                 annote_x_start = 0.7,
+                 annote_y_start = 0.7,
+                 x_axis_sig_figs = 0,
+                 y_axis_sig_figs = 2,
+                 low_x_cap0 = False,
+                 low_y_cap0=False,
+                 dodge = True,
+                 handles_in_legend = 10,
+                 box_width = 0.6,
+                 custom_x_label = None,
+                 custom_y_label = None,
+                 title = None,
+                 plot_type = 'plot',
+                 **kwargs):
+
+        self.xlab = xlab
+        self.ylab = ylab
+        self.zlab = zlab
+
         if not isinstance(DFs, list):
             DFs = [DFs]
         self.DFs = DFs
@@ -63,13 +68,9 @@ class BasePlotter:
         self.max_list_x = []
         self.max_list_y = []
         for DF in DFs:
-            self.max_list_x.append(DF[xlab].max())
-            self.max_list_y.append(DF[ylab].max())
+            self.max_list_x.append(DF[self.xlab].max())
+            self.max_list_y.append(DF[self.ylab].max())
         self.DF_counter = 0
-        
-        self.xlab = xlab
-        self.ylab = ylab
-        self.hues = hues
         
         self.input_fig = input_fig
         self.input_ax = input_ax
@@ -91,6 +92,7 @@ class BasePlotter:
         self.fontweight = fontweight
         self.box_edges = box_edges
         self.fig_width = fig_width
+        self.fig_height = fig_height
         self.xtick_font_ratio = xtick_font_ratio
         self.ytick_font_ratio = ytick_font_ratio
         self.x_exp_location = x_exp_location
@@ -99,17 +101,22 @@ class BasePlotter:
         self.annote_y_start = annote_y_start
         self.x_axis_sig_figs = x_axis_sig_figs
         self.y_axis_sig_figs = y_axis_sig_figs
-        self.low_cap0 = low_cap0
+        self.low_x_cap0 = low_x_cap0
+        self.low_y_cap0 = low_y_cap0
         self.dodge = dodge
         self.handles_in_legend = handles_in_legend
         self.box_width = box_width
         self.custom_x_label = custom_x_label
         self.custom_y_label = custom_y_label
         self.title = title
+        self.plot_type = plot_type
         self.__dict__.update(**kwargs)
         self.kwargs = kwargs
-    
-    def large_loop(self):
+
+    def force_data_frame(self):
+        print("forcing data frame")
+
+    def large_loop(self,save=True):
         for DF in self.DFs:
             # PRE-FORMAT PLOT
             self.pre_format(DF)
@@ -121,7 +128,8 @@ class BasePlotter:
             self.post_format()
             
             # SAVE CURRENT FIGURE
-            self.save()
+            if save:
+                self.save()
             
             # HANDLE LOOPER
             self.fig_list.append(self.fig)
@@ -142,13 +150,14 @@ class BasePlotter:
         self.fig = plt.figure(self.current_fig_num,dpi=self.dpi)
         self.ax = self.fig.add_subplot(111)
         self.fig.set_figwidth(self.fig_width)
+        self.fig.set_figheight(self.fig_height)
         sns.color_palette(self.sns_palette)
         sns.set_style(self.sns_style)
         sns.set_context(self.sns_context)
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         
-        self.unique = list(DF[self.hues].unique())
+        self.unique = list(DF[self.zlab].unique())
         while len(self.unique) > len(self.markers):
             self.markers.extend(self.markers)
         self.marker_dict = dict(zip(self.unique,self.markers))
@@ -186,7 +195,7 @@ class BasePlotter:
         if all([numeric_checker(tick) for tick in xtexts]):
             self.ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
             x_min, x_max = self.ax.get_xlim()
-            x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_cap0)
+            x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
             self.ax.set_xlim(x_min,x_max)
             self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
         
@@ -196,7 +205,7 @@ class BasePlotter:
         if all([numeric_checker(tick) for tick in ytexts]):
             self.ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
             y_min, y_max = self.ax.get_ylim()
-            y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_cap0)
+            y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_y_cap0)
             self.ax.set_ylim(y_min,y_max)
             self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
 
@@ -211,14 +220,24 @@ class BasePlotter:
         ty.set_position((self.y_exp_location,1.05))
     
     def save(self):
-        ylab_list = self.ylab.split(' ')
-        self.ylab_name = ''
-        for seg in ylab_list:
-            if "/" not in seg:
-                self.ylab_name += seg + '_'
+        if self.title is None:
+            if is_mostly_strings(self.DF[self.ylab]):
+                dependent_var_list = self.xlab.split(' ')
+            elif is_mostly_strings(self.DF[self.xlab]):
+                dependent_var_list = self.ylab.split(' ')
             else:
-                self.ylab_name += 'per' + '_'
-        self.save_name = self.DF.name + self.ylab_name + self.plot_type
+                # Assume y is the dependent variable
+                dependent_var_list = self.ylab.split(' ')
+
+            self.dependent_var_name = ''
+            for seg in dependent_var_list:
+                if "/" not in seg:
+                    self.dependent_var_name += seg + '_'
+                else:
+                    self.dependent_var_name += 'per' + '_'
+        else:
+            self.dependent_var_name = '_'
+        self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
         self.save_name.replace('/', "per") 
         
         try:
