@@ -28,15 +28,15 @@ class BasePlotter:
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
-                 folder_name=None,
+                 folder_name="OUTPUT_FIGURES",
                  dpi = 300,
                  sns_palette = "deep",
                  sns_style = "ticks",
                  sns_context = "notebook",
                  fontweight='bold',
                  box_edges = ['bottom','left'],
-                 fig_width = 10,
-                 fig_height = 10,
+                 fig_width = 5,
+                 fig_height = 5,
                  xtick_font_ratio = 1,
                  ytick_font_ratio = 0.9,
                  x_exp_location = 0,
@@ -160,20 +160,14 @@ class BasePlotter:
 
     def large_loop(self,save=True):
         for DF in self.DFs:
-            # PRE-FORMAT PLOT
+            # PROCESS A FIGURE
             self.pre_format(DF)
-            
-            # PLOT
             self.plot()
-                
-            # POST-FORMAT PLOT
             self.post_format()
-            
-            # SAVE CURRENT FIGURE
             if save:
                 self.save()
             
-            # HANDLE LOOPER
+            # HANDLE A LOOPER
             self.fig_list.append(self.fig)
             self.ax_list.append(self.ax)
             self.DF_counter += 1
@@ -206,8 +200,6 @@ class BasePlotter:
     
     def post_format(self):
         handles, labels = self.ax.get_legend_handles_labels()
-        print(handles)
-        print(labels)
         if not labels and not handles:
             plt.legend([]).set_visible(False)
         else:
@@ -241,11 +233,12 @@ class BasePlotter:
         for label in self.ax.get_xticklabels():
             xtexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in xtexts]):
-            self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
-            x_min, x_max = self.ax.get_xlim()
-            x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
-            self.ax.set_xlim(x_min,x_max)
-            self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
+            if self.plot_type != 'box_whisker':
+                self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
+                x_min, x_max = self.ax.get_xlim()
+                x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
+                self.ax.set_xlim(x_min,x_max)
+                self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
         
         ytexts = []
         for label in self.ax.get_yticklabels():

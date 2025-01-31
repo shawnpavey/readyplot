@@ -22,15 +22,15 @@ class ScatterPlotter(BasePlotter):
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
-                 folder_name=None,
+                 folder_name="OUTPUT_FIGURES",
                  dpi = 300,
                  sns_palette = "deep",
                  sns_style = "ticks",
                  sns_context = "notebook",
                  fontweight='bold',
                  box_edges = ['bottom','left'],
-                 fig_width = 10,
-                 fig_height = 10,
+                 fig_width = 5,
+                 fig_height = 5,
                  xtick_font_ratio = 1,
                  ytick_font_ratio = 0.9,
                  x_exp_location = 0,
@@ -90,6 +90,8 @@ class ScatterPlotter(BasePlotter):
         self.plot_type = plot_type
         self.trendline = trendline
         self.show_r2 = show_r2
+        if not self.trendline or not self.show_r2:
+            self.plot_type = "scatter"
         
     def plot(self):
         sns.scatterplot(

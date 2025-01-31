@@ -21,15 +21,15 @@ class BoxWhiskerPlotter(BasePlotter):
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
-                 folder_name=None,
+                 folder_name="OUTPUT_FIGURES",
                  dpi = 300,
                  sns_palette = "deep",
                  sns_style = "ticks",
                  sns_context = "notebook",
                  fontweight='bold',
                  box_edges = ['bottom','left'],
-                 fig_width = 10,
-                 fig_height = 10,
+                 fig_width = 7,
+                 fig_height = 5,
                  xtick_font_ratio = 1,
                  ytick_font_ratio = 0.9,
                  x_exp_location = 0,
@@ -87,6 +87,7 @@ class BoxWhiskerPlotter(BasePlotter):
         self.plot_type = plot_type
         
     def plot(self):
+        self.DF[self.xlab] = self.DF[self.xlab].astype(str)
         sns.boxplot(
             x=self.xlab, y=self.ylab, data=self.DF,
             boxprops={'alpha': 1,'edgecolor':'black'},hue =self.zlab,
