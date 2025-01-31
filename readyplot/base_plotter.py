@@ -108,8 +108,11 @@ class BasePlotter:
             self.fig_list = []
         if self.input_ax is None:
             self.ax_list = []
-        
+
+        if not isinstance(colors, list):
+            colors = [colors]
         self.colors = colors
+
         self.markers = markers
         self.def_font_sz = def_font_sz
         self.def_line_w = def_line_w
