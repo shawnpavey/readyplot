@@ -15,7 +15,7 @@ import scipy.stats as stats
 from .base_plotter import BasePlotter
 
 class ScatterPlotter(BasePlotter):
-    def __init__(self, DFs=None, xlab=None, ylab=None, zlab=None,
+    def __init__(self, DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                  input_fig = None,
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
@@ -47,8 +47,12 @@ class ScatterPlotter(BasePlotter):
                  custom_x_label = None,
                  custom_y_label = None,
                  title = None,
-                 plot_type = 'scatter_R2'):
-        super().__init__(DFs=DFs, xlab=xlab, ylab=ylab, zlab=zlab,
+                 plot_type = 'scatter_R2',
+                 sci_x_lims=(0, 1),
+                 sci_y_lims=(0, 1),
+                 trendline = None,
+                 show_r2 = True):
+        super().__init__(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
                          input_fig=input_fig,
                          input_ax=input_ax,
                          colors=colors,
@@ -80,8 +84,12 @@ class ScatterPlotter(BasePlotter):
                          custom_x_label = custom_x_label,
                          custom_y_label = custom_y_label,
                          plot_type = plot_type,
-                         title = title)
+                         title = title,
+                         sci_x_lims=sci_x_lims,
+                         sci_y_lims=sci_y_lims)
         self.plot_type = plot_type
+        self.trendline = trendline
+        self.show_r2 = show_r2
         
     def plot(self):
         sns.scatterplot(
@@ -91,19 +99,22 @@ class ScatterPlotter(BasePlotter):
                 ax=self.ax,**self.kwargs)
         g_counter = 0
         for g in self.unique:
-            sns.regplot(
-                x=self.xlab, y=self.ylab, data=self.DF.loc[self.DF[self.zlab] == g],
-                ci=None,color = self.colors[self.unique.index(g)],
-                scatter=False,ax=self.ax)       
-            tempDF =  self.DF.loc[self.DF[self.zlab] == g]
-            x = tempDF[self.xlab].to_numpy()
-            y = tempDF[self.ylab].to_numpy()
-            slope, intercept, r_value, p_value, std_err = stats.linregress(x.astype(float),y.astype(float))
-            r_squared = r_value ** 2
-            plt.text(self.max_list_x[self.DF_counter]*self.annote_x_start, 
-                        self.max_list_y[self.DF_counter]*(self.annote_y_start - 0.05*g_counter), 
-                        f"R-squared = {r_squared:.2f}", 
-                        fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
+            if self.trendline:
+                sns.regplot(
+                    x=self.xlab, y=self.ylab, data=self.DF.loc[self.DF[self.zlab] == g],
+                    ci=None,color = self.colors[self.unique.index(g)],
+                    scatter=False,ax=self.ax)
+
+                if self.show_r2:
+                    tempDF =  self.DF.loc[self.DF[self.zlab] == g]
+                    x = tempDF[self.xlab].to_numpy()
+                    y = tempDF[self.ylab].to_numpy()
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(x.astype(float),y.astype(float))
+                    r_squared = r_value ** 2
+                    plt.text(self.max_list_x[self.DF_counter]*self.annote_x_start,
+                                self.max_list_y[self.DF_counter]*(self.annote_y_start - 0.05*g_counter),
+                                f"R-squared = {r_squared:.2f}",
+                                fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
             g_counter += 1
             
     def large_loop(self,plot_type = 'scatter_R2',save = True):

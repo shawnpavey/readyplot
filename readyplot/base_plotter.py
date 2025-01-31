@@ -17,11 +17,11 @@ from matplotlib import pyplot as plt
 import scipy.stats as stats
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame
 
 
 class BasePlotter:
-    def __init__(self, DFs=None, x=None, y=None, z=None, xlab=None, ylab=None, zlab=None,
+    def __init__(self, DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                  input_fig = None,
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
@@ -54,6 +54,8 @@ class BasePlotter:
                  custom_y_label = None,
                  title = None,
                  plot_type = 'plot',
+                 sci_x_lims = (0,1),
+                 sci_y_lims = (0,1),
                  **kwargs):
 
         self.xlab = xlab
@@ -64,10 +66,37 @@ class BasePlotter:
             DFs = [DFs]
         self.DFs = DFs
         self.DF = self.DFs[0]
+
+        self.x = x
+        self.y = y
+        self.z = z
+
+        force_data_frame_booleans = []
+        if isinstance(self.x,list) or isinstance(self.x,np.ndarray):
+            force_data_frame_booleans.append(True)
+        else:
+            force_data_frame_booleans.append(False)
+        if isinstance(self.x, list) or isinstance(self.x, np.ndarray):
+            force_data_frame_booleans.append(True)
+        else:
+            force_data_frame_booleans.append(False)
+        if isinstance(self.x, list) or isinstance(self.x, np.ndarray):
+            force_data_frame_booleans.append(True)
+        else:
+            force_data_frame_booleans.append(False)
+
+        if any(force_data_frame_booleans):
+            self.DFs = self.force_data_frame()
+            self.DF = self.DFs[0]
+        else:
+            if not isinstance(DFs, list):
+                DFs = [DFs]
+            self.DFs = DFs
+            self.DF = self.DFs[0]
         
         self.max_list_x = []
         self.max_list_y = []
-        for DF in DFs:
+        for DF in self.DFs:
             self.max_list_x.append(DF[self.xlab].max())
             self.max_list_y.append(DF[self.ylab].max())
         self.DF_counter = 0
@@ -110,11 +139,24 @@ class BasePlotter:
         self.custom_y_label = custom_y_label
         self.title = title
         self.plot_type = plot_type
+        self.sci_x_lims = sci_x_lims
+        self.sci_y_lims = sci_y_lims
         self.__dict__.update(**kwargs)
         self.kwargs = kwargs
 
     def force_data_frame(self):
-        print("forcing data frame")
+        DFs = pd.DataFrame()
+        DFs[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
+        DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+        try:
+            DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
+        except (TypeError,ValueError) as e:
+            print(f'Caught an exception: {e} Filling z with empty strings to compensate for missing data')
+            if len(self.x) > len(self.y):
+                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+            else:
+                DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
+        return [DFs]
 
     def large_loop(self,save=True):
         for DF in self.DFs:
@@ -164,10 +206,16 @@ class BasePlotter:
     
     def post_format(self):
         handles, labels = self.ax.get_legend_handles_labels()
-        plt.legend(
-            handles[:self.handles_in_legend], 
-            labels[:self.handles_in_legend],
-            prop={'weight': 'bold'})
+        print(handles)
+        print(labels)
+        if not labels and not handles:
+            plt.legend([]).set_visible(False)
+        else:
+            plt.legend([]).set_visible(True)
+            plt.legend(
+                handles[:self.handles_in_legend],
+                labels[:self.handles_in_legend],
+                prop={'weight': 'bold'})
         if self.custom_x_label:
             plt.xlabel(self.custom_x_label)
         if self.custom_y_label:
@@ -193,7 +241,7 @@ class BasePlotter:
         for label in self.ax.get_xticklabels():
             xtexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in xtexts]):
-            self.ax.ticklabel_format(axis='x', style='sci', scilimits=(0,0))
+            self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
             x_min, x_max = self.ax.get_xlim()
             x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
             self.ax.set_xlim(x_min,x_max)
@@ -203,7 +251,7 @@ class BasePlotter:
         for label in self.ax.get_yticklabels():
             ytexts.append(label.get_text())  
         if all([numeric_checker(tick) for tick in ytexts]):
-            self.ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+            self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
             y_min, y_max = self.ax.get_ylim()
             y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_y_cap0)
             self.ax.set_ylim(y_min,y_max)

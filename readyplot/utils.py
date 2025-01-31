@@ -55,3 +55,22 @@ def is_mostly_strings(column, threshold=0.8):
 
     # Check if it exceeds the threshold
     return proportion_strings >= threshold
+
+def ensure_data_frame(input_data):
+    """
+    Converts the input to a Pandas DataFrame whether it's a list, NumPy array, or already a DataFrame.
+    """
+    import pandas as pd
+    import numpy as np
+    if isinstance(input_data, pd.DataFrame):
+        # If it's already a DataFrame, return it as is
+        return input_data
+    elif isinstance(input_data, list):
+        # If it's a list, convert to DataFrame
+        return pd.DataFrame(input_data)
+    elif isinstance(input_data, np.ndarray):
+        # If it's a NumPy array, convert to DataFrame
+        return pd.DataFrame(input_data)
+    else:
+        # Raise an error if it's an unsupported type
+        raise ValueError("Input data must be a list, NumPy array, or Pandas DataFrame.")

@@ -14,7 +14,7 @@ import numpy as np
 from .base_plotter import BasePlotter
 
 class BoxWhiskerPlotter(BasePlotter):
-    def __init__(self, DFs=None, xlab=None, ylab=None, zlab=None,
+    def __init__(self, DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                  input_fig = None,
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
@@ -46,8 +46,11 @@ class BoxWhiskerPlotter(BasePlotter):
                  custom_x_label = None,
                  custom_y_label = None,
                  title = None,
-                 plot_type = 'box_whisker'):
-        super().__init__(DFs=DFs, xlab=xlab, ylab=ylab, zlab=zlab,
+                 plot_type = 'box_whisker',
+                 sci_x_lims = (0, 1),
+                 sci_y_lims = (0, 1)):
+
+        super().__init__(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
                          input_fig=input_fig,
                          input_ax=input_ax,
                          colors=colors,
@@ -78,7 +81,9 @@ class BoxWhiskerPlotter(BasePlotter):
                          box_width = box_width,
                          custom_x_label = custom_x_label,
                          custom_y_label = custom_y_label,
-                         title = title)
+                         title = title,
+                         sci_x_lims = sci_x_lims,
+                         sci_y_lims = sci_y_lims)
         self.plot_type = plot_type
         
     def plot(self):
