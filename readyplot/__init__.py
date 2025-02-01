@@ -13,7 +13,7 @@ reformats given figures).
 from .boxwhisker_plotter import BoxWhiskerPlotter
 from .scatter_plotter import ScatterPlotter
 
-def boxwhisker_plotter(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='ylab', zlab='zlab',
+def boxwhisker(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='ylab', zlab='zlab',
                        folder_name='OUTPUT_FIGURES', colors=['c', 'm', 'g'], low_y_cap0=True,
                        handles_in_legend=3, fig_width=7, fig_height=5, box_width=0.9,
                        custom_y_label=None):
@@ -23,7 +23,7 @@ def boxwhisker_plotter(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='yla
                              fig_height=fig_height, box_width=box_width,
                              custom_y_label=custom_y_label)
 
-def scatter_plotter(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='ylab', zlab='zlab',
+def scatter(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='ylab', zlab='zlab',
                     folder_name='OUTPUT_FIGURES', colors=['c', 'm', 'g'], low_y_cap0=True,
                     handles_in_legend=3, fig_width=7, fig_height=5, box_width=0.9,
                     custom_y_label=None):
@@ -33,4 +33,4 @@ def scatter_plotter(DFs=None, x=None, y=None, z=None, xlab='Group', ylab='ylab',
                           fig_height=fig_height, box_width=box_width,
                           custom_y_label=custom_y_label)
 
-__all__ = ['boxwhisker_plotter', 'scatter_plotter', 'BoxWhiskerPlotter', 'ScatterPlotter']
+__all__ = ['boxwhisker', 'scatter', 'BoxWhiskerPlotter', 'ScatterPlotter']
