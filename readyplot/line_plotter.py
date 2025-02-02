@@ -89,20 +89,13 @@ class LinePlotter(BasePlotter):
                          **kwargs)
         self.plot_type = plot_type
         if self.markers == False:
-            self.markers = [self.markers]
+            self.markers = [False]
         
     def plot(self):
-        if 'style' not in self.kwargs:
-            sns.lineplot(
-                    x=self.xlab ,y=self.ylab ,data=self.DF,
-                    hue=self.zlab,palette=self.colors[0:len(self.unique)],
-                    style=self.zlab, markers=self.markers,
-                    ax=self.ax,**self.kwargs)
-        else:
-            sns.lineplot(
-                x=self.xlab, y=self.ylab, data=self.DF,
-                hue=self.zlab, markers = self.markers, palette=self.colors[0:len(self.unique)],
-                ax=self.ax, **self.kwargs)
+        sns.lineplot(
+            x=self.xlab, y=self.ylab, data=self.DF,
+            hue=self.zlab, markers = self.markers, palette=self.colors[0:len(self.unique)],
+            ax=self.ax, **self.kwargs)
             
     def large_loop(self,plot_type = 'line',save = True):
         super().large_loop(save=save)
