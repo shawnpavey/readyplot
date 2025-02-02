@@ -14,7 +14,7 @@ import numpy as np
 import scipy.stats as stats
 from .base_plotter import BasePlotter
 
-class ScatterPlotter(BasePlotter):
+class LinePlotter(BasePlotter):
     def __init__(self, DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                  input_fig = None,
                  input_ax = None,
@@ -47,11 +47,9 @@ class ScatterPlotter(BasePlotter):
                  custom_x_label = None,
                  custom_y_label = None,
                  title = None,
-                 plot_type = 'scatter_R2',
+                 plot_type = 'line',
                  sci_x_lims=(0, 1),
                  sci_y_lims=(0, 1),
-                 trendline = None,
-                 show_r2 = True,
                  **kwargs):
         super().__init__(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
                          input_fig=input_fig,
@@ -90,44 +88,23 @@ class ScatterPlotter(BasePlotter):
                          sci_y_lims=sci_y_lims,
                          **kwargs)
         self.plot_type = plot_type
-        self.trendline = trendline
-        self.show_r2 = show_r2
-        if not self.trendline or not self.show_r2:
-            self.plot_type = "scatter"
+        if self.markers == False:
+            self.markers = [self.markers]
         
     def plot(self):
         if 'style' not in self.kwargs:
-            sns.scatterplot(
+            sns.lineplot(
                     x=self.xlab ,y=self.ylab ,data=self.DF,
                     hue=self.zlab,palette=self.colors[0:len(self.unique)],
-                    style=self.zlab,markers=self.marker_dict,
+                    style=self.zlab, markers=self.markers,
                     ax=self.ax,**self.kwargs)
         else:
-            sns.scatterplot(
+            sns.lineplot(
                 x=self.xlab, y=self.ylab, data=self.DF,
-                hue=self.zlab, palette=self.colors[0:len(self.unique)],
+                hue=self.zlab, markers = self.markers, palette=self.colors[0:len(self.unique)],
                 ax=self.ax, **self.kwargs)
-        g_counter = 0
-        for g in self.unique:
-            if self.trendline:
-                sns.regplot(
-                    x=self.xlab, y=self.ylab, data=self.DF.loc[self.DF[self.zlab] == g],
-                    ci=None,color = self.colors[self.unique.index(g)],
-                    scatter=False,ax=self.ax)
-
-                if self.show_r2:
-                    tempDF =  self.DF.loc[self.DF[self.zlab] == g]
-                    x = tempDF[self.xlab].to_numpy()
-                    y = tempDF[self.ylab].to_numpy()
-                    slope, intercept, r_value, p_value, std_err = stats.linregress(x.astype(float),y.astype(float))
-                    r_squared = r_value ** 2
-                    plt.text(self.max_list_x[self.DF_counter]*self.annote_x_start,
-                                self.max_list_y[self.DF_counter]*(self.annote_y_start - 0.05*g_counter),
-                                f"R-squared = {r_squared:.2f}",
-                                fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
-            g_counter += 1
             
-    def large_loop(self,plot_type = 'scatter_R2',save = True):
+    def large_loop(self,plot_type = 'line',save = True):
         super().large_loop(save=save)
     
     def pre_format(self,DF):

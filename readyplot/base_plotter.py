@@ -154,7 +154,6 @@ class BasePlotter:
         try:
             DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
         except (TypeError,ValueError) as e:
-            print(f'Caught an exception: {e} Filling z with empty strings to compensate for missing data')
             if len(self.x) > len(self.y):
                 DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
             else:
@@ -195,7 +194,7 @@ class BasePlotter:
         sns.set_context(self.sns_context)
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
-        
+
         self.unique = list(DF[self.zlab].unique())
         while len(self.unique) > len(self.markers):
             self.markers.extend(self.markers)
