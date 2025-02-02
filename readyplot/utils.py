@@ -74,3 +74,75 @@ def ensure_data_frame(input_data):
     else:
         # Raise an error if it's an unsupported type
         raise ValueError("Input data must be a list, NumPy array, or Pandas DataFrame.")
+
+# Function to get the closest named color to a given RGB
+def rgba_to_named_color(rgba):
+    import matplotlib.colors as mcolors
+    import numpy as np
+    # List of single-letter color names
+    single_letter_colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k',]
+    single_letter_colors = list(mcolors.CSS4_COLORS.keys())
+
+    # Extract RGB (ignore alpha channel for matching)
+    rgba_rgb = rgba[:3]
+
+    # Initialize variables to store closest matches
+    min_distance = float('inf')
+    closest_color = None
+
+    # First, check for closest match among single-letter color names
+    for color in single_letter_colors:
+        # Get RGB of each single-letter color
+        named_rgb = mcolors.to_rgb(color)
+
+        # Calculate Euclidean distance between given RGBA and the single-letter RGB
+        distance = np.linalg.norm(np.array(rgba_rgb) - np.array(named_rgb))
+
+        if distance < min_distance:
+            min_distance = distance
+            closest_color = color
+
+    # If a single-letter color is found, return it
+    if closest_color:
+        return closest_color
+
+    # If no single-letter color is a close match, check against all CSS4 named colors
+    named_colors = list(mcolors.CSS4_COLORS.keys())
+    for color in named_colors:
+        # Get RGB of each named color (they are already normalized to [0, 1] range)
+        named_rgb = mcolors.to_rgb(color)
+
+        # Calculate Euclidean distance between given RGBA and the named RGB
+        distance = np.linalg.norm(np.array(rgba_rgb) - np.array(named_rgb))
+
+        if distance < min_distance:
+            min_distance = distance
+            closest_color = color
+
+    return closest_color
+
+
+def match_rgba_to_color(rgba, color_list):
+    import matplotlib.colors as mcolors
+    import numpy as np
+    # Extract the RGB values from the given RGBA (ignore alpha)
+    rgba_rgb = rgba[:3]
+
+    # Initialize a variable to track the minimum distance and closest color
+    min_distance = float('inf')
+    closest_color = None
+
+    # Loop through the color names in the provided list
+    for color_name in color_list:
+        # Convert the named color to RGB using matplotlib's to_rgb function
+        color_rgb = mcolors.to_rgb(color_name)
+
+        # Calculate Euclidean distance between the input RGBA (RGB) and each color's RGB
+        distance = np.linalg.norm(np.array(rgba_rgb) - np.array(color_rgb))
+
+        # Update the closest color if a smaller distance is found
+        if distance < min_distance:
+            min_distance = distance
+            closest_color = color_name
+
+    return closest_color

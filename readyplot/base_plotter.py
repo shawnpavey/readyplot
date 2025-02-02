@@ -17,7 +17,8 @@ from matplotlib import pyplot as plt
 import scipy.stats as stats
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, rgba_to_named_color, match_rgba_to_color
+from matplotlib.patches import Patch
 
 
 class BasePlotter:
@@ -26,6 +27,7 @@ class BasePlotter:
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
+                 hatches=['//', '..', '**', '++', 'OO'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
                  folder_name="OUTPUT_FIGURES",
@@ -97,8 +99,14 @@ class BasePlotter:
         self.max_list_x = []
         self.max_list_y = []
         for DF in self.DFs:
-            self.max_list_x.append(DF[self.xlab].max())
-            self.max_list_y.append(DF[self.ylab].max())
+            try:
+                self.max_list_x.append(DF[self.xlab].max())
+            except:
+                pass
+            try:
+                self.max_list_y.append(DF[self.ylab].max())
+            except:
+                pass
         self.DF_counter = 0
         
         self.input_fig = input_fig
@@ -114,6 +122,7 @@ class BasePlotter:
         self.colors = colors
 
         self.markers = markers
+        self.hatches = hatches
         self.def_font_sz = def_font_sz
         self.def_line_w = def_line_w
         self.folder_name = folder_name
@@ -195,14 +204,26 @@ class BasePlotter:
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
 
-        self.unique = list(DF[self.zlab].unique())
+        try:
+            self.unique = list(DF[self.zlab].unique())
+        except KeyError:
+            self.unique = [self.zlab]
         while len(self.unique) > len(self.markers):
             self.markers.extend(self.markers)
         self.marker_dict = dict(zip(self.unique,self.markers))
     
     def post_format(self):
         handles, labels = self.ax.get_legend_handles_labels()
-        if not labels and not handles:
+
+        if self.plot_type == 'hist':
+            labels = self.unique.copy()
+            handles = []
+            counter = 0
+            for lab in labels:
+                handles.append(Patch(color=self.colors[counter],label=lab))
+                counter +=1
+
+        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) <2):
             plt.legend([]).set_visible(False)
         else:
             plt.legend([]).set_visible(True)
