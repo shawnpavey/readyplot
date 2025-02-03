@@ -27,7 +27,7 @@ class BasePlotter:
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 hatches=['//', '..', '**', '++', 'OO'],
+                 hatches = ['//','...','--','++','OO','**'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
                  folder_name="OUTPUT_FIGURES",
@@ -208,10 +208,14 @@ class BasePlotter:
             self.unique = list(DF[self.zlab].unique())
         except KeyError:
             self.unique = [self.zlab]
-        while len(self.unique) > len(self.markers):
-            self.markers.extend(self.markers)
-        self.marker_dict = dict(zip(self.unique,self.markers))
-    
+
+        try:
+            while len(self.unique) > len(self.markers):
+                self.markers.extend(self.markers)
+            self.marker_dict = dict(zip(self.unique,self.markers))
+        except TypeError:
+            self.marker_dict = {}
+
     def post_format(self):
         handles, labels = self.ax.get_legend_handles_labels()
 
@@ -319,4 +323,19 @@ class BasePlotter:
     
     def plot(self):
         print('Parent placeholder for children plots')
+
+    def kwarg_conflict_resolver(self, kwargs, conflict_vars):
+        if kwargs:
+            pass
+        else:
+            kwargs = self.kwargs
+
+        outputs = []
+        for var in conflict_vars:
+            if var in kwargs:
+                outputs.append(kwargs[var])
+                del kwargs[var]
+            else:
+                outputs.append(getattr(self,var,None))
+        return kwargs, *outputs
     

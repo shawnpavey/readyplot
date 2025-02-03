@@ -40,7 +40,7 @@ def min_maxer(mn,mx,cap0 = False):
             bins = round((s_max-s_min) / (0.5*mag))
         bins = bins / 3
     
-    if s_min < 0 and cap0 == True:
+    if s_min < 0 and (cap0 == True or mn >= 0):
         s_max = s_max - s_min
         s_min = 0
 

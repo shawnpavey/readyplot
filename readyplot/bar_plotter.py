@@ -21,7 +21,7 @@ class BarPlotter(BasePlotter):
                  input_ax = None,
                  colors=['g','r','b','y','c','m','k','w'],
                  markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 hatches = ['//','..','**','++','OO'],
+                 hatches = ['//','...','--','++','OO','**'],
                  def_font_sz = 16,
                  def_line_w = 1.5,
                  folder_name="OUTPUT_FIGURES",
@@ -109,18 +109,12 @@ class BarPlotter(BasePlotter):
         dark_palette = []
         while len(self.unique) > len(self.hatches):
             self.hatches.extend(self.hatches)
-        print(self.hatches)
 
         for bar in self.ax.patches:
             hue_group = bar.get_label()
-
             match_rgba_to_color(bar.get_facecolor(), self.colors)
-
             current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)#rgba_to_named_color(bar.get_facecolor())
-
-            #bar.set_facecolor(self.colors[self.unique.index(hue_group)])
             bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
-
             bar.set_edgecolor('black')
             hatch_pattern = self.hatches[self.colors.index(current_face_color)]
             hatch_density = 1
