@@ -15,8 +15,8 @@ options such as figure width and height. Nothing feels quite as good as watching
 with readyplot figures which are perfect for both data exploration and publication!
 
 |         bar()          |             boxwhisker()             |
-|:----------------------:|:------------------------------------:|:------------------------:|:----:|:--:|
-|  ![Line](images/Line.png) |![Scatter](images/Scatter.png)
+|:----------------------:|:------------------------------------:|
+|  ![Line](images/Line.png) |![Scatter](images/Scatter.png)|
 | hist()          |line()|scatter()|
 |:----------------------:|:------------------------------------:|:------------------------:|
 | ![Bar](images/Bar.png) | ![Boxwhisker](images/Boxwhisker.png) | ![Hist](images/Hist.png) |
