@@ -52,7 +52,7 @@ box_plotter.plot()
 
 # OR: fig,ax = box_plotter.plot() if you want to handle the figure afterward
 ```
-Flexible example (plot() calls:
+Flexible example (plot() calls these behind the scenes):
 ```{python}
 x = ['A','A','A','B','B','B','B','A','B','B']
 y=[1,2,3,4,5,8,4,3,2,9]
