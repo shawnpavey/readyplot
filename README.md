@@ -14,10 +14,9 @@ is for the defaults to be fine-tuned such that the user doesn't need to specify 
 options such as figure width and height. Nothing feels quite as good as watching your output folder auto-populate
 with readyplot figures which are perfect for both data exploration and publication!
 
-| Line Plot | Scatter Plot |
-|-----------|--------------|
-|![Line](images/Line.png)|![Scatter](images/Scatter.png|
-![Line](images/Line.png)![Scatter](images/Scatter.png)
+Line Plot |          Scatter Plot          
+:----------:|:------------------------------:
+![Line](images/Line.png)|![Scatter](images/Scatter.png
 
 # Installation
 
