@@ -28,7 +28,7 @@ This package depends on matplotlib, numpy, pandas, seaborn, scipy, pathlib, and 
 If you do not have these packages in your environment, you can install with pip install package 
 (replace package with your missing dependency).
 # Usage
-##Importing and suggested nickname:
+## Importing and suggested nickname:
 ```{python}
 import readyplot as rp
 ```
