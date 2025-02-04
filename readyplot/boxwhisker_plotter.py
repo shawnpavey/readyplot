@@ -118,7 +118,7 @@ class BoxWhiskerPlotter(BasePlotter):
             sns.stripplot(
                 data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
                 dodge = self.dodge,palette=dark_palette, 
-                marker=self.marker_dict[category],ax=ax)
+                marker=self.marker_dict[category],ax=ax,size=3)
         plt.xlabel(" ")
             
     def plot(self,save=True,**kwargs):
