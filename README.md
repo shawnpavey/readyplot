@@ -15,7 +15,7 @@ options such as figure width and height. Nothing feels quite as good as watching
 with readyplot figures which are perfect for both data exploration and publication!
 
 ````
-![Line](readyplot/Line.png)
+![Line](images/Line.png)
 ````
 
 # Installation
