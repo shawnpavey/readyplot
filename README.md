@@ -16,7 +16,7 @@ with readyplot figures which are perfect for both data exploration and publicati
 
 Line Plot |          Scatter Plot          
 :----------:|:------------------------------:
-![Line](images/Line.png)|![Scatter](images/Scatter.png
+![Line](images/Line.png)|![Scatter](images/Scatter.png)
 
 # Installation
 
