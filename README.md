@@ -28,19 +28,19 @@ This package depends on matplotlib, numpy, pandas, seaborn, scipy, pathlib, and 
 If you do not have these packages in your environment, you can install with pip install package 
 (replace package with your missing dependency).
 # Usage
-Importing and suggested nickname:
+##Importing and suggested nickname:
 ```{python}
 import readyplot as rp
 ```
 
-Initializing:
+## Initializing:
 ```{python}
 # IF PASSING DATA FRAME DF:
 plotter = rp.boxwhisker(DFs=DF) #Many possible arguments to add on initialization
 # IF PASSING X,Y,Z DATA:
 plotter = rp.boxwhisker(x=x,y=y,z=z) #All **kwargs are passed on to the coressponding sns plotting function
 ```
-Available plotters and corresponding sns functions:
+## Available plotters and corresponding sns functions:
 ```{python}
 plotter = rp.bar(x=x,y=y,z=z)           #sns.barplot()
 plotter = rp.boxwhsker(x=x,y=y,z=z)     #sns.boxplot()
@@ -48,7 +48,7 @@ plotter = rp.hist(x=x,y=y,z=z)          #sns.histplot()
 plotter = rp.line(x=x,y=y,z=z)          #sns.lineplot()
 plotter = rp.scatter(x=x,y=y,z=z)       #sns.scatterplot()
 ```
-Quick example:
+## Quick example:
 ```{python}
 x = ['A','A','A','B','B','B','B','A','B','B']
 y=[1,2,3,4,5,8,4,3,2,9]
@@ -58,7 +58,7 @@ box_plotter.plot()
 
 # OR: fig,ax = box_plotter.plot() if you want to handle the figure afterward
 ```
-Flexible example (plot() calls these behind the scenes):
+## Flexible example (plot() calls these behind the scenes):
 ```{python}
 x = ['A','A','A','B','B','B','B','A','B','B']
 y=[1,2,3,4,5,8,4,3,2,9]
