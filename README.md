@@ -6,10 +6,13 @@ to automate figure creation and bridge the gap between procedural data explorati
 # Background
 The readyplot project was born out of the desire to help automate publication-ready figure creation in Python.
 A useful paradigm is that readyplot is to seaborn (sns) what seaborn is to matplotlib.pyplot (plt).
+
 Many researchers tediously copy-paste data into existing plotting software and thus risk poor data handling at worst
 or wasted time at best when they inevitably decide to add exclusion criteria or change esthetics. 
 This package integrates into data-processing pipelines seamlessly without sacrificing figure quality for those who 
-expect publication quality figures. While readyplot offers many options and passes kwargs to its sns functions, the goal
+expect publication quality figures. 
+
+While readyplot offers many options and passes kwargs to its sns functions, the goal
 is for the defaults to be fine-tuned such that the user doesn't need to specify anything other than contextual
 options such as figure width and height. Nothing feels quite as good as watching your output folder auto-populate
 with readyplot figures which are perfect for both data exploration and publication!
@@ -38,9 +41,13 @@ import readyplot as rp
 ## Initializing:
 ```{python}
 # IF PASSING DATA FRAME DF:
-plotter = rp.boxwhisker(DFs=DF) #Many possible arguments to add on initialization
+plotter = rp.boxwhisker(DFs=DF,xlab='X_Column_Name',ylab='Y_Column_Name',zlab='Z/hue_Column_Name') 
+
 # IF PASSING X,Y,Z DATA:
-plotter = rp.boxwhisker(x=x,y=y,z=z) #All **kwargs are passed on to the coressponding sns plotting function
+plotter = rp.boxwhisker(x=x,y=y,z=z) 
+
+#There are many possible arguments to add on initialization
+#All **kwargs are passed on to the coressponding sns plotting function
 ```
 ## Available plotters and corresponding sns functions:
 ```{python}
@@ -52,27 +59,42 @@ plotter = rp.scatter(x=x,y=y,z=z)       #sns.scatterplot()
 ```
 ## Quick example:
 ```{python}
+# Create data
 x = ['A','A','A','B','B','B','B','A','B','B']
 y=[1,2,3,4,5,8,4,3,2,9]
 z = ['C','D','C','D','C','D','C','D','C','D']
+
+# Initialize plotter
 box_plotter = rp.boxwhisker(x=x,y=y,z=z,ylab='your variable here',handles_in_legend=2)
+
+# Plot data
 box_plotter.plot()
 
 # OR: fig,ax = box_plotter.plot() if you want to handle the figure afterward
 ```
 ## Flexible example (plot() calls these behind the scenes):
 ```{python}
+# Create data
 x = ['A','A','A','B','B','B','B','A','B','B']
 y=[1,2,3,4,5,8,4,3,2,9]
 z = ['C','D','C','D','C','D','C','D','C','D']
+
+# Initialize plotter
 box_plotter = rp.boxwhisker(x=x,y=y,z=z,ylab='your variable here',handles_in_legend=2)
+
+# Apply pre-plotting format options
 box_plotter.pre_format()
+
+# Plot data
 box_plotter.just_plot()
+# OR: fig,ax = box_plotter.just_plot() for any of the functions above except initialization
+
+# Apply post-plotting format options (eg. legend)
 box_plotter.post_format()
+
+# Show and save plot
 box_plotter.show()
 box_plotter.save()
-
-# OR: fig,ax = box_plotter.just_plot() for any of the functions above except initialization
 ```
 ---
 # Important input options
@@ -111,8 +133,10 @@ scientific axes ticks. Setting m=n will force all plots to be scientific
 - **input_fig,input_ax**: NOT YET FUNCTIONAL, FUTURE PASSING FIGURES INTO READYPLOT INITIALIZATION
 ---
 # NOTES:
-- **Modularity**: Each plot type (`ScatterPlotter`, `LinePlotter`) is its own class that inherits from a shared `BasePlotter`, making it easy to extend in the future with other types of plots.
-- **Customization**: Users can easily customize plot styles, colors, labels, etc., through constructor parameters.
+- **Modularity**: Each plot type (`ScatterPlotter`, `LinePlotter`, etc...) is its own class that inherits from a shared 
+`BasePlotter`, making it easy to extend in the future with other types of plots
+- **Automation**: Users can easily automate for instance by creating a for loop iterating through column names
+and calling readyplot with a different 'ylab' each time
 ---
 # Conclusion
 Happy plotting! Feel free to suggest additional features or plot types if needed! Readyplot currently includes most
