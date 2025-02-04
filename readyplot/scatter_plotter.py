@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import scipy.stats as stats
+import warnings
 from .base_plotter import BasePlotter
 
 class ScatterPlotter(BasePlotter):
@@ -95,11 +96,11 @@ class ScatterPlotter(BasePlotter):
         if not self.trendline or not self.show_r2:
             self.plot_type = "scatter"
         
-    def plot(self,*kwargs):
+    def just_plot(self,*kwargs):
         kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
             kwargs,['DF','palette', 'style', 'markers', 'ax'])
 
-        defaults_list = [self.colors[0:len(self.unique)], self.zlab, self.marker_dict, self.ax]
+        defaults_list = [self.colors[0:len(self.unique)], self.zlab, self.markers, self.ax]
 
         palette, style, markers, ax = super().var_existence_check(
             [palette, style, markers, ax],
@@ -131,14 +132,24 @@ class ScatterPlotter(BasePlotter):
                                 fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
             g_counter += 1
             
-    def large_loop(self,plot_type = 'scatter_R2',save = True):
-        super().large_loop(save=save)
+    # def large_loop(self,plot_type = 'scatter_R2',save = True):
+    #     super().large_loop(save=save)
+    def plot(self,save=True):
+        super().plot(save=save)
+        return self.fig, self.ax
     
-    def pre_format(self,DF):
-        super().pre_format(DF)
+    def pre_format(self):
+        super().pre_format()
+        return self.fig, self.ax
     
     def post_format(self):
         super().post_format()
+        return self.fig, self.ax
 
     def save(self):
         super().save()
+        return self.fig, self.ax
+
+    def show(self):
+        super().show()
+        return self.fig, self.ax

@@ -19,6 +19,7 @@ import matplotlib.ticker as ticker
 from pathlib import Path
 from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, rgba_to_named_color, match_rgba_to_color
 from matplotlib.patches import Patch
+import warnings
 
 
 class BasePlotter:
@@ -60,6 +61,7 @@ class BasePlotter:
                  sci_y_lims = (0,1),
                  **kwargs):
 
+        warnings.filterwarnings("ignore", message="The markers list has more values")
         self.xlab = xlab
         self.ylab = ylab
         self.zlab = zlab
@@ -169,21 +171,14 @@ class BasePlotter:
                 DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
         return [DFs]
 
-    def large_loop(self,save=True):
-        for DF in self.DFs:
-            # PROCESS A FIGURE
-            self.pre_format(DF)
-            self.plot()
-            self.post_format()
-            if save:
-                self.save()
-            
-            # HANDLE A LOOPER
-            self.fig_list.append(self.fig)
-            self.ax_list.append(self.ax)
-            self.DF_counter += 1
-            print(self.fig_list)
-        return self.fig_list,self.ax_list
+    def plot(self,save=True):
+        self.pre_format()
+        self.just_plot()
+        self.post_format()
+        self.show()
+        if save:
+            self.save()
+        return self.fig,self.ax
     
     def pre_format(self):
         import seaborn as sns
@@ -204,7 +199,7 @@ class BasePlotter:
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
 
         try:
-            self.unique = list(DF[self.zlab].unique())
+            self.unique = list(self.DF[self.zlab].unique())
         except KeyError:
             self.unique = [self.zlab]
 
@@ -315,16 +310,18 @@ class BasePlotter:
         
         plt.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight')
         
-    def show(self,fig_num=0):
-        print(self.fig_list)
-        plt.show(self.fig_list[fig_num])
-        return self.fig_list[fig_num]
+    def show(self):
+        plt.show(self.fig)
+        return self.fig
     
-    def plot(self):
-        print('Parent placeholder for children plots')
+    def just_plot(self):
+        pass
 
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
-        kwargs = {**self.kwargs, **kwargs}
+        if len(kwargs) != 0:
+            kwargs = {**self.kwargs, **kwargs}
+        else:
+            kwargs = self.kwargs
         outputs = []
         for var in conflict_vars:
             if var in kwargs:
@@ -337,10 +334,11 @@ class BasePlotter:
     def var_existence_check(self,inputs,input_keys,defaults_list,kwargs={}):
         outputs = []
         for var in inputs:
-            print(var)
             if var is None and var not in kwargs:
                 var = defaults_list[len(outputs)]
             outputs.append(var)
-            print(var)
-        return tuple(outputs)
+        if len(outputs) == 1:
+            return outputs[0]
+        else:
+            return tuple(outputs)
     

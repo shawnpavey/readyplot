@@ -92,8 +92,7 @@ class HistPlotter(BasePlotter):
         if self.markers == False:
             self.markers = [False]
         
-    def plot(self,**kwargs):
-
+    def just_plot(self,**kwargs):
         kwargs,DF,palette,ax,legend = super().kwarg_conflict_resolver(
             kwargs, ['DF','palette','ax','legend'])
 
@@ -119,14 +118,22 @@ class HistPlotter(BasePlotter):
             self.ylab = 'ylab'
             self.DF[self.ylab] = 'fill'
             
-    def large_loop(self,plot_type = 'line',save = True):
-        super().large_loop(save=save)
+    def plot(self, save=True):
+        super().plot(save=save)
+        return self.fig, self.ax
     
-    def pre_format(self,DF):
-        super().pre_format(DF)
+    def pre_format(self):
+        super().pre_format()
+        return self.fig, self.ax
     
     def post_format(self):
         super().post_format()
+        return self.fig, self.ax
 
     def save(self):
         super().save()
+        return self.fig, self.ax
+
+    def show(self):
+        super().show()
+        return self.fig, self.ax

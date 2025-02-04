@@ -91,7 +91,7 @@ class LinePlotter(BasePlotter):
         if self.markers == False:
             self.markers = [False]
         
-    def plot(self,**kwargs):
+    def just_plot(self,**kwargs):
         kwargs,DF,markers,palette, ax = super().kwarg_conflict_resolver(kwargs, ['DF','markers','palette','ax'])
         defaults_list = [self.colors[0:len(self.unique)]]
         palette = super().var_existence_check([palette],['palette'], defaults_list, kwargs=kwargs)
@@ -101,14 +101,22 @@ class LinePlotter(BasePlotter):
             hue=self.zlab, markers=markers, palette=palette,
             ax=ax, **kwargs)
             
-    def large_loop(self,plot_type = 'line',save = True):
-        super().large_loop(save=save)
+    def plot(self,save=True):
+        super().plot(save=save)
+        return self.fig, self.ax
     
-    def pre_format(self,DF):
-        super().pre_format(DF)
+    def pre_format(self):
+        super().pre_format()
+        return self.fig, self.ax
     
     def post_format(self):
         super().post_format()
+        return self.fig, self.ax
 
     def save(self):
         super().save()
+        return self.fig, self.ax
+
+    def show(self):
+        super().show()
+        return self.fig, self.ax

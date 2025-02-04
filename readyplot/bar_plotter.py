@@ -94,7 +94,7 @@ class BarPlotter(BasePlotter):
         self.hatches = hatches
         self.capsize = capsize
         
-    def plot(self,**kwargs):
+    def just_plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
 
         kwargs,DF,markers,palette,dodge,ax,capsize,linewidth,width = super().kwarg_conflict_resolver(
@@ -142,18 +142,26 @@ class BarPlotter(BasePlotter):
             except KeyError:
                 pass
         plt.xlabel(" ")
-            
-    def large_loop(self,save = True):
-        super().large_loop(save=save)
+
+    def plot(self, save=True):
+        super().plot(save=save)
+        return self.fig, self.ax
     
-    def pre_format(self,DF):
-        super().pre_format(DF)
+    def pre_format(self):
+        super().pre_format()
+        return self.fig, self.ax
     
     def post_format(self):
         super().post_format()
+        return self.fig, self.ax
 
     def save(self):
         super().save()
+        return self.fig, self.ax
+
+    def show(self):
+        super().show()
+        return self.fig, self.ax
 
 
             

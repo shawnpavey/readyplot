@@ -86,7 +86,7 @@ class BoxWhiskerPlotter(BasePlotter):
                          sci_y_lims = sci_y_lims)
         self.plot_type = plot_type
         
-    def plot(self,**kwargs):
+    def just_plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
 
         kwargs,DF,boxprops,showfliers,showmeans,meanprops,palette,linecolor,linewidth, width,dodge,ax = super().kwarg_conflict_resolver(
@@ -121,17 +121,25 @@ class BoxWhiskerPlotter(BasePlotter):
                 marker=self.marker_dict[category],ax=ax)
         plt.xlabel(" ")
             
-    def large_loop(self,save = True):
-        super().large_loop(save=save)
+    def plot(self,save=True):
+        super().plot(save=save)
+        return self.fig, self.ax
     
-    def pre_format(self,DF):
-        super().pre_format(DF)
+    def pre_format(self):
+        super().pre_format()
+        return self.fig, self.ax
     
     def post_format(self):
         super().post_format()
+        return self.fig, self.ax
 
     def save(self):
         super().save()
+        return self.fig, self.ax
+
+    def show(self):
+        super().show()
+        return self.fig, self.ax
 
 
             
