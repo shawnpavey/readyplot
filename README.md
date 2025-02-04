@@ -14,14 +14,20 @@ is for the defaults to be fine-tuned such that the user doesn't need to specify 
 options such as figure width and height. Nothing feels quite as good as watching your output folder auto-populate
 with readyplot figures which are perfect for both data exploration and publication!
 
-## Installation
+## 
+
+# Installation
 
 You can install the package via pip:
 
 ```bash
 pip install readyplot
 ````
-## Usage
+## Dependencies
+This package depends on matplotlib, numpy, pandas, seaborn, scipy, pathlib, and setuptools.
+If you do not have these packages in your environment, you can install with pip install package 
+(replace package with your missing dependency).
+# Usage
 Importing and suggested nickname:
 ```{python}
 import readyplot as rp
@@ -67,7 +73,7 @@ box_plotter.save()
 # OR: fig,ax = box_plotter.just_plot() for any of the functions above except initialization
 ```
 ---
-## Important input options
+# Important input options
 - **DFs, or x,y,z**: Input data frame or multiple lists/numpy arrays.
 - **xlab,ylab,zlab**: String labels for different axes (zlab is for hues/styles); for DFs must match DataFrame column 
 names! While not required fields, if you are getting unexpected behavior, consider adding labs, it may fix your problem.
@@ -102,10 +108,11 @@ scientific axes ticks. Setting m=n will force all plots to be scientific
 - **kwargs**: kwargs for underlying sns functions can be passed to plot() and just_plot()
 - **input_fig,input_ax**: NOT YET FUNCTIONAL, FUTURE PASSING FIGURES INTO READYPLOT INITIALIZATION
 ---
-## NOTES:
+# NOTES:
 - **Modularity**: Each plot type (`ScatterPlotter`, `LinePlotter`) is its own class that inherits from a shared `BasePlotter`, making it easy to extend in the future with other types of plots.
 - **Customization**: Users can easily customize plot styles, colors, labels, etc., through constructor parameters.
 ---
-## Conclusion
-Happy plotting!
+# Conclusion
+Happy plotting! Feel free to suggest additional features or plot types if needed! Readyplot currently includes most
+plotting types I use on a daily basis, but I'd be happy to expand readyplot to match the community's needs.
                                 
