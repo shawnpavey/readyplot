@@ -92,13 +92,14 @@ class LinePlotter(BasePlotter):
             self.markers = [False]
         
     def plot(self,**kwargs):
-        kwargs,DF,markers,palette = super().kwarg_conflict_resolver(kwargs, ['DF','markers','palette'])
-        if not palette:
-            palette = self.colors[0:len(self.unique)]
+        kwargs,DF,markers,palette, ax = super().kwarg_conflict_resolver(kwargs, ['DF','markers','palette','ax'])
+        defaults_list = [self.colors[0:len(self.unique)]]
+        palette = super().var_existence_check([palette],['palette'], defaults_list, kwargs=kwargs)
+
         sns.lineplot(
             x=self.xlab, y=self.ylab, data=DF,
-            hue=self.zlab, markers = markers, palette=palette,
-            ax=self.ax, **kwargs)
+            hue=self.zlab, markers=markers, palette=palette,
+            ax=ax, **kwargs)
             
     def large_loop(self,plot_type = 'line',save = True):
         super().large_loop(save=save)

@@ -8,9 +8,9 @@ functions: custom_plotter (full plotting + formating) and prism_reskin (only
 reformats given figures).
 @author: paveyboys
 """
-from .bar_plotter import BarPlotter
 # readyplot/__init__.py
 
+from .bar_plotter import BarPlotter
 from .boxwhisker_plotter import BoxWhiskerPlotter
 from .hist_plotter import HistPlotter
 from .scatter_plotter import ScatterPlotter
@@ -272,6 +272,7 @@ def bar(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                  plot_type = 'bar',
                  sci_x_lims = (0, 1),
                  sci_y_lims = (0, 1),
+                 capsize=0.4,
                  **kwargs):
     return BarPlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
                          input_fig=input_fig,
@@ -308,6 +309,7 @@ def bar(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
                          title = title,
                          sci_x_lims = sci_x_lims,
                          sci_y_lims = sci_y_lims,
+                         capsize=capsize,
                          **kwargs)
 
 def hist(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab=None, zlab='zlab',

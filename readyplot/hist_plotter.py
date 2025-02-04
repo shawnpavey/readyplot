@@ -92,18 +92,28 @@ class HistPlotter(BasePlotter):
         if self.markers == False:
             self.markers = [False]
         
-    def plot(self):
-        if len(self.unique) == 1:
-            zlab = None
-            palette = None
+    def plot(self,**kwargs):
+
+        kwargs,DF,palette,ax,legend = super().kwarg_conflict_resolver(
+            kwargs, ['DF','palette','ax','legend'])
+
+        if not palette:
+            if len(self.unique) == 1:
+                zlab = None
+                palette = None
+            else:
+                zlab = self.zlab
+                palette = self.colors[0:len(self.unique)]
         else:
-            zlab = self.zlab
-            palette = self.colors[0:len(self.unique)]
-            print(palette)
+            if len(self.unique) == 1:
+                zlab = None
+            else:
+                zlab = self.zlab
+
         sns.histplot(
-            x=self.xlab, y=self.ylab, data=self.DF,
+            x=self.xlab, y=self.ylab, data=DF,
             hue=zlab, palette=palette,
-            ax=self.ax, legend=True, **self.kwargs)
+            ax=ax, legend=legend, **kwargs)
 
         if not self.ylab:
             self.ylab = 'ylab'

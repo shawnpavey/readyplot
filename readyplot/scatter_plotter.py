@@ -95,18 +95,22 @@ class ScatterPlotter(BasePlotter):
         if not self.trendline or not self.show_r2:
             self.plot_type = "scatter"
         
-    def plot(self):
-        if 'style' not in self.kwargs:
-            sns.scatterplot(
-                    x=self.xlab ,y=self.ylab ,data=self.DF,
-                    hue=self.zlab,palette=self.colors[0:len(self.unique)],
-                    style=self.zlab,markers=self.marker_dict,
-                    ax=self.ax,**self.kwargs)
-        else:
-            sns.scatterplot(
-                x=self.xlab, y=self.ylab, data=self.DF,
-                hue=self.zlab, palette=self.colors[0:len(self.unique)],
-                ax=self.ax, **self.kwargs)
+    def plot(self,*kwargs):
+        kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
+            kwargs,['DF','palette', 'style', 'markers', 'ax'])
+
+        defaults_list = [self.colors[0:len(self.unique)], self.zlab, self.marker_dict, self.ax]
+
+        palette, style, markers, ax = super().var_existence_check(
+            [palette, style, markers, ax],
+            ['palette', 'style', 'markers', 'ax'],
+            defaults_list, kwargs=kwargs)
+
+        sns.scatterplot(
+            x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
+            palette=palette, style=style, markers=markers,
+            ax=ax, **kwargs)
+
         g_counter = 0
         for g in self.unique:
             if self.trendline:

@@ -51,7 +51,8 @@ class BarPlotter(BasePlotter):
                  title = None,
                  plot_type = 'bar',
                  sci_x_lims = (0, 1),
-                 sci_y_lims = (0, 1)):
+                 sci_y_lims = (0, 1),
+                 capsize=0.4):
 
         super().__init__(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
                          input_fig=input_fig,
@@ -87,25 +88,32 @@ class BarPlotter(BasePlotter):
                          custom_y_label = custom_y_label,
                          title = title,
                          sci_x_lims = sci_x_lims,
-                         sci_y_lims = sci_y_lims)
+                         sci_y_lims = sci_y_lims,
+                         capsize = capsize)
         self.plot_type = plot_type
         self.hatches = hatches
-        if self.markers == False:
-            self.markers = [False]
+        self.capsize = capsize
         
-    def plot(self):
+    def plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
-        err_kws = {
-            'color': 'k',
-            'linewidth': self.def_line_w,  # Set error bar line width
-        }
+
+        kwargs,DF,markers,palette,dodge,ax,capsize,linewidth,width = super().kwarg_conflict_resolver(
+            kwargs, ['DF','markers','palette','dodge','ax','capsize','linewidth','width'])
+
+        defaults_list = [self.colors[0:len(self.unique)], self.def_line_w, self.box_width]
+
+        palette, linewidth, width = super().var_existence_check(
+            [palette, linewidth, width],
+            ['palette', 'linewidth', 'width'],
+            defaults_list, kwargs=kwargs)
+
         sns.barplot(
-            x=self.xlab, y=self.ylab, data=self.DF,
+            x=self.xlab, y=self.ylab, data=DF,
             hue =self.zlab,
-            palette=self.colors[0:len(self.unique)],
-            linewidth=self.def_line_w,width = self.box_width,
-            dodge = self.dodge,ax=self.ax, err_kws={'color': 'k','linewidth': self.def_line_w}, capsize=0.4,
-            **self.kwargs)
+            palette=palette,
+            linewidth=linewidth,width=width,
+            dodge = dodge,ax=ax, err_kws={'color': 'k','linewidth': self.def_line_w}, capsize=capsize,
+            **kwargs)
         dark_palette = []
         while len(self.unique) > len(self.hatches):
             self.hatches.extend(self.hatches)
@@ -126,10 +134,13 @@ class BarPlotter(BasePlotter):
         for i, category in enumerate(self.DF[self.zlab].unique()):
             df_copy = self.DF.copy()
             df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
-            sns.stripplot(
-                data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
-                dodge = self.dodge,palette=dark_palette, 
-                marker=self.marker_dict[category],ax=self.ax)
+            try:
+                sns.stripplot(
+                    data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
+                    dodge = self.dodge,palette=dark_palette,
+                    marker=self.marker_dict[category],ax=self.ax)
+            except KeyError:
+                pass
         plt.xlabel(" ")
             
     def large_loop(self,save = True):

@@ -185,11 +185,10 @@ class BasePlotter:
             print(self.fig_list)
         return self.fig_list,self.ax_list
     
-    def pre_format(self,DF):
+    def pre_format(self):
         import seaborn as sns
         from matplotlib import pyplot as plt
-        
-        self.DF = DF
+
         if len(plt.get_fignums()) == 0:
             self.current_fig_num = 0
         else:
@@ -325,11 +324,7 @@ class BasePlotter:
         print('Parent placeholder for children plots')
 
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
-        if kwargs:
-            pass
-        else:
-            kwargs = self.kwargs
-
+        kwargs = {**self.kwargs, **kwargs}
         outputs = []
         for var in conflict_vars:
             if var in kwargs:
@@ -338,4 +333,14 @@ class BasePlotter:
             else:
                 outputs.append(getattr(self,var,None))
         return kwargs, *outputs
+
+    def var_existence_check(self,inputs,input_keys,defaults_list,kwargs={}):
+        outputs = []
+        for var in inputs:
+            print(var)
+            if var is None and var not in kwargs:
+                var = defaults_list[len(outputs)]
+            outputs.append(var)
+            print(var)
+        return tuple(outputs)
     

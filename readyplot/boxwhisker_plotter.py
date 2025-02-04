@@ -86,16 +86,29 @@ class BoxWhiskerPlotter(BasePlotter):
                          sci_y_lims = sci_y_lims)
         self.plot_type = plot_type
         
-    def plot(self):
+    def plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
+
+        kwargs,DF,boxprops,showfliers,showmeans,meanprops,palette,linecolor,linewidth, width,dodge,ax = super().kwarg_conflict_resolver(
+            kwargs, ['DF','boxprops','showfliers','showmeans','meanprops','palette','linecolor','linewidth','width','dodge','ax'])
+
+        defaults_list =[self.colors[0:len(self.unique)],{'alpha': 1, 'edgecolor': 'black'},
+                        False,True,{"marker": "x", "markeredgecolor": "black"},'k',self.def_line_w,
+                        self.box_width,True,self.ax]
+
+        palette,boxprops,showfliers,showmeans,meanprops,linecolor,linewidth,width,dodge,ax = super().var_existence_check(
+            [palette,boxprops,showfliers,showmeans,meanprops,linecolor,linewidth,width,dodge,ax],
+            ['palette','boxprops','showfliers','showmeans','meanprops','linecolor','linewidth','width','dodge','ax'],
+            defaults_list,kwargs=kwargs)
+
         sns.boxplot(
-            x=self.xlab, y=self.ylab, data=self.DF,
-            boxprops={'alpha': 1,'edgecolor':'black'},hue =self.zlab,
-            showfliers=False,showmeans=True,
-            meanprops={"marker": "x", "markeredgecolor": "black"},
-            palette=self.colors[0:len(self.unique)],linecolor='k',
-            linewidth=self.def_line_w,width = self.box_width,
-            dodge = self.dodge,ax=self.ax,**self.kwargs)
+            x=self.xlab, y=self.ylab, data=DF,
+            hue =self.zlab,boxprops=boxprops,
+            showfliers=showfliers,showmeans=showmeans,
+            meanprops=meanprops,
+            palette=palette,linecolor=linecolor,
+            linewidth=linewidth, width=width,
+            dodge = dodge,ax=ax,**kwargs)
         dark_palette = []
         for i in range(len(self.DF[self.zlab].unique())):
             dark_palette.append('k')
@@ -105,7 +118,7 @@ class BoxWhiskerPlotter(BasePlotter):
             sns.stripplot(
                 data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
                 dodge = self.dodge,palette=dark_palette, 
-                marker=self.marker_dict[category],ax=self.ax)
+                marker=self.marker_dict[category],ax=ax)
         plt.xlabel(" ")
             
     def large_loop(self,save = True):
