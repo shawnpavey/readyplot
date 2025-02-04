@@ -96,7 +96,7 @@ class ScatterPlotter(BasePlotter):
         if not self.trendline or not self.show_r2:
             self.plot_type = "scatter"
         
-    def just_plot(self,*kwargs):
+    def just_plot(self,**kwargs):
         kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
             kwargs,['DF','palette', 'style', 'markers', 'ax'])
 
@@ -134,8 +134,8 @@ class ScatterPlotter(BasePlotter):
             
     # def large_loop(self,plot_type = 'scatter_R2',save = True):
     #     super().large_loop(save=save)
-    def plot(self,save=True):
-        super().plot(save=save)
+    def plot(self,save=True,**kwargs):
+        super().plot(save=save,**kwargs)
         return self.fig, self.ax
     
     def pre_format(self):

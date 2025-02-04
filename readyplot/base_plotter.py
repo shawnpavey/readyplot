@@ -171,9 +171,9 @@ class BasePlotter:
                 DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
         return [DFs]
 
-    def plot(self,save=True):
+    def plot(self,save=True,**kwargs):
         self.pre_format()
-        self.just_plot()
+        self.just_plot(**kwargs)
         self.post_format()
         self.show()
         if save:
@@ -314,7 +314,7 @@ class BasePlotter:
         plt.show(self.fig)
         return self.fig
     
-    def just_plot(self):
+    def just_plot(self,**kwargs):
         pass
 
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):

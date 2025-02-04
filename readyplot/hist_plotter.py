@@ -118,8 +118,8 @@ class HistPlotter(BasePlotter):
             self.ylab = 'ylab'
             self.DF[self.ylab] = 'fill'
             
-    def plot(self, save=True):
-        super().plot(save=save)
+    def plot(self, save=True,**kwargs):
+        super().plot(save=save,**kwargs)
         return self.fig, self.ax
     
     def pre_format(self):

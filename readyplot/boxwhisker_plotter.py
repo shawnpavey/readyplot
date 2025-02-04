@@ -121,7 +121,7 @@ class BoxWhiskerPlotter(BasePlotter):
                 marker=self.marker_dict[category],ax=ax)
         plt.xlabel(" ")
             
-    def plot(self,save=True):
+    def plot(self,save=True,**kwargs):
         super().plot(save=save)
         return self.fig, self.ax
     

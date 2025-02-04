@@ -101,7 +101,7 @@ class LinePlotter(BasePlotter):
             hue=self.zlab, markers=markers, palette=palette,
             ax=ax, **kwargs)
             
-    def plot(self,save=True):
+    def plot(self,save=True,**kwargs):
         super().plot(save=save)
         return self.fig, self.ax
     
