@@ -67,7 +67,7 @@ box_plotter.save()
 # OR: fig,ax = box_plotter.just_plot() for any of the functions above except initialization
 ```
 ## Important input options
-````
+```
 - **DFs, or x,y,z**: Input data frame or multiple lists/numpy arrays.
 - **xlab,ylab,zlab**: String labels for different axes (zlab is for hues/styles); for DFs must match DataFrame column 
 names! While not required fields, if you are getting unexpected behavior, consider adding labs, it may fix your problem.
@@ -101,7 +101,7 @@ scientific axes ticks. Setting m=n will force all plots to be scientific
 - **capsize**: Size of error bar caps for the barplots
 - **kwargs**: kwargs for underlying sns functions can be passed to plot() and just_plot()
 - **input_fig,input_ax**: NOT YET FUNCTIONAL, FUTURE PASSING FIGURES INTO READYPLOT INITIALIZATION
-````
+```
 ## NOTES:
 - **Modularity**: Each plot type (`ScatterPlotter`, `LinePlotter`) is its own class that inherits from a shared `BasePlotter`, making it easy to extend in the future with other types of plots.
 - **Customization**: Users can easily customize plot styles, colors, labels, etc., through constructor parameters.
