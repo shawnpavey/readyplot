@@ -57,25 +57,11 @@ class ScatterPlotter(BasePlotter):
                                 f"R-squared = {r_squared:.2f}",
                                 fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
             g_counter += 1
-            
-    # def large_loop(self,plot_type = 'scatter_R2',save = True):
-    #     super().large_loop(save=save)
-    def plot(self,save=True,**kwargs):
-        super().plot(save=save,**kwargs)
-        return self.fig, self.ax
-    
-    def pre_format(self):
-        super().pre_format()
-        return self.fig, self.ax
-    
-    def post_format(self):
-        super().post_format()
-        return self.fig, self.ax
 
-    def save(self):
-        super().save()
-        return self.fig, self.ax
-
-    def show(self):
-        super().show()
-        return self.fig, self.ax
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        for base in type(self).mro():
+            if name in base.__dict__:
+                return base.__dict__[name].__get__(self)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

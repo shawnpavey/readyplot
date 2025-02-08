@@ -59,27 +59,14 @@ class BoxWhiskerPlotter(BasePlotter):
                 dodge = self.dodge,palette=dark_palette, 
                 marker=self.marker_dict[category],ax=ax,size=3)
         plt.xlabel(" ")
-            
-    def plot(self,save=True,**kwargs):
-        super().plot(save=save)
-        return self.fig, self.ax
-    
-    def pre_format(self):
-        super().pre_format()
-        return self.fig, self.ax
-    
-    def post_format(self):
-        super().post_format()
-        return self.fig, self.ax
 
-    def save(self):
-        super().save()
-        return self.fig, self.ax
-
-    def show(self):
-        super().show()
-        return self.fig, self.ax
-
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        for base in type(self).mro():
+            if name in base.__dict__:
+                return base.__dict__[name].__get__(self)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
             
     

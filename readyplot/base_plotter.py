@@ -106,6 +106,7 @@ class BasePlotter:
         self.just_plot(**kwargs)
         self.post_format()
         self.show()
+        print('Using PARENT method instead')
         if save:
             self.save()
         return self.fig,self.ax
@@ -242,6 +243,7 @@ class BasePlotter:
             print(f"Directory '{self.folder_name}' already exists.")
         
         plt.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight')
+        return self.fig, self.ax
         
     def show(self):
         plt.show(self.fig)
