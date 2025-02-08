@@ -74,7 +74,7 @@ def initialize_common_defaults(args,input_dict):
         pass
     del args
 
-    if 'DFs' in input_dict:
+    if 'DFs' in input_dict and all(item not in input_dict for item in ['xlab','ylab','zlab']):
         if 'xlab' not in input_dict:
             try:
                 input_dict['xlab'] = input_dict['DFs'].columns[0]

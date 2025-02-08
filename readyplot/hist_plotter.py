@@ -35,11 +35,10 @@ class HistPlotter(BasePlotter):
             else:
                 zlab = self.zlab
 
-        self.DF[self.ylab] = 'fill'
-        xlab = self.xlab
+        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
 
         sns.histplot(
-            x=xlab, data=DF,
+            x=xlab,y=ylab, data=DF,
             hue=zlab, palette=palette,
             ax=ax, legend=legend, **kwargs)
 

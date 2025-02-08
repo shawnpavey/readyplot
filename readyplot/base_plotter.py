@@ -90,7 +90,7 @@ class BasePlotter:
         try:
             DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
         except ValueError:
-            DFs[self.ylab] = np.nan
+            pass
         try:
             DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
         except (TypeError,ValueError) as e:
@@ -222,15 +222,20 @@ class BasePlotter:
     
     def save(self,**kwargs):
         if '.' not in self.folder_name:
-            if self.title is None:
-                if is_mostly_strings(self.DF[self.ylab]):
-                    dependent_var_list = self.xlab.split(' ')
-                elif is_mostly_strings(self.DF[self.xlab]):
-                    dependent_var_list = self.ylab.split(' ')
-                else:
-                    # Assume y is the dependent variable
-                    dependent_var_list = self.ylab.split(' ')
+            xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
 
+            if self.title is None:
+                if xlab and ylab:
+                    if is_mostly_strings(self.DF[self.ylab]):
+                        dependent_var_list = self.xlab.split(' ')
+                    elif is_mostly_strings(self.DF[self.xlab]):
+                        dependent_var_list = self.ylab.split(' ')
+                    else:
+                        # Assume y is the dependent variable
+                        dependent_var_list = self.ylab.split(' ')
+                else:
+                    temp_string = (xlab if xlab is not None else "") + (ylab if ylab is not None else "")
+                    dependent_var_list= temp_string.split(' ')
                 self.dependent_var_name = ''
                 for seg in dependent_var_list:
                     if "/" not in seg:

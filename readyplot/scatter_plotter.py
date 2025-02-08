@@ -37,7 +37,6 @@ class ScatterPlotter(BasePlotter):
         if zlab is None:
             zlab = xlab
 
-        print(style)
         sns.scatterplot(
             x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, style=style, markers=markers,
