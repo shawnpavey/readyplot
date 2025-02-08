@@ -146,3 +146,14 @@ def match_rgba_to_color(rgba, color_list):
             closest_color = color_name
 
     return closest_color
+
+def check_labels_in_DF(DF,xlab,ylab,zlab):
+    column_names = DF.columns
+    outputs = []
+    for lab in [xlab,ylab,zlab]:
+        if lab in column_names:
+            pass
+        else:
+            lab = None
+        outputs.append(lab)
+    return outputs

@@ -15,7 +15,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF
 from matplotlib.patches import Patch
 import warnings
 
@@ -23,8 +23,14 @@ import warnings
 class BasePlotter:
     def __init__(self,input_dict, **kwargs):
         warnings.filterwarnings("ignore", message="The markers list has more values")
+        warnings.simplefilter("ignore", category=UserWarning)
+
         for name, value in input_dict.items():
             setattr(self, name, value)
+
+        if self.excel_path and self.sheet_name:
+            self.DFs = pd.read_excel(self.excel_path, sheet_name=self.sheet_name)
+
 
         if not isinstance(self.DFs, list):
             self.DFs = [self.DFs]

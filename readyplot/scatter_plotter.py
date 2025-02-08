@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
 from .base_plotter import BasePlotter
+from .utils import check_labels_in_DF
 
 class ScatterPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
@@ -32,9 +33,13 @@ class ScatterPlotter(BasePlotter):
             ['palette', 'style', 'markers', 'ax'],
             defaults_list, kwargs=kwargs)
 
+        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
+        if zlab is None:
+            zlab = xlab
+
         print(style)
         sns.scatterplot(
-            x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
+            x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, style=style, markers=markers,
             ax=ax, **kwargs)
 

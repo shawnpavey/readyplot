@@ -10,6 +10,7 @@ reformats given figures).
 """
 import seaborn as sns
 from .base_plotter import BasePlotter
+from .utils import check_labels_in_DF
 
 class HistPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
@@ -35,9 +36,10 @@ class HistPlotter(BasePlotter):
                 zlab = self.zlab
 
         self.DF[self.ylab] = 'fill'
+        xlab = self.xlab
 
         sns.histplot(
-            x=self.xlab, data=DF,
+            x=xlab, data=DF,
             hue=zlab, palette=palette,
             ax=ax, legend=legend, **kwargs)
 

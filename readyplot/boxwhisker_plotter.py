@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from .base_plotter import BasePlotter
+from .utils import check_labels_in_DF
 
 class BoxWhiskerPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
@@ -40,9 +41,14 @@ class BoxWhiskerPlotter(BasePlotter):
             DF[self.ylab] = DF[self.xlab]
             DF[self.xlab] = self.ylab
 
+        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
+        if zlab is None:
+            zlab = xlab
+            dodge = False
+
         sns.boxplot(
-            x=self.xlab, y=self.ylab, data=DF,
-            hue =self.zlab,boxprops=boxprops,
+            x=xlab, y=ylab, data=DF,
+            hue=zlab,boxprops=boxprops,
             showfliers=showfliers,showmeans=showmeans,
             meanprops=meanprops,
             palette=palette,linecolor=linecolor,

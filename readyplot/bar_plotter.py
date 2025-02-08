@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from .base_plotter import BasePlotter
-from .utils import match_rgba_to_color
+from .utils import match_rgba_to_color, check_labels_in_DF
+import warnings
 
 
 class BarPlotter(BasePlotter):
@@ -32,9 +33,14 @@ class BarPlotter(BasePlotter):
             ['palette', 'linewidth', 'width'],
             defaults_list, kwargs=kwargs)
 
+        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
+        if zlab is None:
+            zlab = xlab
+            dodge = False
+
         sns.barplot(
-            x=self.xlab, y=self.ylab, data=DF,
-            hue =self.zlab,
+            x=xlab, y=ylab, data=DF,
+            hue =zlab,
             palette=palette,
             linewidth=linewidth,width=width,
             dodge = dodge,ax=ax, err_kws={'color': 'k','linewidth': self.def_line_w}, capsize=capsize,
@@ -54,14 +60,20 @@ class BarPlotter(BasePlotter):
             bar.set_hatch(f"{hatch_pattern * hatch_density}")
             bar.set_linewidth(self.def_line_w)
 
-        for i in range(len(self.DF[self.zlab].unique())):
+        try:
+            unique = self.DF[self.zlab].unique()
+        except KeyError:
+            unique = ['placeholder']
+
+        for i in range(len(unique)):
             dark_palette.append('k')
-        for i, category in enumerate(self.DF[self.zlab].unique()):
+        for i, category in enumerate(unique):
             df_copy = self.DF.copy()
-            df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
+            if unique[0] != 'placeholder':
+                df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
             try:
                 sns.stripplot(
-                    data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
+                    data=df_copy, x=xlab, y=ylab,hue=zlab,
                     dodge = self.dodge,palette=dark_palette,
                     marker=self.marker_dict[category],ax=self.ax)
             except KeyError:

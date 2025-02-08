@@ -10,6 +10,7 @@ reformats given figures).
 """
 import seaborn as sns
 from .base_plotter import BasePlotter
+from .utils import check_labels_in_DF
 
 class LinePlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
@@ -27,6 +28,10 @@ class LinePlotter(BasePlotter):
             [palette, style, markers, ax],
             ['palette', 'style', 'markers', 'ax'],
             defaults_list, kwargs=kwargs)
+
+        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
+        if zlab is None:
+            zlab = xlab
 
         sns.lineplot(
             x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
