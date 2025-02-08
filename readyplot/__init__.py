@@ -16,374 +16,103 @@ from .hist_plotter import HistPlotter
 from .scatter_plotter import ScatterPlotter
 from .line_plotter import LinePlotter
 
-def boxwhisker(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 7,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0=False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'box_whisker',
-                 sci_x_lims = (0, 1),
-                 sci_y_lims = (0, 1),
-                 **kwargs):
-    return BoxWhiskerPlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
-                         input_fig=input_fig,
-                         input_ax=input_ax,
-                         colors=colors,
-                         markers=markers,
-                         def_font_sz=def_font_sz,
-                         def_line_w = def_line_w,
-                         folder_name = folder_name,
-                         dpi = dpi,
-                         sns_palette= sns_palette,
-                         sns_style = sns_style,
-                         sns_context = sns_context,
-                         fontweight = fontweight,
-                         box_edges = box_edges,
-                         fig_width = fig_width,
-                         fig_height = fig_height,
-                         xtick_font_ratio = xtick_font_ratio,
-                         ytick_font_ratio = ytick_font_ratio,
-                         x_exp_location = x_exp_location,
-                         y_exp_location = y_exp_location,
-                         annote_x_start = annote_x_start,
-                         annote_y_start = annote_y_start,
-                         x_axis_sig_figs = x_axis_sig_figs,
-                         y_axis_sig_figs = y_axis_sig_figs,
-                         low_x_cap0=low_x_cap0,
-                         low_y_cap0 = low_y_cap0,
-                         dodge = dodge,
-                         handles_in_legend = handles_in_legend,
-                         box_width = box_width,
-                         custom_x_label = custom_x_label,
-                         custom_y_label = custom_y_label,
-                         title = title,
-                         sci_x_lims = sci_x_lims,
-                         sci_y_lims = sci_y_lims,
-                         **kwargs)
+expected_keys = ['DFs','x','y','z','xlab','ylab','zlab','input_fig','input_ax',
+                 'colors','markers','hatches','def_font_sz','def_line_w','fontweight',
+                 'folder_name','dpi',
+                 'box_edges','fig_width','fig_height','xtick_font_ratio','ytick_font_ratio',
+                 'x_exp_location','y_exp_location','annote_x_start','annote_y_start',
+                 'x_axis_sig_figs','y_axis_sig_figs','low_x_cap0','low_y_cap0',
+                 'sci_x_lims','sci_y_lims',
+                 'dodge', 'handles_in_legend', 'box_width',
+                 'custom_x_label','custom_y_label','title',
+                 'sns_palette','sns_style','sns_context',
+                 'plot_type',
+                 'capsize', 'trendline', 'show_r2','style']
 
-def scatter(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 5,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0=False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'scatter_R2',
-                 sci_x_lims=(0, 1),
-                 sci_y_lims=(0, 1),
-                 trendline = None,
-                 show_r2 = True,
-                 **kwargs):
-    return ScatterPlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
-                         input_fig=input_fig,
-                         input_ax=input_ax,
-                         colors=colors,
-                         markers=markers,
-                         def_font_sz=def_font_sz,
-                         def_line_w = def_line_w,
-                         folder_name = folder_name,
-                         dpi = dpi,
-                         sns_palette= sns_palette,
-                         sns_style = sns_style,
-                         sns_context = sns_context,
-                         fontweight = fontweight,
-                         box_edges = box_edges,
-                         fig_width = fig_width,
-                         fig_height = fig_height,
-                         xtick_font_ratio = xtick_font_ratio,
-                         ytick_font_ratio = ytick_font_ratio,
-                         x_exp_location = x_exp_location,
-                         y_exp_location = y_exp_location,
-                         annote_x_start = annote_x_start,
-                         annote_y_start = annote_y_start,
-                         x_axis_sig_figs = x_axis_sig_figs,
-                         y_axis_sig_figs = y_axis_sig_figs,
-                         low_x_cap0=low_x_cap0,
-                         low_y_cap0=low_y_cap0,
-                         dodge = dodge,
-                         handles_in_legend = handles_in_legend,
-                         box_width = box_width,
-                         custom_x_label = custom_x_label,
-                         custom_y_label = custom_y_label,
-                         plot_type = plot_type,
-                         title = title,
-                         sci_x_lims=sci_x_lims,
-                         sci_y_lims=sci_y_lims,
-                          **kwargs)
 
-def line(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=None,
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 5,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0=False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'line',
-                 sci_x_lims=(0, 1),
-                 sci_y_lims=(0, 1),
-                 **kwargs):
-    return LinePlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
-                         input_fig=input_fig,
-                         input_ax=input_ax,
-                         colors=colors,
-                         markers=markers,
-                         def_font_sz=def_font_sz,
-                         def_line_w = def_line_w,
-                         folder_name = folder_name,
-                         dpi = dpi,
-                         sns_palette= sns_palette,
-                         sns_style = sns_style,
-                         sns_context = sns_context,
-                         fontweight = fontweight,
-                         box_edges = box_edges,
-                         fig_width = fig_width,
-                         fig_height = fig_height,
-                         xtick_font_ratio = xtick_font_ratio,
-                         ytick_font_ratio = ytick_font_ratio,
-                         x_exp_location = x_exp_location,
-                         y_exp_location = y_exp_location,
-                         annote_x_start = annote_x_start,
-                         annote_y_start = annote_y_start,
-                         x_axis_sig_figs = x_axis_sig_figs,
-                         y_axis_sig_figs = y_axis_sig_figs,
-                         low_x_cap0=low_x_cap0,
-                         low_y_cap0=low_y_cap0,
-                         dodge = dodge,
-                         handles_in_legend = handles_in_legend,
-                         box_width = box_width,
-                         custom_x_label = custom_x_label,
-                         custom_y_label = custom_y_label,
-                         plot_type = plot_type,
-                         title = title,
-                         sci_x_lims=sci_x_lims,
-                         sci_y_lims=sci_y_lims,
-                         **kwargs)
+def bar(**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+    return BarPlotter(initialized_inputs,**new_kwargs)
 
-def bar(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 hatches = ['//','...','--','++','OO','**'],
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 7,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0=False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'bar',
-                 sci_x_lims = (0, 1),
-                 sci_y_lims = (0, 1),
-                 capsize=0.4,
-                 **kwargs):
-    return BarPlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
-                         input_fig=input_fig,
-                         input_ax=input_ax,
-                         colors=colors,
-                         markers=markers,
-                         hatches = hatches,
-                         def_font_sz=def_font_sz,
-                         def_line_w = def_line_w,
-                         folder_name = folder_name,
-                         dpi = dpi,
-                         sns_palette= sns_palette,
-                         sns_style = sns_style,
-                         sns_context = sns_context,
-                         fontweight = fontweight,
-                         box_edges = box_edges,
-                         fig_width = fig_width,
-                         fig_height = fig_height,
-                         xtick_font_ratio = xtick_font_ratio,
-                         ytick_font_ratio = ytick_font_ratio,
-                         x_exp_location = x_exp_location,
-                         y_exp_location = y_exp_location,
-                         annote_x_start = annote_x_start,
-                         annote_y_start = annote_y_start,
-                         x_axis_sig_figs = x_axis_sig_figs,
-                         y_axis_sig_figs = y_axis_sig_figs,
-                         low_x_cap0=low_x_cap0,
-                         low_y_cap0 = low_y_cap0,
-                         dodge = dodge,
-                         handles_in_legend = handles_in_legend,
-                         box_width = box_width,
-                         custom_x_label = custom_x_label,
-                         custom_y_label = custom_y_label,
-                         title = title,
-                         sci_x_lims = sci_x_lims,
-                         sci_y_lims = sci_y_lims,
-                         capsize=capsize,
-                         **kwargs)
+def boxwhisker(**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+    return BoxWhiskerPlotter(initialized_inputs,**new_kwargs)
 
-def hist(DFs=None, x=None, y=None, z=None, xlab='xlab', ylab=None, zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 5,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0=False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'hist',
-                 sci_x_lims=(0, 1),
-                 sci_y_lims=(0, 1),
-                 **kwargs):
-    return HistPlotter(DFs=DFs, x=x, y=y, z=z, xlab=xlab, ylab=ylab, zlab=zlab,
-                         input_fig=input_fig,
-                         input_ax=input_ax,
-                         colors=colors,
-                         markers=markers,
-                         def_font_sz=def_font_sz,
-                         def_line_w = def_line_w,
-                         folder_name = folder_name,
-                         dpi = dpi,
-                         sns_palette= sns_palette,
-                         sns_style = sns_style,
-                         sns_context = sns_context,
-                         fontweight = fontweight,
-                         box_edges = box_edges,
-                         fig_width = fig_width,
-                         fig_height = fig_height,
-                         xtick_font_ratio = xtick_font_ratio,
-                         ytick_font_ratio = ytick_font_ratio,
-                         x_exp_location = x_exp_location,
-                         y_exp_location = y_exp_location,
-                         annote_x_start = annote_x_start,
-                         annote_y_start = annote_y_start,
-                         x_axis_sig_figs = x_axis_sig_figs,
-                         y_axis_sig_figs = y_axis_sig_figs,
-                         low_x_cap0=low_x_cap0,
-                         low_y_cap0=low_y_cap0,
-                         dodge = dodge,
-                         handles_in_legend = handles_in_legend,
-                         box_width = box_width,
-                         custom_x_label = custom_x_label,
-                         custom_y_label = custom_y_label,
-                         plot_type = plot_type,
-                         title = title,
-                         sci_x_lims=sci_x_lims,
-                         sci_y_lims=sci_y_lims,
-                         **kwargs)
+def hist(**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+    return HistPlotter(initialized_inputs,**new_kwargs)
+
+def line(**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+    return LinePlotter(initialized_inputs,**new_kwargs)
+
+def scatter(**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+    return ScatterPlotter(initialized_inputs,**new_kwargs)
+
+
+def initialize_common_defaults(input_dict):
+    DFs = None
+    x = None
+    y = None
+    z = None
+    xlab = 'xlab'
+    ylab = 'ylab'
+    zlab = 'zlab'
+    input_fig = None
+    input_ax = None
+    colors = ['g', 'r', 'b', 'y', 'c', 'm', 'k', 'w']
+    markers = ['o', 's', 'D', 'p', 'h', '*', 'x', '+', '^', 'v', '>', '<']
+    hatches = ['//', '...', '--', '++', 'OO', '**']
+    def_font_sz = 16
+    def_line_w = 1.5
+    folder_name = "OUTPUT_FIGURES"
+    dpi = 300
+    sns_palette = "deep"
+    sns_style = "ticks"
+    sns_context = "notebook"
+    fontweight = 'bold'
+    box_edges = ['bottom', 'left']
+    fig_width = 7
+    fig_height = 5
+    xtick_font_ratio = 1
+    ytick_font_ratio = 0.9
+    x_exp_location = 0
+    y_exp_location = 0
+    annote_x_start = 0.7
+    annote_y_start = 0.7
+    x_axis_sig_figs = 0
+    y_axis_sig_figs = 2
+    low_x_cap0 = False
+    low_y_cap0 = False
+    dodge = True
+    handles_in_legend = 10
+    box_width = 0.6
+    custom_x_label = None
+    custom_y_label = None
+    title = None
+    plot_type = 'bar'
+    sci_x_lims = (0, 1)
+    sci_y_lims = (0, 1)
+    capsize = 0.4
+    trendline = False
+    show_r2 = False
+    style = None
+
+    initialized_dict = {}
+    kwargs = {}
+
+    for name, value in locals().items():
+        if name != 'input_dict' and name != 'initialized_dict' and name != 'kwargs':
+            if name in expected_keys:
+                if name in input_dict:
+                    initialized_dict[name] = input_dict[name]
+                else:
+                    initialized_dict[name] = value
+            else:
+                kwargs[name] = value
+    return initialized_dict, kwargs
+
 
 __all__ = ['boxwhisker',
            'scatter',

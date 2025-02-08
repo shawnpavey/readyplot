@@ -9,71 +9,26 @@ reformats given figures).
 @author: paveyboys
 """
 import numpy as np
-import matplotlib as mpl
 import pandas as pd
 import os
 import seaborn as sns
 from matplotlib import pyplot as plt
-import scipy.stats as stats
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, rgba_to_named_color, match_rgba_to_color
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame
 from matplotlib.patches import Patch
 import warnings
 
 
 class BasePlotter:
-    def __init__(self, DFs=None, x=None, y=None, z=None, xlab='xlab', ylab='ylab', zlab='zlab',
-                 input_fig = None,
-                 input_ax = None,
-                 colors=['g','r','b','y','c','m','k','w'],
-                 markers=['o','s','D','p','h','*','x','+','^','v','>','<'],
-                 hatches = ['//','...','--','++','OO','**'],
-                 def_font_sz = 16,
-                 def_line_w = 1.5,
-                 folder_name="OUTPUT_FIGURES",
-                 dpi = 300,
-                 sns_palette = "deep",
-                 sns_style = "ticks",
-                 sns_context = "notebook",
-                 fontweight='bold',
-                 box_edges = ['bottom','left'],
-                 fig_width = 5,
-                 fig_height = 5,
-                 xtick_font_ratio = 1,
-                 ytick_font_ratio = 0.9,
-                 x_exp_location = 0,
-                 y_exp_location = 0,
-                 annote_x_start = 0.7,
-                 annote_y_start = 0.7,
-                 x_axis_sig_figs = 0,
-                 y_axis_sig_figs = 2,
-                 low_x_cap0 = False,
-                 low_y_cap0=False,
-                 dodge = True,
-                 handles_in_legend = 10,
-                 box_width = 0.6,
-                 custom_x_label = None,
-                 custom_y_label = None,
-                 title = None,
-                 plot_type = 'plot',
-                 sci_x_lims = (0,1),
-                 sci_y_lims = (0,1),
-                 **kwargs):
-
+    def __init__(self,input_dict, **kwargs):
         warnings.filterwarnings("ignore", message="The markers list has more values")
-        self.xlab = xlab
-        self.ylab = ylab
-        self.zlab = zlab
+        for name, value in input_dict.items():
+            setattr(self, name, value)
 
-        if not isinstance(DFs, list):
-            DFs = [DFs]
-        self.DFs = DFs
+        if not isinstance(self.DFs, list):
+            self.DFs = [self.DFs]
         self.DF = self.DFs[0]
-
-        self.x = x
-        self.y = y
-        self.z = z
 
         force_data_frame_booleans = []
         if isinstance(self.x,list) or isinstance(self.x,np.ndarray):
@@ -93,11 +48,11 @@ class BasePlotter:
             self.DFs = self.force_data_frame()
             self.DF = self.DFs[0]
         else:
-            if not isinstance(DFs, list):
-                DFs = [DFs]
-            self.DFs = DFs
+            if not isinstance(self.DFs, list):
+                self.DFs = [self.DFs]
+            self.DFs = self.DFs
             self.DF = self.DFs[0]
-        
+
         self.max_list_x = []
         self.max_list_y = []
         for DF in self.DFs:
@@ -110,53 +65,20 @@ class BasePlotter:
             except:
                 pass
         self.DF_counter = 0
-        
-        self.input_fig = input_fig
-        self.input_ax = input_ax
-        
+
         if self.input_fig is None:
             self.fig_list = []
         if self.input_ax is None:
             self.ax_list = []
 
-        if not isinstance(colors, list):
-            colors = [colors]
-        self.colors = colors
+        if not isinstance(self.colors, list):
+            self.colors = [self.colors]
 
-        self.markers = markers
-        self.hatches = hatches
-        self.def_font_sz = def_font_sz
-        self.def_line_w = def_line_w
-        self.folder_name = folder_name
-        self.dpi = dpi
-        self.sns_palette = sns_palette
-        self.sns_style = sns_style
-        self.sns_context = sns_context
-        self.fontweight = fontweight
-        self.box_edges = box_edges
-        self.fig_width = fig_width
-        self.fig_height = fig_height
-        self.xtick_font_ratio = xtick_font_ratio
-        self.ytick_font_ratio = ytick_font_ratio
-        self.x_exp_location = x_exp_location
-        self.y_exp_location = y_exp_location
-        self.annote_x_start = annote_x_start
-        self.annote_y_start = annote_y_start
-        self.x_axis_sig_figs = x_axis_sig_figs
-        self.y_axis_sig_figs = y_axis_sig_figs
-        self.low_x_cap0 = low_x_cap0
-        self.low_y_cap0 = low_y_cap0
-        self.dodge = dodge
-        self.handles_in_legend = handles_in_legend
-        self.box_width = box_width
-        self.custom_x_label = custom_x_label
-        self.custom_y_label = custom_y_label
-        self.title = title
-        self.plot_type = plot_type
-        self.sci_x_lims = sci_x_lims
-        self.sci_y_lims = sci_y_lims
-        self.__dict__.update(**kwargs)
+        print(self.xlab)
+
         self.kwargs = kwargs
+        self.__dict__.update(**kwargs)
+
 
     def force_data_frame(self):
         DFs = pd.DataFrame()
