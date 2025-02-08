@@ -15,6 +15,7 @@ from .boxwhisker_plotter import BoxWhiskerPlotter
 from .hist_plotter import HistPlotter
 from .scatter_plotter import ScatterPlotter
 from .line_plotter import LinePlotter
+import pandas as pd
 
 expected_keys = ['DFs','x','y','z','xlab','ylab','zlab','input_fig','input_ax',
                  'colors','markers','hatches','def_font_sz','def_line_w','fontweight',
@@ -30,28 +31,61 @@ expected_keys = ['DFs','x','y','z','xlab','ylab','zlab','input_fig','input_ax',
                  'capsize', 'trendline', 'show_r2','style']
 
 
-def bar(**kwargs):
-    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+def bar(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return BarPlotter(initialized_inputs,**new_kwargs)
 
-def boxwhisker(**kwargs):
-    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+def boxwhisker(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return BoxWhiskerPlotter(initialized_inputs,**new_kwargs)
 
-def hist(**kwargs):
-    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+def hist(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return HistPlotter(initialized_inputs,**new_kwargs)
 
-def line(**kwargs):
-    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+def line(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return LinePlotter(initialized_inputs,**new_kwargs)
 
-def scatter(**kwargs):
-    initialized_inputs, new_kwargs = initialize_common_defaults(kwargs)
+def scatter(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return ScatterPlotter(initialized_inputs,**new_kwargs)
 
 
-def initialize_common_defaults(input_dict):
+def initialize_common_defaults(args,input_dict):
+    if len(args) == 1:
+        if isinstance(args[0], pd.DataFrame):
+            input_dict['DFs'] = args[0]
+        else:
+            input_dict['x'] = args[0]
+    elif len(args) == 2:
+        input_dict['x'] = args[0]
+        input_dict['y'] = args[1]
+    elif len(args) == 3:
+        input_dict['x'] = args[0]
+        input_dict['y'] = args[1]
+        input_dict['z'] = args[2]
+    else:
+        pass
+    del args
+
+    if 'DFs' in input_dict:
+        if 'xlab' not in input_dict:
+            try:
+                input_dict['xlab'] = input_dict['DFs'].columns[0]
+            except:
+                pass
+        if 'ylab' not in input_dict:
+            try:
+                input_dict['ylab'] = input_dict['DFs'].columns[1]
+            except:
+                pass
+        if 'zlab' not in input_dict:
+            try:
+                input_dict['zlab'] = input_dict['DFs'].columns[2]
+            except:
+                pass
+
     DFs = None
     x = None
     y = None
@@ -87,7 +121,7 @@ def initialize_common_defaults(input_dict):
     low_y_cap0 = False
     dodge = True
     handles_in_legend = 10
-    box_width = 0.6
+    box_width = 0.8
     custom_x_label = None
     custom_y_label = None
     title = None

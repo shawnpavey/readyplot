@@ -32,6 +32,14 @@ class BoxWhiskerPlotter(BasePlotter):
             ['palette','boxprops','showfliers','showmeans','meanprops','linecolor','linewidth','width','dodge','ax'],
             defaults_list,kwargs=kwargs)
 
+        try:
+            temp = DF[self.ylab]
+        except KeyError:
+            DF[self.ylab] = np.nan
+        if DF[self.ylab].isna().all():
+            DF[self.ylab] = DF[self.xlab]
+            DF[self.xlab] = self.ylab
+
         sns.boxplot(
             x=self.xlab, y=self.ylab, data=DF,
             hue =self.zlab,boxprops=boxprops,

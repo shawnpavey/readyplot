@@ -18,7 +18,6 @@ class LinePlotter(BasePlotter):
             self.markers = [False]
         
     def just_plot(self,**kwargs):
-        print(self.style)
         kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
             kwargs, ['DF', 'palette', 'style', 'markers', 'ax'])
 
@@ -28,7 +27,7 @@ class LinePlotter(BasePlotter):
             [palette, style, markers, ax],
             ['palette', 'style', 'markers', 'ax'],
             defaults_list, kwargs=kwargs)
-        print(self.xlab,self.ylab,self.zlab,style)
+
         sns.lineplot(
             x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
             palette=palette, style=style, markers=markers,

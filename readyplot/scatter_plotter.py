@@ -32,6 +32,7 @@ class ScatterPlotter(BasePlotter):
             ['palette', 'style', 'markers', 'ax'],
             defaults_list, kwargs=kwargs)
 
+        print(style)
         sns.scatterplot(
             x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
             palette=palette, style=style, markers=markers,

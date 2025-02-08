@@ -74,8 +74,6 @@ class BasePlotter:
         if not isinstance(self.colors, list):
             self.colors = [self.colors]
 
-        print(self.xlab)
-
         self.kwargs = kwargs
         self.__dict__.update(**kwargs)
 
@@ -83,14 +81,24 @@ class BasePlotter:
     def force_data_frame(self):
         DFs = pd.DataFrame()
         DFs[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
-        DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+        try:
+            DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+        except ValueError:
+            DFs[self.ylab] = np.nan
         try:
             DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
         except (TypeError,ValueError) as e:
-            if len(self.x) > len(self.y):
-                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+            if isinstance(self.y, list):
+                if any(self.y):
+                    if len(self.x) > len(self.y):
+                        DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+                    else:
+                        DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
+                else:
+                    DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
             else:
-                DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
+                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+
         return [DFs]
 
     def plot(self,save=True,**kwargs):
@@ -187,11 +195,14 @@ class BasePlotter:
         for label in self.ax.get_yticklabels():
             ytexts.append(label.get_text())  
         if all([numeric_checker(tick) for tick in ytexts]):
-            self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
-            y_min, y_max = self.ax.get_ylim()
-            y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_y_cap0)
-            self.ax.set_ylim(y_min,y_max)
-            self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
+            try:
+                self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
+                y_min, y_max = self.ax.get_ylim()
+                y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_y_cap0)
+                self.ax.set_ylim(y_min,y_max)
+                self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
+            except AttributeError:
+                pass
 
         tx = self.ax.xaxis.get_offset_text()
         tx.set_fontweight(self.fontweight)
