@@ -105,10 +105,9 @@ class BasePlotter:
         self.pre_format()
         self.just_plot(**kwargs)
         self.post_format()
-        self.show()
-        print('Using PARENT method instead')
         if save:
             self.save()
+        #self.show()
         return self.fig,self.ax
     
     def pre_format(self):
@@ -215,38 +214,53 @@ class BasePlotter:
         ty.set_fontsize(self.def_font_sz*0.9)
         ty.set_position((self.y_exp_location,1.05))
     
-    def save(self):
-        if self.title is None:
-            if is_mostly_strings(self.DF[self.ylab]):
-                dependent_var_list = self.xlab.split(' ')
-            elif is_mostly_strings(self.DF[self.xlab]):
-                dependent_var_list = self.ylab.split(' ')
-            else:
-                # Assume y is the dependent variable
-                dependent_var_list = self.ylab.split(' ')
-
-            self.dependent_var_name = ''
-            for seg in dependent_var_list:
-                if "/" not in seg:
-                    self.dependent_var_name += seg + '_'
+    def save(self,**kwargs):
+        if '.' not in self.folder_name:
+            if self.title is None:
+                if is_mostly_strings(self.DF[self.ylab]):
+                    dependent_var_list = self.xlab.split(' ')
+                elif is_mostly_strings(self.DF[self.xlab]):
+                    dependent_var_list = self.ylab.split(' ')
                 else:
-                    self.dependent_var_name += 'per' + '_'
+                    # Assume y is the dependent variable
+                    dependent_var_list = self.ylab.split(' ')
+
+                self.dependent_var_name = ''
+                for seg in dependent_var_list:
+                    if "/" not in seg:
+                        self.dependent_var_name += seg + '_'
+                    else:
+                        self.dependent_var_name += 'per' + '_'
+            else:
+                self.dependent_var_name = '_'
+            self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
+            self.save_name.replace('/', "per")
+
+            try:
+                os.mkdir(self.folder_name)
+                print(f"Directory '{self.folder_name}' created successfully.")
+            except FileExistsError:
+                print(f"Directory '{self.folder_name}' already exists.")
+
+            self.fig.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight',**kwargs)
         else:
-            self.dependent_var_name = '_'
-        self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
-        self.save_name.replace('/', "per") 
-        
-        try:
-            os.mkdir(self.folder_name)
-            print(f"Directory '{self.folder_name}' created successfully.")
-        except FileExistsError:
-            print(f"Directory '{self.folder_name}' already exists.")
-        
-        plt.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight')
+            if self.folder_name[0] == os.sep:
+                full_path = os.sep
+            else:
+                full_path = ''
+            self.dir_name = self.folder_name.split(os.sep)[:-1]
+            self.dir_name = os.path.join(full_path,*self.dir_name)
+            print(self.dir_name)
+            try:
+                os.mkdir(self.dir_name)
+                print(f"Directory '{self.dir_name}' created successfully.")
+            except FileExistsError:
+                print(f"Directory '{self.dir_name}' already exists.")
+            self.fig.savefig(self.folder_name, bbox_inches='tight', **kwargs)
         return self.fig, self.ax
         
-    def show(self):
-        plt.show(self.fig)
+    def show(self,**kwargs):
+        plt.show(self.fig,**kwargs)
         return self.fig
     
     def just_plot(self,**kwargs):
