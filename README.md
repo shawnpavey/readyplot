@@ -41,21 +41,21 @@ import readyplot as rp
 ## Initializing:
 ```{python}
 # IF PASSING DATA FRAME DF:
-plotter = rp.boxwhisker(DFs=DF,xlab='X_Column_Name',ylab='Y_Column_Name',zlab='Z/hue_Column_Name') 
+plotter = rp.boxwhisker(DF,xlab='X_Column_Name',ylab='Y_Column_Name',zlab='Z/hue_Column_Name') 
 
 # IF PASSING X,Y,Z DATA:
-plotter = rp.boxwhisker(x=x,y=y,z=z) 
+plotter = rp.boxwhisker(x,y,z) 
 
 #There are many possible arguments to add on initialization
 #All **kwargs are passed on to the coressponding sns plotting function
 ```
 ## Available plotters and corresponding sns functions:
 ```{python}
-plotter = rp.bar(x=x,y=y,z=z)           #sns.barplot()
-plotter = rp.boxwhsker(x=x,y=y,z=z)     #sns.boxplot()
-plotter = rp.hist(x=x,y=y,z=z)          #sns.histplot()
-plotter = rp.line(x=x,y=y,z=z)          #sns.lineplot()
-plotter = rp.scatter(x=x,y=y,z=z)       #sns.scatterplot()
+plotter = rp.bar(x,y,z)           #sns.barplot()
+plotter = rp.boxwhsker(x,y,z)     #sns.boxplot()
+plotter = rp.hist(x,y,z)          #sns.histplot()
+plotter = rp.line(x,y,z)          #sns.lineplot()
+plotter = rp.scatter(x,y,z)       #sns.scatterplot()
 ```
 ## Quick example:
 ```{python}
@@ -65,7 +65,7 @@ y=[1,2,3,4,5,8,4,3,2,9]
 z = ['C','D','C','D','C','D','C','D','C','D']
 
 # Initialize plotter
-box_plotter = rp.boxwhisker(x=x,y=y,z=z,ylab='your variable here',handles_in_legend=2)
+box_plotter = rp.boxwhisker(x,y,z,ylab='your variable here',handles_in_legend=2)
 
 # Plot data
 box_plotter.plot()
@@ -80,7 +80,7 @@ y=[1,2,3,4,5,8,4,3,2,9]
 z = ['C','D','C','D','C','D','C','D','C','D']
 
 # Initialize plotter
-box_plotter = rp.boxwhisker(x=x,y=y,z=z,ylab='your variable here',handles_in_legend=2)
+box_plotter = rp.boxwhisker(x,y,z,ylab='your variable here',handles_in_legend=2)
 
 # Apply pre-plotting format options
 box_plotter.pre_format()
@@ -95,6 +95,25 @@ box_plotter.post_format()
 # Show and save plot
 box_plotter.show()
 box_plotter.save()
+```
+## Simple Examples for each plot type:
+```{python}
+x1 = ['A','A','A','B','B','B','B','A','B','B']
+x2 = [3,1,9,5,8,8,3,2,1,10]
+y=[1,2,3,4,5,8,4,3,2,9]
+z = ['C','D','C','D','C','D','C','D','C','D']
+df = pd.DataFrame({'x':x1,'y':y,'z':z})
+
+bar_plot = readyplot.bar(df) # You could pass x1,y,z instead
+bar_plot.plot()
+box_plot = readyplot.boxwhisker(df)
+box_plot.plot()
+hist_plot = readyplot.hist(x2)
+hist_plot.plot()
+line_plot = readyplot.line(x2,y) # You could insert a 2 column data frame with x2,y and only pass that instead
+line_plot.plot()
+scatter_plot = readyplot.scatter(x2,y)
+scatter_plot.plot()
 ```
 ---
 # Important input options
