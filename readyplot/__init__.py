@@ -9,7 +9,7 @@ reformats given figures).
 @author: paveyboys
 """
 # readyplot/__init__.py
-
+#%% IMPORT PACKAGES
 from .bar_plotter import BarPlotter
 from .boxwhisker_plotter import BoxWhiskerPlotter
 from .hist_plotter import HistPlotter
@@ -29,7 +29,8 @@ expected_keys = ['DFs','x','y','z','excel_path','sheet_name','xlab','ylab','zlab
                  'custom_x_label','custom_y_label','title',
                  'sns_palette','sns_style','sns_context',
                  'plot_type',
-                 'capsize', 'trendline', 'show_r2','style','line_color','back_color','darkmode','apply_color_lines_only']
+                 'capsize', 'trendline', 'show_r2','style','line_color','back_color','darkmode','apply_color_lines_only',
+                 'plot_line_palette']
 
 
 def bar(*args,**kwargs):
@@ -143,6 +144,7 @@ def initialize_common_defaults(args,input_dict):
     back_color = 'white'
     darkmode = False
     apply_color_lines_only = False
+    plot_line_palette = None
 
     initialized_dict = {}
     kwargs = {}

@@ -8,6 +8,7 @@ functions: custom_plotter (full plotting + formating) and plotting software (onl
 reformats given figures).
 @author: paveyboys
 """
+#%% IMPORT PACKAGES
 import numpy as np
 import pandas as pd
 import os
@@ -18,7 +19,6 @@ from pathlib import Path
 from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF
 from matplotlib.patches import Patch
 import warnings
-
 
 class BasePlotter:
     def __init__(self,input_dict, **kwargs):
@@ -327,3 +327,11 @@ class BasePlotter:
         plt.rcParams["xtick.color"] = self.line_color  # X-axis tick color
         plt.rcParams["ytick.color"] = self.line_color  # Y-axis tick color
         plt.rcParams["grid.color"] = "#444444"  # Gridline color
+
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        for base in type(self).mro():
+            if name in base.__dict__:
+                return base.__dict__[name].__get__(self)
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")

@@ -8,17 +8,20 @@ functions: custom_plotter (full plotting + formating) and plotting software (onl
 reformats given figures).
 @author: paveyboys
 """
+#%% IMPORT PACKAGES
 import seaborn as sns
 from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF
 
+#%% INITIALIZE CHILD CLASS
 class LinePlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
         self.plot_type = 'line'
         if self.markers == False:
             self.markers = [False]
-        
+
+    # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
         kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
             kwargs, ['DF', 'palette', 'style', 'markers', 'ax'])
@@ -34,15 +37,28 @@ class LinePlotter(BasePlotter):
         if zlab is None:
             zlab = xlab
 
+        # %% PLOT WITH SEABORN
         sns.lineplot(
             x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
             palette=palette, style=style, markers=markers,
             ax=ax, **kwargs)
 
+        #%% EXTRA PLOT EDITING
+
+
+    # %% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE
     def __getattr__(self, name):
-        if name in self.__dict__:
-            return self.__dict__[name]
-        for base in type(self).mro():
-            if name in base.__dict__:
-                return base.__dict__[name].__get__(self)
-        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+        super().__getattr__(name)
+
+    # %% CUSTOM METHODS
+    #%% FIX
+    def generate_resolver_lists(self,loc_vars,kwargs):
+        conflict_vars = ['DF','markers','palette','dodge','ax','capsize','linewidth','width']
+        defaults_list = [self.colors[0:len(self.unique)], self.def_line_w, self.box_width]
+        kwargs, DF, markers, palette, dodge, ax, capsize, linewidth, width = super().kwarg_conflict_resolver(kwargs,conflict_vars)
+        inputs = [palette, linewidth, width]
+        input_keys = ['palette', 'linewidth', 'width']
+
+        outputs = [DF, markers, palette, dodge, ax, capsize, linewidth, width]
+
+        return conflict_vars, defaults_list, inputs, input_keys, outputs

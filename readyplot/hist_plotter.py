@@ -8,23 +8,43 @@ functions: custom_plotter (full plotting + formating) and plotting software (onl
 reformats given figures).
 @author: paveyboys
 """
+#%% IMPORT PACKAGES
 import seaborn as sns
 from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF
 import matplotlib.pyplot as plt
 
+#%% INITIALIZE CHILD CLASS
 class HistPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
         self.plot_type = 'hist'
-        if not self.markers == False:
-            self.markers = [False]
-        
-    def just_plot(self,**kwargs):
-        kwargs,DF,palette,ax,legend = super().kwarg_conflict_resolver(
-            kwargs, ['DF','palette','ax','legend'])
 
-        if not palette:
+    # %% DEFINE PLOTTER, PREPARE INPUTS
+    def just_plot(self,**kwargs):
+        kwargs, DF, palette, ax, legend = self.generate_resolver_lists(locals(), kwargs)
+        xlab, ylab, zlab, palette = self.label_prep(locals())
+
+        # %% PLOT WITH SEABORN
+        sns.histplot(
+            x=xlab,y=ylab, data=DF,
+            hue=zlab, palette=palette,
+            ax=ax, fill=not self.apply_color_lines_only,**kwargs)
+
+        #%% EXTRA PLOT EDITING
+
+    # %% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE
+    def __getattr__(self, name):
+        super().__getattr__(name)
+
+    # %% CUSTOM METHODS
+    def generate_resolver_lists(self,l,kwargs):
+        kwargs, DF, palette, ax, legend = super().kwarg_conflict_resolver(
+            kwargs, ['DF', 'palette', 'ax', 'legend'])
+        return kwargs, DF, palette, ax, legend
+
+    def label_prep(self,l):
+        if not l['palette']:
             if len(self.unique) == 1:
                 zlab = None
                 palette = None
@@ -32,22 +52,12 @@ class HistPlotter(BasePlotter):
                 zlab = self.zlab
                 palette = self.colors[0:len(self.unique)]
         else:
+            palette = l['palette']
             if len(self.unique) == 1:
                 zlab = None
             else:
                 zlab = self.zlab
 
-        xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
+        xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
 
-        sns.histplot(
-            x=xlab,y=ylab, data=DF,
-            hue=zlab, palette=palette,
-            ax=ax, fill=not self.apply_color_lines_only,**kwargs)
-
-    def __getattr__(self, name):
-        if name in self.__dict__:
-            return self.__dict__[name]
-        for base in type(self).mro():
-            if name in base.__dict__:
-                return base.__dict__[name].__get__(self)
-        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+        return xlab, ylab, zlab, palette

@@ -8,6 +8,7 @@ functions: custom_plotter (full plotting + formating) and plotting software (onl
 reformats given figures).
 @author: paveyboys
 """
+#%% IMPORT PACKAGES
 def numeric_checker(string):
     try:
         float(string)

@@ -8,12 +8,14 @@ functions: custom_plotter (full plotting + formating) and plotting software (onl
 reformats given figures).
 @author: paveyboys
 """
+#%% IMPORT PACKAGES
 import matplotlib.pyplot as plt
 import seaborn as sns
 import scipy.stats as stats
 from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF
 
+#%% INITIALIZE CHILD CLASS
 class ScatterPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
@@ -22,7 +24,8 @@ class ScatterPlotter(BasePlotter):
         self.show_r2 = input_dict['show_r2']
         if not self.trendline or not self.show_r2:
             self.plot_type = "scatter"
-        
+
+    # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
         kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(
             kwargs,['DF','palette', 'style', 'markers', 'ax'])
@@ -38,11 +41,13 @@ class ScatterPlotter(BasePlotter):
         if zlab is None:
             zlab = xlab
 
+        # %% PLOT WITH SEABORN
         sns.scatterplot(
             x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, style=style, markers=markers,
             ax=ax, **kwargs)
 
+        #%% EXTRA PLOT EDITING
         g_counter = 0
         for g in self.unique:
             if self.trendline:
@@ -63,10 +68,20 @@ class ScatterPlotter(BasePlotter):
                                 fontsize=int(0.75*self.def_font_sz),color = self.colors[self.unique.index(g)])
             g_counter += 1
 
+
+    # %% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE
     def __getattr__(self, name):
-        if name in self.__dict__:
-            return self.__dict__[name]
-        for base in type(self).mro():
-            if name in base.__dict__:
-                return base.__dict__[name].__get__(self)
-        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+        super().__getattr__(name)
+
+    # %% CUSTOM METHODS
+    #%% FIX
+    def generate_resolver_lists(self,loc_vars,kwargs):
+        conflict_vars = ['DF','markers','palette','dodge','ax','capsize','linewidth','width']
+        defaults_list = [self.colors[0:len(self.unique)], self.def_line_w, self.box_width]
+        kwargs, DF, markers, palette, dodge, ax, capsize, linewidth, width = super().kwarg_conflict_resolver(kwargs,conflict_vars)
+        inputs = [palette, linewidth, width]
+        input_keys = ['palette', 'linewidth', 'width']
+
+        outputs = [DF, markers, palette, dodge, ax, capsize, linewidth, width]
+
+        return conflict_vars, defaults_list, inputs, input_keys, outputs
