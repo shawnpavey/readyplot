@@ -157,3 +157,20 @@ def check_labels_in_DF(DF,xlab,ylab,zlab):
             lab = None
         outputs.append(lab)
     return outputs
+
+
+def find_closest(dictionary, x_pos):
+    # Initialize variables to track the closest key and value
+    closest_key = None
+    closest_value = None
+    min_diff = float('inf')  # Start with a very large difference
+
+    # Iterate over the dictionary to find the closest key
+    for key, value in dictionary.items():
+        diff = abs(value - x_pos)  # Calculate the absolute difference between key and input x_pos
+        if diff < min_diff:
+            min_diff = diff
+            closest_key = key
+            closest_value = value
+
+    return closest_key, closest_value

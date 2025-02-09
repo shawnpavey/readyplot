@@ -42,7 +42,7 @@ class HistPlotter(BasePlotter):
         sns.histplot(
             x=xlab,y=ylab, data=DF,
             hue=zlab, palette=palette,
-            ax=ax, **kwargs)
+            ax=ax, fill=not self.apply_color_lines_only,**kwargs)
 
     def __getattr__(self, name):
         if name in self.__dict__:

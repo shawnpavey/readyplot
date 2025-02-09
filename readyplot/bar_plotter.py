@@ -56,8 +56,12 @@ class BarPlotter(BasePlotter):
         except KeyError:
             unique = ['placeholder']
 
-        for i in range(len(unique)):
-            dark_palette.append(self.line_color)
+        if self.apply_color_lines_only:
+            dark_palette = palette
+        else:
+            for i in range(len(unique)):
+                dark_palette.append(self.line_color)
+
         for i, category in enumerate(unique):
             df_copy = self.DF.copy()
             if unique[0] != 'placeholder':
@@ -73,16 +77,29 @@ class BarPlotter(BasePlotter):
         while len(self.unique) > len(self.hatches):
             self.hatches.extend(self.hatches)
 
+        counter = 0
         for bar in self.ax.patches:
             hue_group = bar.get_label()
             match_rgba_to_color(bar.get_facecolor(), self.colors)
             current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
             bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
-            bar.set_edgecolor(self.line_color)
+            if self.apply_color_lines_only:
+                bar.set_edgecolor(current_face_color)
+                bar.set_facecolor(self.back_color)
+            else:
+                bar.set_edgecolor(self.line_color)
             hatch_pattern = self.hatches[self.colors.index(current_face_color)]
             hatch_density = 1
             bar.set_hatch(f"{hatch_pattern * hatch_density}")
             bar.set_linewidth(self.def_line_w)
+
+            if self.apply_color_lines_only:
+                try:
+                    ax.lines[counter].set_color(current_face_color)
+                except IndexError:
+                    pass
+            counter +=1
+
         plt.xlabel(" ")
 
     def __getattr__(self, name):

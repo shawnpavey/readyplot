@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from .base_plotter import BasePlotter
-from .utils import check_labels_in_DF
+from .utils import check_labels_in_DF, match_rgba_to_color, find_closest
 
 class BoxWhiskerPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
@@ -49,15 +49,18 @@ class BoxWhiskerPlotter(BasePlotter):
 
         sns.boxplot(
             x=xlab, y=ylab, data=DF,
-            hue=zlab,boxprops=boxprops,
+            hue=zlab,
             showfliers=showfliers,showmeans=showmeans,
             meanprops=meanprops,
             palette=palette,linecolor=linecolor,
             linewidth=linewidth, width=width,
-            dodge = dodge,ax=ax,**kwargs)
+            dodge = dodge,ax=ax,fill=not self.apply_color_lines_only,**kwargs)
+
         dark_palette = []
         for i in range(len(self.DF[self.zlab].unique())):
             dark_palette.append(self.line_color)
+        if self.apply_color_lines_only:
+            dark_palette = palette
         for i, category in enumerate(self.DF[self.zlab].unique()):
             df_copy = self.DF.copy()
             df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
