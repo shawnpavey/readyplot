@@ -15,6 +15,7 @@ from .utils import check_labels_in_DF
 class LinePlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
+        self.plot_type = 'line'
         if self.markers == False:
             self.markers = [False]
         

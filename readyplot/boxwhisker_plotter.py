@@ -17,6 +17,7 @@ from .utils import check_labels_in_DF
 class BoxWhiskerPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
+        self.plot_type = 'boxwhisker'
         
     def just_plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
@@ -24,8 +25,8 @@ class BoxWhiskerPlotter(BasePlotter):
         kwargs,DF,boxprops,showfliers,showmeans,meanprops,palette,linecolor,linewidth, width,dodge,ax = super().kwarg_conflict_resolver(
             kwargs, ['DF','boxprops','showfliers','showmeans','meanprops','palette','linecolor','linewidth','width','dodge','ax'])
 
-        defaults_list =[self.colors[0:len(self.unique)],{'alpha': 1, 'edgecolor': 'black'},
-                        False,True,{"marker": "x", "markeredgecolor": "black"},'k',self.def_line_w,
+        defaults_list =[self.colors[0:len(self.unique)],{'alpha': 1, 'edgecolor': self.line_color},
+                        False,True,{"marker": "x", "markeredgecolor": self.line_color},self.line_color,self.def_line_w,
                         self.box_width,True,self.ax]
 
         palette,boxprops,showfliers,showmeans,meanprops,linecolor,linewidth,width,dodge,ax = super().var_existence_check(
@@ -56,13 +57,13 @@ class BoxWhiskerPlotter(BasePlotter):
             dodge = dodge,ax=ax,**kwargs)
         dark_palette = []
         for i in range(len(self.DF[self.zlab].unique())):
-            dark_palette.append('k')
+            dark_palette.append(self.line_color)
         for i, category in enumerate(self.DF[self.zlab].unique()):
             df_copy = self.DF.copy()
             df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
             sns.stripplot(
-                data=df_copy, x=self.xlab, y=self.ylab,hue=self.zlab,
-                dodge = self.dodge,palette=dark_palette, 
+                data=df_copy, x=xlab, y=ylab,hue=zlab,
+                dodge = dodge,palette=dark_palette,
                 marker=self.marker_dict[category],ax=ax,size=3)
         plt.xlabel(" ")
 

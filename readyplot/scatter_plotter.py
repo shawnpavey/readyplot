@@ -17,6 +17,7 @@ from .utils import check_labels_in_DF
 class ScatterPlotter(BasePlotter):
     def __init__(self, input_dict, **kwargs):
         super().__init__(input_dict, **kwargs)
+        self.plot_type = 'scatter'
         self.trendline = input_dict['trendline']
         self.show_r2 = input_dict['show_r2']
         if not self.trendline or not self.show_r2:

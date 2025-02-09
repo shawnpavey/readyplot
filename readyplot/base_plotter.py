@@ -83,54 +83,31 @@ class BasePlotter:
         self.kwargs = kwargs
         self.__dict__.update(**kwargs)
 
-
-    def force_data_frame(self):
-        DFs = pd.DataFrame()
-        DFs[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
-        try:
-            DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
-        except ValueError:
-            pass
-        try:
-            DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
-        except (TypeError,ValueError) as e:
-            if isinstance(self.y, list):
-                if any(self.y):
-                    if len(self.x) > len(self.y):
-                        DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
-                    else:
-                        DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
-                else:
-                    DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
-            else:
-                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
-
-        return [DFs]
-
     def plot(self,save=True,**kwargs):
         self.pre_format()
         self.just_plot(**kwargs)
         self.post_format()
         if save:
             self.save()
-        #self.show()
+        self.show()
         return self.fig,self.ax
     
     def pre_format(self):
         import seaborn as sns
         from matplotlib import pyplot as plt
 
+        self.format_colors()
+
         if len(plt.get_fignums()) == 0:
             self.current_fig_num = 0
         else:
             self.current_fig_num = max(plt.get_fignums()) + 1
-        self.fig = plt.figure(self.current_fig_num,dpi=self.dpi)
+
+        self.fig = plt.figure(self.current_fig_num, dpi=self.dpi)
         self.ax = self.fig.add_subplot(111)
         self.fig.set_figwidth(self.fig_width)
         self.fig.set_figheight(self.fig_height)
-        sns.color_palette(self.sns_palette)
-        sns.set_style(self.sns_style)
-        sns.set_context(self.sns_context)
+
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
 
@@ -164,7 +141,11 @@ class BasePlotter:
             plt.legend(
                 handles[:self.handles_in_legend],
                 labels[:self.handles_in_legend],
-                prop={'weight': 'bold'})
+                prop={'weight': 'bold'},)
+
+            for text in plt.gca().get_legend().get_texts():
+                text.set_color(self.line_color)
+
         if self.custom_x_label:
             plt.xlabel(self.custom_x_label)
         if self.custom_y_label:
@@ -185,6 +166,7 @@ class BasePlotter:
         for tick in self.ax.get_yticklabels():
             tick.set_fontweight(self.fontweight)
             tick.set_fontsize(self.def_font_sz*self.ytick_font_ratio)
+
          
         xtexts = []
         for label in self.ax.get_xticklabels():
@@ -301,4 +283,47 @@ class BasePlotter:
             return outputs[0]
         else:
             return tuple(outputs)
-    
+
+    def force_data_frame(self):
+        DFs = pd.DataFrame()
+        DFs[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
+        try:
+            DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+        except ValueError:
+            pass
+        try:
+            DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
+        except (TypeError,ValueError) as e:
+            if isinstance(self.y, list):
+                if any(self.y):
+                    if len(self.x) > len(self.y):
+                        DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+                    else:
+                        DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
+                else:
+                    DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+            else:
+                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+
+        return [DFs]
+
+    def format_colors(self):
+        sns.color_palette(self.sns_palette)
+        sns.set_style(self.sns_style)
+        sns.set_context(self.sns_context)
+
+        if self.darkmode:
+            self.line_color = 'white'
+            self.back_color = 'black'
+            sns.set_palette("muted")  # or "bright" or "pastel"
+        else:
+            sns.set_palette("deep")  # or "bright" or "pastel"
+
+        plt.rcParams["figure.facecolor"] = self.back_color  # Background color of the plot
+        plt.rcParams["axes.facecolor"] = self.back_color  # Axes background color
+        plt.rcParams["axes.edgecolor"] = self.line_color  # Axes border color
+        plt.rcParams["axes.labelcolor"] = self.line_color  # Axis labels color
+        plt.rcParams['legend.facecolor'] = self.back_color  # Legend background
+        plt.rcParams["xtick.color"] = self.line_color  # X-axis tick color
+        plt.rcParams["ytick.color"] = self.line_color  # Y-axis tick color
+        plt.rcParams["grid.color"] = "#444444"  # Gridline color

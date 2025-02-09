@@ -19,6 +19,7 @@ import warnings
 class BarPlotter(BasePlotter):
     def __init__(self, input_dict,**kwargs):
         super().__init__(input_dict,**kwargs)
+        self.plot_type = 'bar'
         
     def just_plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
@@ -43,30 +44,20 @@ class BarPlotter(BasePlotter):
             hue =zlab,
             palette=palette,
             linewidth=linewidth,width=width,
-            dodge = dodge,ax=ax, err_kws={'color': 'k','linewidth': self.def_line_w}, capsize=capsize,
+            dodge = dodge,ax=ax, err_kws={'color': self.line_color,'linewidth': self.def_line_w}, capsize=capsize,
             **kwargs)
+
+        if markers:
+            plt.ylim(DF[ylab].min(),DF[ylab].max())
+
         dark_palette = []
-        while len(self.unique) > len(self.hatches):
-            self.hatches.extend(self.hatches)
-
-        for bar in self.ax.patches:
-            hue_group = bar.get_label()
-            match_rgba_to_color(bar.get_facecolor(), self.colors)
-            current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)#rgba_to_named_color(bar.get_facecolor())
-            bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
-            bar.set_edgecolor('black')
-            hatch_pattern = self.hatches[self.colors.index(current_face_color)]
-            hatch_density = 1
-            bar.set_hatch(f"{hatch_pattern * hatch_density}")
-            bar.set_linewidth(self.def_line_w)
-
         try:
             unique = self.DF[self.zlab].unique()
         except KeyError:
             unique = ['placeholder']
 
         for i in range(len(unique)):
-            dark_palette.append('k')
+            dark_palette.append(self.line_color)
         for i, category in enumerate(unique):
             df_copy = self.DF.copy()
             if unique[0] != 'placeholder':
@@ -74,10 +65,24 @@ class BarPlotter(BasePlotter):
             try:
                 sns.stripplot(
                     data=df_copy, x=xlab, y=ylab,hue=zlab,
-                    dodge = self.dodge,palette=dark_palette,
-                    marker=self.marker_dict[category],ax=self.ax)
+                    dodge = dodge,palette=dark_palette,
+                    marker=self.marker_dict[category],ax=ax)
             except KeyError:
                 pass
+
+        while len(self.unique) > len(self.hatches):
+            self.hatches.extend(self.hatches)
+
+        for bar in self.ax.patches:
+            hue_group = bar.get_label()
+            match_rgba_to_color(bar.get_facecolor(), self.colors)
+            current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
+            bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
+            bar.set_edgecolor(self.line_color)
+            hatch_pattern = self.hatches[self.colors.index(current_face_color)]
+            hatch_density = 1
+            bar.set_hatch(f"{hatch_pattern * hatch_density}")
+            bar.set_linewidth(self.def_line_w)
         plt.xlabel(" ")
 
     def __getattr__(self, name):
