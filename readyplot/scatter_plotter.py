@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan 27 14:34:59 2025
-Custom plotter function which copies styles used by Shawn Pavey in plotting software. Many
-inputs are customizable, but defaults work well. This script contains two
-functions: custom_plotter (full plotting + formating) and plotting software (only
-reformats given figures).
-@author: paveyboys
+A child class for the base plotter which produces scatter plots with potential trendline overlays
+@author: Shawn Pavey
 """
 #%% IMPORT PACKAGES
 import matplotlib.pyplot as plt
