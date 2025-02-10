@@ -15,6 +15,7 @@ from pathlib import Path
 from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF
 from matplotlib.patches import Patch
 import warnings
+from matplotlib.colors import to_rgb
 
 class BasePlotter:
     def __init__(self,input_dict, **kwargs):
@@ -316,6 +317,8 @@ class BasePlotter:
             sns.set_palette("muted")  # or "bright" or "pastel"
         else:
             sns.set_palette("deep")  # or "bright" or "pastel"
+
+        self.back_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
 
         plt.rcParams["figure.facecolor"] = self.back_color  # Background color of the plot
         plt.rcParams["axes.facecolor"] = self.back_color  # Axes background color
