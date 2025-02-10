@@ -85,7 +85,7 @@ class BasePlotter:
         self.post_format()
         if save:
             self.save()
-        self.show()
+        #self.show()
         return self.fig,self.ax
     
     def pre_format(self):

@@ -4,7 +4,7 @@
 A child class for the base plotter which produces bar charts with potential scatter overlays
 @author: Shawn Pavey
 """
-#%% IMPORT PACKAGES
+# %% IMPORT PACKAGES
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -12,62 +12,58 @@ from .base_plotter import BasePlotter
 from .utils import match_rgba_to_color, check_labels_in_DF
 import warnings
 
-#%% INITIALIZE CHILD CLASS
+#-----------------------------------------------------------------------------------------------------------------------
+# CHILD CLASS MAIN
+#-----------------------------------------------------------------------------------------------------------------------
+# %% INITIALIZE CHILD CLASS
 class BarPlotter(BasePlotter):
     def __init__(self, input_dict,**kwargs):
         super().__init__(input_dict,**kwargs)
         self.plot_type = 'bar'
 
-    #%% DEFINE PLOTTER, PREPARE INPUTS
+    # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
         conflict_vars,defaults_list,inputs,input_keys,outputs = self.generate_resolver_lists(locals(),kwargs)
-        DF,markers,palette,dodge,ax,capsize,linewidth,width = outputs
+        DF,kwargs, markers,palette,dodge,ax,capsize,linewidth,width = outputs
         palette, linewidth, width = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
         xlab,ylab,zlab,dodge = self.label_prep(locals())
 
-        #%% PLOT WITH SEABORN
+        # %% PLOT WITH SEABORN
         sns.barplot(
             x=xlab,y=ylab,data=DF,hue=zlab,
             palette=palette,linewidth=linewidth,capsize=capsize,width=width,dodge=dodge,
             ax=ax, err_kws={'color': self.line_color,'linewidth': self.def_line_w},**kwargs)
 
-        #%% EXTRA PLOT EDITING
+        # %% EXTRA PLOT EDITING
         self.local_scatter(locals())
         self.hatches_and_colors(locals())
         plt.xlabel(" ")
 
-
-#%% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE
+#-----------------------------------------------------------------------------------------------------------------------
+# LOCAL METHODS
+#-----------------------------------------------------------------------------------------------------------------------
+# %% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE
     def __getattr__(self, name):
         super().__getattr__(name)
 
-#%% CUSTOM METHODS
+# %% CUSTOM METHODS
     def generate_resolver_lists(self,loc_vars,kwargs):
         conflict_vars = ['DF','markers','palette','dodge','ax','capsize','linewidth','width']
         defaults_list = [self.colors[0:len(self.unique)], self.def_line_w, self.box_width]
-
         kwargs, DF, markers, palette, dodge, ax, capsize, linewidth, width = super().kwarg_conflict_resolver(kwargs,conflict_vars)
 
         inputs = [palette, linewidth, width]
         input_keys = ['palette', 'linewidth', 'width']
-        outputs = [DF, markers, palette, dodge, ax, capsize, linewidth, width]
+        outputs = [DF, kwargs, markers, palette, dodge, ax, capsize, linewidth, width]
 
         return conflict_vars, defaults_list, inputs, input_keys, outputs
 
-
     def label_prep(self,l):
-        dodge = l['dodge']
-        DF = l['DF']
-
+        dodge,DF = l['dodge'],l['DF']
         xlab,ylab,zlab = check_labels_in_DF(self.DF,self.xlab,self.ylab,self.zlab)
-
-        if zlab is None:
-            zlab = xlab
-            dodge = False
-
+        (zlab,dodge) = (xlab,False) if zlab is None else (zlab,dodge)
         plt.ylim(DF[ylab].min(), DF[ylab].max())
-
         return xlab,ylab,zlab,dodge
 
     def local_scatter(self,l):
@@ -102,16 +98,16 @@ class BarPlotter(BasePlotter):
 
     def hatches_and_colors(self,l):
         ax = l['ax']
-
         while len(self.unique) > len(self.hatches):
             self.hatches.extend(self.hatches)
-
         counter = 0
+
         for bar in self.ax.patches:
             hue_group = bar.get_label()
             match_rgba_to_color(bar.get_facecolor(), self.colors)
             current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
             bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
+
             if self.apply_color_lines_only:
                 bar.set_edgecolor(current_face_color)
                 bar.set_facecolor(self.back_color)
@@ -119,6 +115,7 @@ class BarPlotter(BasePlotter):
                 bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
             else:
                 bar.set_edgecolor(self.line_color)
+
             hatch_pattern = self.hatches[self.colors.index(current_face_color)]
             hatch_density = 1
             bar.set_hatch(f"{hatch_pattern * hatch_density}")
