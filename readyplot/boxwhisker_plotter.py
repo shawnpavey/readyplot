@@ -36,9 +36,10 @@ class BoxWhiskerPlotter(BasePlotter):
         for i,u in enumerate(self.unique):
             line_palette = self.plot_line_palette[i] if self.plot_line_palette else self.line_color
             tempDF = DF.copy()
-            for v in self.unique:
-                tempDF[ylab],tempDF.loc[tempDF[zlab]==v,ylab] = (
-                    tempDF[ylab].astype(float),float("inf")) if v!=u else (tempDF[ylab],tempDF.loc[tempDF[zlab]==v,ylab])
+            if self.plot_line_palette is not None:
+                for v in self.unique:
+                    tempDF[ylab],tempDF.loc[tempDF[zlab]==v,ylab] = (
+                        tempDF[ylab].astype(float),float("inf")) if v!=u else (tempDF[ylab],tempDF.loc[tempDF[zlab]==v,ylab])
 
             sns.boxplot(
                 x=xlab, y=ylab, data=tempDF,
@@ -48,6 +49,9 @@ class BoxWhiskerPlotter(BasePlotter):
                 palette=palette,linecolor=line_palette,
                 linewidth=linewidth, width=width,
                 dodge = dodge,ax=ax,legend=i==0,fill=not self.apply_color_lines_only,**kwargs)
+
+            if self.plot_line_palette is None:
+                break
 
         # %% EXTRA PLOT EDITING
         self.legend_fixer(locals())
