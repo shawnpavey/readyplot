@@ -10,6 +10,7 @@ import seaborn as sns
 import numpy as np
 from .base_plotter import BasePlotter
 from .utils import match_rgba_to_color, check_labels_in_DF
+from matplotlib.colors import to_rgb
 import warnings
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -110,7 +111,9 @@ class BarPlotter(BasePlotter):
 
             if self.apply_color_lines_only:
                 bar.set_edgecolor(current_face_color)
-                bar.set_facecolor(self.back_color)
+                bar_face_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
+                print(bar_face_color)
+                bar.set_facecolor(bar_face_color)
             elif self.plot_line_palette:
                 bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
             else:

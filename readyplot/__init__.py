@@ -26,7 +26,7 @@ expected_keys = ['DFs','x','y','z','excel_path','sheet_name','xlab','ylab','zlab
                  'sns_palette','sns_style','sns_context',
                  'plot_type',
                  'capsize', 'trendline', 'show_r2','style','line_color','back_color','darkmode','apply_color_lines_only',
-                 'plot_line_palette']
+                 'plot_line_palette','transparent']
 
 
 def bar(*args,**kwargs):
@@ -141,6 +141,7 @@ def initialize_common_defaults(args,input_dict):
     darkmode = False
     apply_color_lines_only = False
     plot_line_palette = None
+    transparent = False
 
     initialized_dict = {}
     kwargs = {}

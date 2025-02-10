@@ -134,10 +134,11 @@ class BasePlotter:
             plt.legend([]).set_visible(False)
         else:
             plt.legend([]).set_visible(True)
+            alpha = 0 if self.transparent else 1
             plt.legend(
                 handles[:self.handles_in_legend],
                 labels[:self.handles_in_legend],
-                prop={'weight': 'bold'},)
+                prop={'weight': 'bold'},framealpha=alpha)
 
             for text in plt.gca().get_legend().get_texts():
                 text.set_color(self.line_color)
@@ -231,7 +232,8 @@ class BasePlotter:
             except FileExistsError:
                 print(f"Directory '{self.folder_name}' already exists.")
 
-            self.fig.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight',**kwargs)
+            self.fig.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight',
+                             transparent=self.transparent,**kwargs)
         else:
             if self.folder_name[0] == os.sep:
                 full_path = os.sep
