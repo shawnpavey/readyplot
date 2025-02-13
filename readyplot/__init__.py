@@ -75,18 +75,41 @@ def initialize_common_defaults(args,input_dict):
         if 'xlab' not in input_dict:
             try:
                 input_dict['xlab'] = input_dict['DFs'].columns[0]
+                xlab = 'xlab'
             except:
                 pass
         if 'ylab' not in input_dict:
             try:
                 input_dict['ylab'] = input_dict['DFs'].columns[1]
+                ylab = 'ylab'
             except:
                 pass
         if 'zlab' not in input_dict:
             try:
                 input_dict['zlab'] = input_dict['DFs'].columns[2]
+                zlab = 'zlab'
             except:
                 pass
+    elif 'DFs' in input_dict:
+        print('DF IN INPUT DICT')
+        if 'xlab' not in input_dict:
+            xlab = 'xlab' if len(input_dict['DFs'].columns) == 1 else None
+        else:
+            xlab = input_dict['xlab']
+        if 'ylab' not in input_dict:
+            ylab = 'ylab' if len(input_dict['DFs'].columns) == 2 else None
+        else:
+            ylab = input_dict['ylab']
+        if 'zlab' not in input_dict:
+            zlab = 'zlab' if len(input_dict['DFs'].columns) == 3 else None
+        else:
+            zlab = input_dict['zlab']
+    else:
+        xlab = 'xlab'
+        ylab = 'ylab'
+        zlab = 'zlab'
+
+    print(xlab,ylab,zlab)
 
     DFs = None
     x = None
@@ -94,9 +117,6 @@ def initialize_common_defaults(args,input_dict):
     z = None
     excel_path = None
     sheet_name = None
-    xlab = 'xlab'
-    ylab = 'ylab'
-    zlab = 'zlab'
     input_fig = None
     input_ax = None
     colors = ['g', 'r', 'b', 'y', 'c', 'm', 'k', 'w']
@@ -155,6 +175,11 @@ def initialize_common_defaults(args,input_dict):
                     initialized_dict[name] = value
             else:
                 kwargs[name] = value
+        elif name == 'input_dict':
+            for name2, value2 in value.items():
+                if name2 not in expected_keys:
+                    kwargs[name2] = value2
+
     return initialized_dict, kwargs
 
 

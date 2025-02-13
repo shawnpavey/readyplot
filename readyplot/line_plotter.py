@@ -28,7 +28,7 @@ class LinePlotter(BasePlotter):
 
         # %% PLOT WITH SEABORN
         sns.lineplot(
-            x=self.xlab, y=self.ylab, data=DF, hue=self.zlab,
+            x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, style=style, markers=markers,
             ax=ax, **kwargs)
 
@@ -56,5 +56,4 @@ class LinePlotter(BasePlotter):
 
     def label_prep(self, l):
         xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
-        zlab = xlab if zlab is None else zlab
         return xlab, ylab, zlab
