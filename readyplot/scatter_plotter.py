@@ -34,6 +34,7 @@ class ScatterPlotter(BasePlotter):
             ax=ax, **kwargs)
 
         # %% EXTRA PLOT EDITING
+        self.plot_errors(xlab, ylab, zlab)
         self.local_trendline(locals())
 
 # -----------------------------------------------------------------------------------------------------------------------

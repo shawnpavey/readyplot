@@ -31,7 +31,7 @@ class HistPlotter(BasePlotter):
             ax=ax, fill=not self.apply_color_lines_only,**kwargs)
 
         # %% EXTRA PLOT EDITING
-
+        self.plot_errors(xlab, ylab, zlab)
 # -----------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
 # -----------------------------------------------------------------------------------------------------------------------

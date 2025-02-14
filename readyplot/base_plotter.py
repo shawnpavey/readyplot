@@ -77,6 +77,13 @@ class BasePlotter:
         if not isinstance(self.colors, list):
             self.colors = [self.colors]
 
+        if not isinstance(self.xlines, list):
+            self.xlines = [self.xlines]
+        if not isinstance(self.ylines, list):
+            self.ylines = [self.ylines]
+
+        self.resolve_err_list()
+
         self.kwargs = kwargs
         self.__dict__.update(**kwargs)
 
@@ -108,6 +115,12 @@ class BasePlotter:
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
 
+        if self.xlines[0]:
+            for line in self.xlines:
+                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+        if self.ylines[0]:
+            for line in self.ylines:
+                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
         try:
             self.unique = list(self.DF[self.zlab].unique())
         except KeyError:
@@ -257,6 +270,73 @@ class BasePlotter:
     
     def just_plot(self,**kwargs):
         pass
+
+    def plot_errors(self,xlab,ylab,zlab):
+        err_vars = [ self.yerror_vals,self.hi_yerror_vals,self.low_yerror_vals,
+                 self.xerror_vals,self.hi_xerror_vals,self.low_xerror_vals]
+
+        x_ticks = self.ax.get_xticks()
+        x_labels = self.ax.get_xticklabels()
+        y_ticks = self.ax.get_yticks()
+        y_labels = self.ax.get_yticklabels()
+
+        if any(error_var is not None for error_var in err_vars):
+            for i,group in enumerate(self.unique):
+                try:
+                    tempDF = self.DF[self.DF[zlab] == group]
+                except KeyError:
+                    tempDF = self.DF
+
+                for j,row in tempDF.iterrows():
+                    tempx = row[xlab]
+                    tempy = row[ylab]
+
+                    if isinstance(tempx, str):
+                        for k, label in enumerate(x_labels):
+                            if label.get_text() == tempx:
+                                tempx = x_ticks[i]
+                                break
+                    if isinstance(tempy, str):
+                        for k, label in enumerate(y_labels):
+                            if label.get_text() == tempy:
+                                tempy = y_ticks[i]
+                                break
+
+                    temp_x_err = np.array([row['x_errs'][0],row['x_errs'][1]])
+                    temp_y_err = np.array([row['y_errs'][0],row['y_errs'][1]])
+                    self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
+                                     capsize = self.capsize,color=self.colors[i])
+        else:
+            print('Skipping error bars')
+
+    def resolve_err_list(self):
+        temp_list = []
+        if self.xerror_vals is not None:
+            temp_list = [[item,item] for item in self.xerror_vals]
+        elif self.hi_xerror_vals is not None:
+            for item0 in self.low_xerror_vals:
+                for item1 in self.high_xerror_vals:
+                    temp_list.append([item0, item1])
+        else:
+            temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
+        output_x = np.array(temp_list)
+
+        temp_list = []
+        if self.yerror_vals is not None:
+            temp_list = [[item,item] for item in self.yerror_vals]
+        elif self.hi_yerror_vals is not None:
+            for i, item0 in enumerate(self.low_yerror_vals):
+                temp_list.append([item0, self.hi_yerror_vals[i]])
+        else:
+            temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
+        output_y = np.array(temp_list)
+
+        print(temp_list)
+
+        self.DF['x_errs'] = [arr for arr in output_x]
+        self.DF['y_errs'] = [arr for arr in output_y]
+
+        return output_x,output_y
 
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
         if len(kwargs) != 0:

@@ -37,6 +37,7 @@ class BarPlotter(BasePlotter):
             ax=ax, err_kws={'color': self.line_color,'linewidth': self.def_line_w},**kwargs)
 
         # %% EXTRA PLOT EDITING
+        self.plot_errors(xlab, ylab, zlab)
         self.local_scatter(locals())
         self.hatches_and_colors(locals())
         plt.xlabel(" ")

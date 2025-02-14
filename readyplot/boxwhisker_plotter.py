@@ -54,6 +54,7 @@ class BoxWhiskerPlotter(BasePlotter):
                 break
 
         # %% EXTRA PLOT EDITING
+        self.plot_errors(xlab, ylab, zlab)
         self.legend_fixer(locals())
         self.local_scatter(locals())
 
