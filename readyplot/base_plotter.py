@@ -331,8 +331,6 @@ class BasePlotter:
             temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
         output_y = np.array(temp_list)
 
-        print(temp_list)
-
         self.DF['x_errs'] = [arr for arr in output_x]
         self.DF['y_errs'] = [arr for arr in output_y]
 
