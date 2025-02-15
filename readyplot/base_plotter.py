@@ -310,6 +310,18 @@ class BasePlotter:
             print('Skipping error bars')
 
     def resolve_err_list(self):
+        if any(var is not None for var in [self.low_xerror_vals,self.hi_xerror_vals]) and not all(
+                var is None for var in [self.low_xerror_vals, self.hi_xerror_vals]
+        ):
+            self.low_xerror_vals = self.hi_xerror_vals if self.low_xerror_vals is None else self.low_xerror_vals
+            self.hi_xerror_vals = self.low_xerror_vals if self.hi_xerror_vals is None else self.hi_xerror_vals
+
+        if any(var is not None for var in [self.low_yerror_vals,self.hi_yerror_vals]) and not all(
+                var is None for var in [self.low_yerror_vals, self.hi_yerror_vals]
+        ):
+            self.low_yerror_vals = self.hi_yerror_vals if self.low_yerror_vals is None else self.low_yerror_vals
+            self.hi_yerror_vals = self.low_yerror_vals if self.hi_yerror_vals is None else self.hi_yerror_vals
+
         temp_list = []
         if self.xerror_vals is not None:
             if isinstance(self.xerror_vals, str):
