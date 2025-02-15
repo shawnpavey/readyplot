@@ -227,7 +227,7 @@ class BasePlotter:
                         # Assume y is the dependent variable
                         dependent_var_list = self.ylab.split(' ')
                 else:
-                    temp_string = (xlab if xlab is not None else "") + (ylab if ylab is not None else "")
+                    temp_string = str((xlab if xlab is not None else "") + (ylab if ylab is not None else ""))
                     dependent_var_list= temp_string.split(' ')
                 self.dependent_var_name = ''
                 for seg in dependent_var_list:
@@ -312,21 +312,36 @@ class BasePlotter:
     def resolve_err_list(self):
         temp_list = []
         if self.xerror_vals is not None:
-            temp_list = [[item,item] for item in self.xerror_vals]
+            if isinstance(self.xerror_vals, str):
+                temp_list = self.DF[self.xerror_vals].tolist()
+            else:
+                temp_list = [[item,item] for item in self.xerror_vals]
         elif self.hi_xerror_vals is not None:
-            for item0 in self.low_xerror_vals:
-                for item1 in self.high_xerror_vals:
-                    temp_list.append([item0, item1])
+            if isinstance(self.hi_xerror_vals, str):
+                temp_list=[]
+                for _, row in self.DF.iterrows():
+                    temp_list.append([row[self.low_xerror_vals], row[self.hi_xerror_vals]])
+            else:
+                for i, item0 in enumerate(self.low_xerror_vals):
+                    temp_list.append([item0, self.hi_xerror_vals[i]])
         else:
             temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
         output_x = np.array(temp_list)
 
         temp_list = []
         if self.yerror_vals is not None:
-            temp_list = [[item,item] for item in self.yerror_vals]
+            if isinstance(self.yerror_vals, str):
+                temp_list = self.DF[self.yerror_vals].tolist()
+            else:
+                temp_list = [[item,item] for item in self.yerror_vals]
         elif self.hi_yerror_vals is not None:
-            for i, item0 in enumerate(self.low_yerror_vals):
-                temp_list.append([item0, self.hi_yerror_vals[i]])
+            if isinstance(self.hi_yerror_vals, str):
+                temp_list = []
+                for _, row in self.DF.iterrows():
+                    temp_list.append([row[self.low_yerror_vals], row[self.hi_yerror_vals]])
+            else:
+                for i, item0 in enumerate(self.low_yerror_vals):
+                    temp_list.append([item0, self.hi_yerror_vals[i]])
         else:
             temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
         output_y = np.array(temp_list)
