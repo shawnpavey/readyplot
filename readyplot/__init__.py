@@ -181,11 +181,11 @@ def initialize_common_defaults(args,input_dict):
     initialized_dict = {}
     kwargs = {}
 
-    special_entries = ['special_entries','nested_kwargs','input_dict','initialized_dict','kwargs','legend_kwargs']
+    special_entries = ['special_entries','nested_kwargs','input_dict','initialized_dict','kwargs']
     nested_kwargs = ['legend_kwargs','custom_error_kwargs']
 
     for name, value in locals().items():
-        if name not in special_entries:
+        if name not in special_entries and name not in nested_kwargs:
             if name in expected_keys:
                 if name in input_dict:
                     initialized_dict[name] = input_dict[name]
