@@ -31,63 +31,31 @@ class BasePlotter:
         for name, value in input_dict.items():
             setattr(self, name, value)
 
-        if not isinstance(self.DFs, list):
-            self.DFs = [self.DFs]
-        self.DF = self.DFs[0]
+        # IF ANY x,y,z INPUTS ARE LISTS OR ARRAYS, FORCE THEM INTO DATA FRAME FORM
+        if any(isinstance(i,(list,np.ndarray)) for i in (self.x,self.y,self.z)):
+            self.DF = self.force_data_frame()
 
-        force_data_frame_booleans = []
-        if isinstance(self.x,list) or isinstance(self.x,np.ndarray):
-            force_data_frame_booleans.append(True)
-        else:
-            force_data_frame_booleans.append(False)
-        if isinstance(self.x, list) or isinstance(self.x, np.ndarray):
-            force_data_frame_booleans.append(True)
-        else:
-            force_data_frame_booleans.append(False)
-        if isinstance(self.x, list) or isinstance(self.x, np.ndarray):
-            force_data_frame_booleans.append(True)
-        else:
-            force_data_frame_booleans.append(False)
-
-        if any(force_data_frame_booleans):
-            self.DFs = self.force_data_frame()
-            self.DF = self.DFs[0]
-        else:
-            if not isinstance(self.DFs, list):
-                self.DFs = [self.DFs]
-            self.DFs = self.DFs
-            self.DF = self.DFs[0]
-
+        # INITIALIZE REQUIRED BACKGROUND VARIABLES
+        self.DF_counter = 0
+        self.kwargs = kwargs
         self.max_list_x = []
         self.max_list_y = []
-        for DF in self.DFs:
-            try:
-                self.max_list_x.append(DF[self.xlab].max())
-            except:
-                pass
-            try:
-                self.max_list_y.append(DF[self.ylab].max())
-            except:
-                pass
-        self.DF_counter = 0
 
-        if self.input_fig is None:
-            self.fig_list = []
-        if self.input_ax is None:
-            self.ax_list = []
+        # POPULATE BACKGROUND VARIABLES
+        self.__dict__.update(**kwargs)
+        try: self.max_list_x.append(self.DF[self.xlab].max())
+        except: pass
+        try: self.max_list_y.append(self.DF[self.ylab].max())
+        except: pass
 
-        if not isinstance(self.colors, list):
-            self.colors = [self.colors]
+        # FORCE SOME INPUTS TO BE LISTS IF THEY AREN'T ALREADY
+        if not isinstance(self.colors, list): self.colors = [self.colors]
+        if not isinstance(self.xlines, list): self.xlines = [self.xlines]
+        if not isinstance(self.ylines, list): self.ylines = [self.ylines]
 
-        if not isinstance(self.xlines, list):
-            self.xlines = [self.xlines]
-        if not isinstance(self.ylines, list):
-            self.ylines = [self.ylines]
-
+        # RESOLVE THE INPUT ERRORS AS MULTIPLE OPTIONS ARE AVAILABLE TO THE USER
         self.resolve_err_list()
 
-        self.kwargs = kwargs
-        self.__dict__.update(**kwargs)
 
     def plot(self,save=True,**kwargs):
         self.pre_format()
@@ -312,57 +280,32 @@ class BasePlotter:
             pass
 
     def resolve_err_list(self):
-        if any(var is not None for var in [self.low_xerror_vals,self.hi_xerror_vals]) and not all(
-                var is None for var in [self.low_xerror_vals, self.hi_xerror_vals]
-        ):
-            self.low_xerror_vals = self.hi_xerror_vals if self.low_xerror_vals is None else self.low_xerror_vals
-            self.hi_xerror_vals = self.low_xerror_vals if self.hi_xerror_vals is None else self.hi_xerror_vals
+        # INITIALIZE OUPUTS AND STORE VARIABLES FOR KEY,VAL DICTIONARY ITERATION LATER
+        output_x = []
+        output_y = []
+        variables = {
+            'xerror_vals':self.xerror_vals,'low_xerror_vals':self.low_xerror_vals,'hi_xerror_vals':self.hi_xerror_vals,
+            'yerror_vals':self.yerror_vals,'low_yerror_vals':self.low_yerror_vals,'hi_yerror_vals':self.hi_yerror_vals}
 
-        if any(var is not None for var in [self.low_yerror_vals,self.hi_yerror_vals]) and not all(
-                var is None for var in [self.low_yerror_vals, self.hi_yerror_vals]
-        ):
-            self.low_yerror_vals = self.hi_yerror_vals if self.low_yerror_vals is None else self.low_yerror_vals
-            self.hi_yerror_vals = self.low_yerror_vals if self.hi_yerror_vals is None else self.hi_yerror_vals
+        # ITERATE THROUGH VARIABLES AND IF ANY ARE STRINGS RETRIEVE ERROR BAR DATA FROM THE DATA FRAME COLUMN
+        for key, val in variables.items():
+            if isinstance(val, str):
+                setattr(self, key, self.DF[val].tolist())
 
-        temp_list = []
-        if self.xerror_vals is not None:
-            if isinstance(self.xerror_vals, str):
-                temp_list = self.DF[self.xerror_vals].tolist()
-            else:
-                temp_list = [[item,item] for item in self.xerror_vals]
-        elif self.hi_xerror_vals is not None:
-            if isinstance(self.hi_xerror_vals, str):
-                temp_list=[]
-                for _, row in self.DF.iterrows():
-                    temp_list.append([row[self.low_xerror_vals], row[self.hi_xerror_vals]])
-            else:
-                for i, item0 in enumerate(self.low_xerror_vals):
-                    temp_list.append([item0, self.hi_xerror_vals[i]])
-        else:
-            temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
-        output_x = np.array(temp_list)
+        # ITERATE AND GET X AND Y ERRORS TO BE LIST VALUES WITH LOW AND HIGH, SET NONES TO NP.NAN
+        for i, row in self.DF.iterrows():
+            low_x,hi_x = (self.xerror_vals[i],self.xerror_vals[i]) if self.xerror_vals is not None else np.nan,np.nan
+            low_x = self.low_xerror_vals[i] if self.low_xerror_vals is not None else np.nan
+            hi_x = self.hi_xerror_vals[i] if self.hi_xerror_vals is not None else np.nan
+            low_y,hi_y = (self.yerror_vals[i],self.yerror_vals[i]) if self.yerror_vals is not None else np.nan,np.nan
+            low_y = self.low_yerror_vals[i] if self.low_yerror_vals is not None else np.nan
+            hi_y = self.hi_yerror_vals[i] if self.hi_yerror_vals is not None else np.nan
+            output_x.append([low_x,hi_x])
+            output_y.append([low_y,hi_y])
 
-        temp_list = []
-        if self.yerror_vals is not None:
-            if isinstance(self.yerror_vals, str):
-                temp_list = self.DF[self.yerror_vals].tolist()
-            else:
-                temp_list = [[item,item] for item in self.yerror_vals]
-        elif self.hi_yerror_vals is not None:
-            if isinstance(self.hi_yerror_vals, str):
-                temp_list = []
-                for _, row in self.DF.iterrows():
-                    temp_list.append([row[self.low_yerror_vals], row[self.hi_yerror_vals]])
-            else:
-                for i, item0 in enumerate(self.low_yerror_vals):
-                    temp_list.append([item0, self.hi_yerror_vals[i]])
-        else:
-            temp_list = [[np.nan, np.nan] for item in range(len(self.DF))]
-        output_y = np.array(temp_list)
-
+        # SET DATA FRAME'S X AND Y ERRORS AS [low,high] LIST ELEMENTS
         self.DF['x_errs'] = [arr for arr in output_x]
         self.DF['y_errs'] = [arr for arr in output_y]
-
         return output_x,output_y
 
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
@@ -391,27 +334,27 @@ class BasePlotter:
             return tuple(outputs)
 
     def force_data_frame(self):
-        DFs = pd.DataFrame()
-        DFs[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
+        DF = pd.DataFrame()
+        DF[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
         try:
-            DFs[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+            DF[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
         except ValueError:
             pass
         try:
-            DFs[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
+            DF[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
         except (TypeError,ValueError) as e:
             if isinstance(self.y, list):
                 if any(self.y):
                     if len(self.x) > len(self.y):
-                        DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+                        DF[self.zlab] = pd.DataFrame(['' for i in self.x])
                     else:
-                        DFs[self.zlab] = pd.DataFrame(['' for i in self.y])
+                        DF[self.zlab] = pd.DataFrame(['' for i in self.y])
                 else:
-                    DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+                    DF[self.zlab] = pd.DataFrame(['' for i in self.x])
             else:
-                DFs[self.zlab] = pd.DataFrame(['' for i in self.x])
+                DF[self.zlab] = pd.DataFrame(['' for i in self.x])
 
-        return [DFs]
+        return DF
 
     def format_colors(self):
         sns.color_palette(self.sns_palette)

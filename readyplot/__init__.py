@@ -29,7 +29,7 @@ def initialize_common_defaults(args,input_dict):
     # %% INITIALIZE DEFAULT VALUES
     # GENERAL ESSENTIALS IN FRONT-END OR BACK-END
     # Input Data
-    DFs = None
+    DF = None
     x = None
     y = None
     z = None
@@ -99,8 +99,8 @@ def initialize_common_defaults(args,input_dict):
     sci_y_lims = (-1,3)
 
     # XLines and YLines
-    xlines = None
-    ylines = None
+    xlines = [None]
+    ylines = [None]
 
     # NICHE FEATURES GENERALLY PLOT-TYPE DEPENDENT
     # Legend Tool for Strip-Plot Overlay
@@ -145,9 +145,13 @@ def initialize_common_defaults(args,input_dict):
             initialized_dict[name] = dict_update_nested(value,input_dict[name]) if name in input_dict else value
 
         # SORT VARIABLE INTO REGULAR VARIABLES OR SEABORN KWARGS IF IT IS NOT A SPECIAL LOCAL VARIABLE
-        elif name not in special_entries:
+        elif name not in special_entries and name is not 'DFs':
             if name in expected_keys: initialized_dict[name] = input_dict[name] if name in input_dict else value
             else: kwargs[name] = value
+
+        # LEGACY CATCH, SOME PEOPLE MAY USE DFs INSTEAD OF DF AND THIS WILL CATCH THAT
+        elif name is 'DFs':
+            initialized_dict['DF'] = value
 
     return initialized_dict, kwargs
 
@@ -156,21 +160,20 @@ def initialize_common_defaults(args,input_dict):
 #-----------------------------------------------------------------------------------------------------------------------
 # %% PARSE USER ARGUMENTS
 def parse_args(l):
+    # UNPACK LOCALS INTO VARIABLES
     args,input_dict = l['args'],l['input_dict']
+
+    # PARSE ARGS INTO DF IF PROVIDED, BEHAVIOR VARIES BY TEH NUMBER OF ARGS
     if len(args) == 1:
-        if isinstance(args[0], pd.DataFrame):
-            input_dict['DFs'] = args[0]
+        if isinstance(args[0], pd.DataFrame): input_dict['DF'] = args[0]
         elif isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray)):
-            if '.csv' in args[0]:
-                input_dict['DFs'] = pd.read_csv(args[0])
-            else:
-                input_dict['DFs'] = pd.read_excel(args[0])
-        else:
-            input_dict['x'] = args[0]
+            if '.csv' in args[0]: input_dict['DF'] = pd.read_csv(args[0])
+            else: input_dict['DF'] = pd.read_excel(args[0])
+        else: input_dict['x'] = args[0]
     elif len(args) == 2:
         if (isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray))) and (
                 isinstance(args[1], str) and not isinstance(args[1], (list, np.ndarray))):
-            input_dict['DFs'] = pd.read_excel(args[0], sheet_name=args[1])
+            input_dict['DF'] = pd.read_excel(args[0], sheet_name=args[1])
         else:
             input_dict['x'] = args[0]
             input_dict['y'] = args[1]
@@ -178,50 +181,51 @@ def parse_args(l):
         input_dict['x'] = args[0]
         input_dict['y'] = args[1]
         input_dict['z'] = args[2]
+
+    # IF NO ARGS (OR MORE THAN 3) PROVIDED
     else:
-        d = l['input_dict']
-        if 'excel_path' in d and 'sheet_name' in d:
-            input_dict['DFs'] = pd.read_excel(d['excel_path'], sheet_name=d['sheet_name'])
-        elif 'excel_path' in d:
-            input_dict['DFs'] = pd.read_excel(d['excel_path'])
-        elif 'csv_path' in d:
-            input_dict['DFs'] = pd.read_csv(d['csv_path'])
+        if 'excel_path' in input_dict and 'sheet_name' in input_dict:
+            input_dict['DF'] = pd.read_excel(input_dict['excel_path'], sheet_name=input_dict['sheet_name'])
+        elif 'excel_path' in input_dict:
+            input_dict['DF'] = pd.read_excel(input_dict['excel_path'])
+        elif 'csv_path' in input_dict:
+            input_dict['DF'] = pd.read_csv(input_dict['csv_path'])
 
     return input_dict
 
 # %% PREPARE XLAB,YLAB,ZLAB HANDLING TO PROPERLY COMBINE REQUIRED INNER DEFAULTS WITH USER INPUT
 def prepare_data_frame_col_names(l):
     input_dict = l['input_dict']
-    if 'DFs' in input_dict and all(item not in input_dict for item in ['xlab','ylab','zlab']):
+    if 'DF' in input_dict and all(item not in input_dict for item in ['xlab','ylab','zlab']):
         if 'xlab' not in input_dict:
             try:
-                input_dict['xlab'] = input_dict['DFs'].columns[0]
+                input_dict['xlab'] = input_dict['DF'].columns[0]
                 xlab = 'xlab'
             except:
                 pass
         if 'ylab' not in input_dict:
             try:
-                input_dict['ylab'] = input_dict['DFs'].columns[1]
+                input_dict['ylab'] = input_dict['DF'].columns[1]
                 ylab = 'ylab'
             except:
                 pass
         if 'zlab' not in input_dict:
             try:
-                input_dict['zlab'] = input_dict['DFs'].columns[2]
+                input_dict['zlab'] = input_dict['DF'].columns[2]
                 zlab = 'zlab'
             except:
                 pass
-    elif 'DFs' in input_dict:
+    elif 'DF' in input_dict:
         if 'xlab' not in input_dict:
-            xlab = 'xlab' if len(input_dict['DFs'].columns) == 1 else None
+            xlab = 'xlab' if len(input_dict['DF'].columns) == 1 else None
         else:
             xlab = input_dict['xlab']
         if 'ylab' not in input_dict:
-            ylab = 'ylab' if len(input_dict['DFs'].columns) == 2 else None
+            ylab = 'ylab' if len(input_dict['DF'].columns) == 2 else None
         else:
             ylab = input_dict['ylab']
         if 'zlab' not in input_dict:
-            zlab = 'zlab' if len(input_dict['DFs'].columns) == 3 else None
+            zlab = 'zlab' if len(input_dict['DF'].columns) == 3 else None
         else:
             zlab = input_dict['zlab']
     else:
