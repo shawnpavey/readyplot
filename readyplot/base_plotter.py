@@ -25,6 +25,8 @@ class BasePlotter:
         for name, value in input_dict.items():
             setattr(self, name, value)
 
+        print(self.legend_kwargs)
+
         if self.excel_path and self.sheet_name:
             self.DFs = pd.read_excel(self.excel_path, sheet_name=self.sheet_name)
         elif self.excel_path:
@@ -152,11 +154,10 @@ class BasePlotter:
             self.legend.set_visible(False)
         else:
             self.legend.set_visible(True)
-            alpha = 0 if self.transparent else 1
+            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
             self.legend = plt.legend(
                 handles[:self.handles_in_legend],
-                labels[:self.handles_in_legend],
-                prop={'weight': 'bold'},framealpha=alpha)
+                labels[:self.handles_in_legend], **self.legend_kwargs)
 
             for text in plt.gca().get_legend().get_texts():
                 text.set_color(self.line_color)

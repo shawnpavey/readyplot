@@ -171,3 +171,17 @@ def find_closest(dictionary, x_pos):
             closest_value = value
 
     return closest_key, closest_value
+
+def dict_update_nested_recursion(default_dictionary, input_dictionary):
+    """
+    Recursively update a nested dictionary
+    """
+    for key, value in input_dictionary.items():
+        if isinstance(value, dict):
+            if key in default_dictionary:
+                default_dictionary[key] = dict_update_nested_recursion(default_dictionary[key], value)
+            else:
+                default_dictionary[key] = value
+        else:
+            default_dictionary[key] = value
+    return default_dictionary

@@ -13,6 +13,7 @@ from .scatter_plotter import ScatterPlotter
 from .line_plotter import LinePlotter
 import pandas as pd
 import numpy as np
+from .utils import dict_update_nested_recursion
 
 expected_keys = ['DFs','x','y','z','excel_path','sheet_name','csv_path','xlab','ylab','zlab','input_fig','input_ax',
                  'colors','markers','hatches','def_font_sz','def_line_w','fontweight',
@@ -27,7 +28,8 @@ expected_keys = ['DFs','x','y','z','excel_path','sheet_name','csv_path','xlab','
                  'plot_type',
                  'capsize', 'trendline', 'show_r2','style','line_color','back_color','darkmode','apply_color_lines_only',
                  'plot_line_palette','transparent','xlines','ylines',
-                 'yerror_vals','hi_yerror_vals','low_yerror_vals','xerror_vals','hi_xerror_vals','low_xerror_vals']
+                 'yerror_vals','hi_yerror_vals','low_yerror_vals','xerror_vals','hi_xerror_vals','low_xerror_vals',
+                 'legend_kwargs']
 
 
 def bar(*args,**kwargs):
@@ -174,12 +176,16 @@ def initialize_common_defaults(args,input_dict):
     low_xerror_vals = None
     xlines = None
     ylines = None
+    legend_kwargs = {'prop':{'weight': 'bold'},'framealpha':1}
 
     initialized_dict = {}
     kwargs = {}
 
+    special_entries = ['special_entries','nested_kwargs','input_dict','initialized_dict','kwargs','legend_kwargs']
+    nested_kwargs = ['legend_kwargs','custom_error_kwargs']
+
     for name, value in locals().items():
-        if name != 'input_dict' and name != 'initialized_dict' and name != 'kwargs':
+        if name not in special_entries:
             if name in expected_keys:
                 if name in input_dict:
                     initialized_dict[name] = input_dict[name]
@@ -187,10 +193,17 @@ def initialize_common_defaults(args,input_dict):
                     initialized_dict[name] = value
             else:
                 kwargs[name] = value
+
         elif name == 'input_dict':
             for name2, value2 in value.items():
                 if name2 not in expected_keys:
                     kwargs[name2] = value2
+
+        elif name in nested_kwargs:
+            if name in input_dict:
+                initialized_dict[name] = dict_update_nested_recursion(value,input_dict[name])
+            else:
+                initialized_dict[name] = value
 
     return initialized_dict, kwargs
 
