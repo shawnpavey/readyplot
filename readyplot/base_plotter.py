@@ -27,6 +27,8 @@ class BasePlotter:
 
         if self.excel_path and self.sheet_name:
             self.DFs = pd.read_excel(self.excel_path, sheet_name=self.sheet_name)
+        elif self.csv_path:
+            self.DFs = pd.read_csv(self.csv_path)
 
 
         if not isinstance(self.DFs, list):

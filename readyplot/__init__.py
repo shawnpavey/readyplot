@@ -14,7 +14,7 @@ from .line_plotter import LinePlotter
 import pandas as pd
 import numpy as np
 
-expected_keys = ['DFs','x','y','z','excel_path','sheet_name','xlab','ylab','zlab','input_fig','input_ax',
+expected_keys = ['DFs','x','y','z','excel_path','sheet_name','csv_path','xlab','ylab','zlab','input_fig','input_ax',
                  'colors','markers','hatches','def_font_sz','def_line_w','fontweight',
                  'folder_name','dpi',
                  'box_edges','fig_width','fig_height','xtick_font_ratio','ytick_font_ratio',
@@ -61,6 +61,8 @@ def initialize_common_defaults(args,input_dict):
         if (isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray))) and (
                 isinstance(args[1], str) and not isinstance(args[1], (list, np.ndarray))):
             input_dict['DFs'] = pd.read_excel(args[0], sheet_name=args[1])
+        elif isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray)):
+            input_dict['DFs'] = pd.read_csv(args[0])
         else:
             input_dict['x'] = args[0]
             input_dict['y'] = args[1]
@@ -118,6 +120,7 @@ def initialize_common_defaults(args,input_dict):
     z = None
     excel_path = None
     sheet_name = None
+    csv_path = None
     input_fig = None
     input_ax = None
     colors = ['g', 'r', 'b', 'y', 'c', 'm', 'k', 'w']
