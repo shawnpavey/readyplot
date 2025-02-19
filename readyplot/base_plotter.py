@@ -31,7 +31,7 @@ class BasePlotter:
         for name, value in input_dict.items():
             setattr(self, name, value)
 
-        # IF ANY x,y,z INPUTS ARE LISTS OR ARRAYS, FORCE THEM INTO DATA FRAME FORM
+        # IF ANY X,Y,Z INPUTS ARE LISTS OR ARRAYS, FORCE THEM INTO DATA FRAME FORM
         if any(isinstance(i,(list,np.ndarray)) for i in (self.x,self.y,self.z)):
             self.DF = self.force_data_frame()
 
@@ -41,7 +41,7 @@ class BasePlotter:
         self.max_list_x = []
         self.max_list_y = []
 
-        # POPULATE BACKGROUND VARIABLES
+        # POPULATE SOME BACKGROUND VARIABLES
         self.__dict__.update(**kwargs)
         try: self.max_list_x.append(self.DF[self.xlab].max())
         except: pass
@@ -53,56 +53,55 @@ class BasePlotter:
         if not isinstance(self.xlines, list): self.xlines = [self.xlines]
         if not isinstance(self.ylines, list): self.ylines = [self.ylines]
 
-        # RESOLVE THE INPUT ERRORS AS MULTIPLE OPTIONS ARE AVAILABLE TO THE USER
+        # RESOLVE THE INPUT ERROR BARS AS MULTIPLE OPTIONS ARE AVAILABLE TO THE USER
         self.resolve_err_list()
 
+        # DETECT UNIQUE GROUPS IN ZLAB AS THIS WILL BE USED FOR COLOR AND MARKER SELECTION
+        try: self.unique = list(self.DF[self.zlab].unique())
+        except KeyError: self.unique = [self.zlab]
 
+        # CREATE DICTIONARY OF MARKERS AND GROUPS FOR EASIER MARKER HANDLING LATER
+        try:
+            while len(self.unique) > len(self.markers): self.markers.extend(self.markers)
+            self.marker_dict = dict(zip(self.unique,self.markers))
+        except TypeError: self.marker_dict = {}
+
+    # %% PLOT
     def plot(self,save=True,**kwargs):
         self.pre_format()
         self.just_plot(**kwargs)
         self.post_format()
         if save:
             self.save()
-        #self.show()
         return self.fig,self.ax
-    
-    def pre_format(self):
-        import seaborn as sns
-        from matplotlib import pyplot as plt
 
+    # %% PRE FORMAT THE PLOT
+    def pre_format(self):
+        # UPDATE COLORS FROM LINE AND BACK COLORS AS WELL AS SNS PREFERENCES, USES RCPARAMS A LOT
         self.format_colors()
 
-        if len(plt.get_fignums()) == 0:
-            self.current_fig_num = 0
-        else:
-            self.current_fig_num = max(plt.get_fignums()) + 1
-
-        self.fig = plt.figure(self.current_fig_num, dpi=self.dpi)
+        # CREATE THE FIGURE AND START TRACKING FIG, AX, LEGEND
+        self.fig = plt.figure(dpi=self.dpi)
         self.ax = self.fig.add_subplot(111)
         self.legend = self.ax.legend()
         self.fig.set_figwidth(self.fig_width)
         self.fig.set_figheight(self.fig_height)
 
+        # CREATE EMPTY LABELS WITH PROPER FONTWEIGHT AND SIZE
         plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
         plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
 
+        # PRE-POPULATE XLINES AND YLINES IF THEY ARE GIVEN
+        if self.xlines is not None or self.ylines is not None: self.plot_xline_yline()
+
+    def plot_xline_yline(self):
         if self.xlines[0]:
             for line in self.xlines:
                 self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
         if self.ylines[0]:
             for line in self.ylines:
                 self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-        try:
-            self.unique = list(self.DF[self.zlab].unique())
-        except KeyError:
-            self.unique = [self.zlab]
 
-        try:
-            while len(self.unique) > len(self.markers):
-                self.markers.extend(self.markers)
-            self.marker_dict = dict(zip(self.unique,self.markers))
-        except TypeError:
-            self.marker_dict = {}
 
     def post_format(self):
         handles, labels = self.ax.get_legend_handles_labels()
@@ -294,12 +293,17 @@ class BasePlotter:
 
         # ITERATE AND GET X AND Y ERRORS TO BE LIST VALUES WITH LOW AND HIGH, SET NONES TO NP.NAN
         for i, row in self.DF.iterrows():
+            # Process x
             low_x,hi_x = (self.xerror_vals[i],self.xerror_vals[i]) if self.xerror_vals is not None else np.nan,np.nan
             low_x = self.low_xerror_vals[i] if self.low_xerror_vals is not None else np.nan
             hi_x = self.hi_xerror_vals[i] if self.hi_xerror_vals is not None else np.nan
+
+            # Process y
             low_y,hi_y = (self.yerror_vals[i],self.yerror_vals[i]) if self.yerror_vals is not None else np.nan,np.nan
             low_y = self.low_yerror_vals[i] if self.low_yerror_vals is not None else np.nan
             hi_y = self.hi_yerror_vals[i] if self.hi_yerror_vals is not None else np.nan
+
+            # Build output lists
             output_x.append([low_x,hi_x])
             output_y.append([low_y,hi_y])
 
