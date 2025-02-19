@@ -94,7 +94,7 @@ class BarPlotter(BasePlotter):
                 sns.stripplot(
                     data=df_copy, x=xlab, y=ylab, hue=zlab,
                     dodge=dodge, palette=dark_palette,
-                    marker=self.marker_dict[category], ax=ax)
+                    marker=self.marker_dict[category], ax=ax,legend=False)
             except KeyError:
                 pass
 
