@@ -30,7 +30,6 @@ class BasePlotter:
         elif self.csv_path:
             self.DFs = pd.read_csv(self.csv_path)
 
-
         if not isinstance(self.DFs, list):
             self.DFs = [self.DFs]
         self.DF = self.DFs[0]
@@ -247,7 +246,7 @@ class BasePlotter:
                 os.mkdir(self.folder_name)
                 print(f"Directory '{self.folder_name}' created successfully.")
             except FileExistsError:
-                print(f"Directory '{self.folder_name}' already exists.")
+                print(f"Directory '{self.folder_name}' already exists overwriting and/or adding data.")
 
             self.fig.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight',
                              transparent=self.transparent,**kwargs)
@@ -263,7 +262,7 @@ class BasePlotter:
                 os.mkdir(self.dir_name)
                 print(f"Directory '{self.dir_name}' created successfully.")
             except FileExistsError:
-                print(f"Directory '{self.dir_name}' already exists.")
+                print(f"Directory '{self.dir_name}' already exists, overwriting and/or adding data.")
             self.fig.savefig(self.folder_name, bbox_inches='tight', **kwargs)
         return self.fig, self.ax
         
@@ -310,7 +309,7 @@ class BasePlotter:
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
                                      capsize = self.capsize,color=self.colors[i])
         else:
-            print('Skipping error bars')
+            pass
 
     def resolve_err_list(self):
         if any(var is not None for var in [self.low_xerror_vals,self.hi_xerror_vals]) and not all(

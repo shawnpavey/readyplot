@@ -55,14 +55,14 @@ def initialize_common_defaults(args,input_dict):
     if len(args) == 1:
         if isinstance(args[0], pd.DataFrame):
             input_dict['DFs'] = args[0]
+        elif isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray)):
+            input_dict['DFs'] = pd.read_csv(args[0])
         else:
             input_dict['x'] = args[0]
     elif len(args) == 2:
         if (isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray))) and (
                 isinstance(args[1], str) and not isinstance(args[1], (list, np.ndarray))):
             input_dict['DFs'] = pd.read_excel(args[0], sheet_name=args[1])
-        elif isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray)):
-            input_dict['DFs'] = pd.read_csv(args[0])
         else:
             input_dict['x'] = args[0]
             input_dict['y'] = args[1]
@@ -94,7 +94,6 @@ def initialize_common_defaults(args,input_dict):
             except:
                 pass
     elif 'DFs' in input_dict:
-        print('DF IN INPUT DICT')
         if 'xlab' not in input_dict:
             xlab = 'xlab' if len(input_dict['DFs'].columns) == 1 else None
         else:
@@ -111,8 +110,6 @@ def initialize_common_defaults(args,input_dict):
         xlab = 'xlab'
         ylab = 'ylab'
         zlab = 'zlab'
-
-    print(xlab,ylab,zlab)
 
     DFs = None
     x = None

@@ -113,7 +113,6 @@ class BarPlotter(BasePlotter):
             if self.apply_color_lines_only:
                 bar.set_edgecolor(current_face_color)
                 bar_face_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
-                print(bar_face_color)
                 bar.set_facecolor(bar_face_color)
             elif self.plot_line_palette:
                 bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
