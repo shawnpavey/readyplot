@@ -56,7 +56,10 @@ def initialize_common_defaults(args,input_dict):
         if isinstance(args[0], pd.DataFrame):
             input_dict['DFs'] = args[0]
         elif isinstance(args[0], str) and not isinstance(args[0], (list, np.ndarray)):
-            input_dict['DFs'] = pd.read_csv(args[0])
+            if '.csv' in args[0]:
+                input_dict['DFs'] = pd.read_csv(args[0])
+            else:
+                input_dict['DFs'] = pd.read_excel(args[0])
         else:
             input_dict['x'] = args[0]
     elif len(args) == 2:
