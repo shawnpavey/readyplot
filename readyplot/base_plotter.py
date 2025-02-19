@@ -109,6 +109,7 @@ class BasePlotter:
 
         self.fig = plt.figure(self.current_fig_num, dpi=self.dpi)
         self.ax = self.fig.add_subplot(111)
+        self.legend = self.ax.legend()
         self.fig.set_figwidth(self.fig_width)
         self.fig.set_figheight(self.fig_height)
 
@@ -145,11 +146,11 @@ class BasePlotter:
                 counter +=1
 
         if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) <2):
-            plt.legend([]).set_visible(False)
+            self.legend.set_visible(False)
         else:
-            plt.legend([]).set_visible(True)
+            self.legend.set_visible(True)
             alpha = 0 if self.transparent else 1
-            plt.legend(
+            self.legend = plt.legend(
                 handles[:self.handles_in_legend],
                 labels[:self.handles_in_legend],
                 prop={'weight': 'bold'},framealpha=alpha)
@@ -441,3 +442,9 @@ class BasePlotter:
             if name in base.__dict__:
                 return base.__dict__[name].__get__(self)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+    def get_legend(self):
+        if self.legend is not None:
+            return self.legend
+        else:
+            pass
