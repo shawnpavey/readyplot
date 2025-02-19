@@ -179,7 +179,14 @@ def parse_args(l):
         input_dict['y'] = args[1]
         input_dict['z'] = args[2]
     else:
-        pass
+        d = l['input_dict']
+        if 'excel_path' in d and 'sheet_name' in d:
+            input_dict['DFs'] = pd.read_excel(d['excel_path'], sheet_name=d['sheet_name'])
+        elif 'excel_path' in d:
+            input_dict['DFs'] = pd.read_excel(d['excel_path'])
+        elif 'csv_path' in d:
+            input_dict['DFs'] = pd.read_csv(d['csv_path'])
+
     return input_dict
 
 # %% PREPARE XLAB,YLAB,ZLAB HANDLING TO PROPERLY COMBINE REQUIRED INNER DEFAULTS WITH USER INPUT

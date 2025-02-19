@@ -4,7 +4,7 @@
 A parent class, base plotter, which initializes plotters and holds common 'self'-referring functions
 @author: Shawn Pavey
 """
-#%% IMPORT PACKAGES
+# %% IMPORT PACKAGES
 import numpy as np
 import pandas as pd
 import os
@@ -17,20 +17,19 @@ from matplotlib.patches import Patch
 import warnings
 from matplotlib.colors import to_rgb
 
+#%%---------------------------------------------------------------------------------------------------------------------
+# PARENT CLASS MAIN
+#-----------------------------------------------------------------------------------------------------------------------
+# %% INITIALIZE PARENT CLASS
 class BasePlotter:
     def __init__(self,input_dict, **kwargs):
+        # IGNORE WARNINGS ABOUT MARKER LISTS BEING TOO LONG, THE LOOPING BEHAVIOR IS SOMETIMES INTERNALLY EXPECTED
         warnings.filterwarnings("ignore", message="The markers list has more values")
         warnings.simplefilter("ignore", category=UserWarning)
 
+        # ITERATE THROUGH THE SORTED INPUT DICT AND INITIALIZE WITH: self.name = value
         for name, value in input_dict.items():
             setattr(self, name, value)
-
-        if self.excel_path and self.sheet_name:
-            self.DFs = pd.read_excel(self.excel_path, sheet_name=self.sheet_name)
-        elif self.excel_path:
-            self.DFs = pd.read_excel(self.excel_path)
-        elif self.csv_path:
-            self.DFs = pd.read_csv(self.csv_path)
 
         if not isinstance(self.DFs, list):
             self.DFs = [self.DFs]
