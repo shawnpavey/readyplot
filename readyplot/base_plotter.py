@@ -25,8 +25,6 @@ class BasePlotter:
         for name, value in input_dict.items():
             setattr(self, name, value)
 
-        print(self.legend_kwargs)
-
         if self.excel_path and self.sheet_name:
             self.DFs = pd.read_excel(self.excel_path, sheet_name=self.sheet_name)
         elif self.excel_path:
