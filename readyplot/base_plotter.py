@@ -183,8 +183,8 @@ class BasePlotter:
 
         # UPDATE THE DATA FRAME NAME, ONLY USED IN NICHE SAVING SCENARIOS FOR AUTOMATIC FILE NAMING
         if self.title != '' and self.title is not None: self.DF.name = self.title
-        elif self.custom_x_label != '' and self.custom_x_label is not None: self.DF.name = self.custom_x_label
         elif self.custom_y_label != '' and self.custom_y_label is not None: self.DF.name = self.custom_y_label
+        elif self.custom_x_label != '' and self.custom_x_label is not None: self.DF.name = self.custom_x_label
 
     def plot_xline_yline(self):
         if self.xlines[0]:
