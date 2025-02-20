@@ -402,53 +402,78 @@ class BasePlotter:
         ty.set_fontsize(self.def_font_sz * 0.9)
         ty.set_position((self.y_exp_location, 1.05))
 
+    # %% GET AND SET FUNCTION FOR HANDLING VARIABLES EXTERNAL TO READYPLOT
+    def get(self,key):
+        # GET WHICHEVER ATTRIBUTE IS PROVIDED IN KEY, ITERATE IF LIST
+        output = []
+        if isinstance(key, list): output = [getattr(self, i) for i in key]
+        else: output = getattr(self, key)
+        return output
+
+    def set(self,key,value):
+        # SET WHICHEVER ATTRIBUTE IS PROVIDED IN KEY TO THE PROVIDED VALUE, ITERATE IF LIST
+        if isinstance(key, list):
+            for i,key in enumerate(key):
+                setattr(self, key, value[i])
+        else: setattr(self, key, value)
+
+    def get_all(self):
+        # GET ALL VARIABLES
+        output = {key: value for key, value in vars(self).items()}
+        return output
+
+    def set_all(self,input_dict):
+        # SET ALL VARIABLES
+        for key, value in input_dict.items():
+            setattr(self, key, value)
+
+
     # %% INTERNAL METHODS FOR HANDLING INPUTS, GENERAL ESTHETICS, AND SAVE HELPER FUNCTIONS
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
-        if len(kwargs) != 0:
-            kwargs = {**self.kwargs, **kwargs}
-        else:
-            kwargs = self.kwargs
+        # COMBINE INPUT KWARGS WITH GENERAL KWARGS
+        if len(kwargs) != 0: kwargs = {**self.kwargs, **kwargs}
+        else: kwargs = self.kwargs
+
+        # FOR VAR IN THE SUPPLIED CONFLICT_VARS LIST, IF IT IS IN THE SUPPLIED KWARGS USE IT, ELSE GET SELF.VAR
         outputs = []
         for var in conflict_vars:
             if var in kwargs:
                 outputs.append(kwargs[var])
                 del kwargs[var]
-            else:
-                outputs.append(getattr(self,var,None))
+            else: outputs.append(getattr(self,var,None))
+
+        # RETURN UPDATED KWARGS LIST AND UNPACKED OUTPUTS
         return kwargs, *outputs
 
     def var_existence_check(self,inputs,input_keys,defaults_list,kwargs={}):
+        # IF THE INPUT VAR DOES NOT ALREADY EXIST IN KWARGS, ASSIGN THE PROVIDED DEFAULT TO IT
         outputs = []
         for var in inputs:
-            if var is None and var not in kwargs:
-                var = defaults_list[len(outputs)]
+            if var is None and var not in kwargs: var = defaults_list[len(outputs)]
             outputs.append(var)
-        if len(outputs) == 1:
-            return outputs[0]
-        else:
-            return tuple(outputs)
+
+        # RETURN TUPLE COMPATIBLE OUTPUTS
+        if len(outputs) == 1: return outputs[0]
+        else: return tuple(outputs)
 
     def force_data_frame(self):
+        # CREATE A TEMPORARY DATA FRAME, WE KNOW X IS PROVIDED BUT TRY/EXCEPT THE Y AND Z VALUES
         DF = pd.DataFrame()
         DF[self.xlab] = pd.DataFrame(ensure_data_frame(self.x))
-        try:
-            DF[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
-        except ValueError:
-            pass
-        try:
-            DF[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
+        try: DF[self.ylab] = pd.DataFrame(ensure_data_frame(self.y))
+        except ValueError: pass
+        try: DF[self.zlab] = pd.DataFrame(ensure_data_frame(self.z))
         except (TypeError,ValueError) as e:
+
+        # IF Z GIVES AN ERROR, CHECK X AND Y AND POPULATE WITH EMPTY STRINGS FOR THE LONGEST DATAFRAME (OBSOLETE?)
             if isinstance(self.y, list):
                 if any(self.y):
-                    if len(self.x) > len(self.y):
-                        DF[self.zlab] = pd.DataFrame(['' for i in self.x])
-                    else:
-                        DF[self.zlab] = pd.DataFrame(['' for i in self.y])
-                else:
-                    DF[self.zlab] = pd.DataFrame(['' for i in self.x])
-            else:
-                DF[self.zlab] = pd.DataFrame(['' for i in self.x])
+                    DF[self.zlab] = pd.DataFrame(
+                        ['' for i in self.x]) if len(self.x) > len(self.y) else pd.DataFrame(['' for i in self.y])
+                else: DF[self.zlab] = pd.DataFrame(['' for i in self.x])
+            else: DF[self.zlab] = pd.DataFrame(['' for i in self.x])
 
+        # RETURN TEMPORARY DATAFRAME
         return DF
 
     def format_colors(self):
