@@ -63,6 +63,7 @@ def initialize_common_defaults(args,input_dict):
     xerror_vals = None
     hi_xerror_vals = None
     low_xerror_vals = None
+    error_lim_affect = False
 
     # General Text
     custom_x_label = None

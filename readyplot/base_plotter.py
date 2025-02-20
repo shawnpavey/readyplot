@@ -272,6 +272,9 @@ class BasePlotter:
         y_ticks = self.ax.get_yticks()
         y_labels = self.ax.get_yticklabels()
 
+        x_min, x_max = self.ax.get_xlim()
+        y_min, y_max = self.ax.get_ylim()
+
         # START LOOP IF ANY ERROR KEYWORDS HAVE BEEN PASSED< CREATE A TEMPORARY DF PER GROUP
         if any(error_var is not None for error_var in err_vars):
             for i,group in enumerate(self.unique):
@@ -299,10 +302,19 @@ class BasePlotter:
                     # PLOT ERROR BARS AND FIX THE ISSUE WHERE ONLY A HIGH OR LOW ERROR LEADS TO MISSING CONNECTION
                     temp_x_err = np.array([row['x_errs'][0],row['x_errs'][1]])
                     temp_y_err = np.array([row['y_errs'][0],row['y_errs'][1]])
+                    if tempx+temp_x_err[1] > x_max and self.error_lim_affect:
+                        x_max = tempx+temp_x_err[1]
+                        self.ax.set_xlim(x_min,x_max)
+                    if tempy+temp_y_err[1] > y_max and self.error_lim_affect:
+                        y_max = tempy+temp_y_err[1]
+                        self.ax.set_ylim(y_min,y_max)
+                        print('GotHere',y_max)
                     linewidth = getattr(self, 'linewidth', self.def_line_w)
                     self.fix_trailing_errors(tempx, tempy, temp_x_err, temp_y_err, self.colors[i],linewidth)
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
                                      capsize = self.capsize,color=self.colors[i],linewidth=linewidth,capthick=linewidth)
+                    self.ax.set_xlim(x_min, x_max)
+                    self.ax.set_ylim(y_min, y_max)
 
         # PASS IF NO ERROR KEYWORDS HAVE BEEN PASSED
         else:
@@ -380,7 +392,7 @@ class BasePlotter:
             if self.plot_type != 'box_whisker':
                 x_min, x_max = self.ax.get_xlim()
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
-                if 10**x_min > self.sci_x_lims[0] and 10**x_max < self.sci_x_lims[1]:
+                if x_min > 10**self.sci_x_lims[0] and x_max < 10**self.sci_x_lims[1]:
                     # self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                     x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
                     x_min = 0 if self.DF[self.xlab].min() >= 0 else x_min
@@ -408,7 +420,7 @@ class BasePlotter:
             try:
                 y_min, y_max = self.ax.get_ylim()
                 self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
-                if 10**y_min > self.sci_y_lims[0] and 10**y_max < self.sci_y_lims[1]:
+                if y_min > 10**self.sci_y_lims[0] and y_max < 10**self.sci_y_lims[1]:
                     # self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                     y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
                     y_min = 0 if self.DF[self.ylab].min() >= 0 else y_min
