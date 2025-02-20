@@ -378,11 +378,21 @@ class BasePlotter:
             xtexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in xtexts]):
             if self.plot_type != 'box_whisker':
-                self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                 x_min, x_max = self.ax.get_xlim()
-                x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
-                self.ax.set_xlim(x_min, x_max)
-                self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
+                self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
+                if 10**x_min > self.sci_x_lims[0] and 10**x_max < self.sci_x_lims[1]:
+                    # self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
+                    x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
+                    x_min = 0 if self.DF[self.xlab].min() >= 0 else x_min
+                    self.ax.set_xlim(x_min, x_max)
+                    self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
+                else:
+                    if self.DF[self.xlab].min() < x_min: x_min = self.DF[self.xlab].min()
+                    if self.DF[self.xlab].max() >= x_max: x_max = self.DF[self.xlab].max()*1.05
+                    if x_min > 0: x_min = 0
+                    self.ax.set_ylim(x_min*1.03, x_max*1.03)
+
+
         # MANAGE EXPONENTS
         tx = self.ax.xaxis.get_offset_text()
         tx.set_fontweight(self.fontweight)
@@ -396,13 +406,21 @@ class BasePlotter:
             ytexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in ytexts]):
             try:
-                self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                 y_min, y_max = self.ax.get_ylim()
-                y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
-                self.ax.set_ylim(y_min, y_max)
-                self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
-            except AttributeError:
-                pass
+                self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
+                if 10**y_min > self.sci_y_lims[0] and 10**y_max < self.sci_y_lims[1]:
+                    # self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
+                    y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
+                    y_min = 0 if self.DF[self.ylab].min() >= 0 else y_min
+                    self.ax.set_ylim(y_min, y_max)
+                    self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
+                else:
+                    if self.DF[self.ylab].min() < y_min: y_min = self.DF[self.ylab].min()
+                    if self.DF[self.ylab].max() >= y_max: y_max = self.DF[self.ylab].max()*1.1
+                    if y_min > 0: y_min = 0
+                    self.ax.set_ylim(y_min*1.03, y_max*1.03)
+            except AttributeError:pass
+            except KeyError:pass
 
         # MANAGE EXPONENTS
         ty = self.ax.yaxis.get_offset_text()

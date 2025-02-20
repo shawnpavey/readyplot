@@ -87,7 +87,7 @@ def initialize_common_defaults(args,input_dict):
     box_edges = ['bottom', 'left']
     def_line_w = 1.5
     xtick_font_ratio = 1
-    ytick_font_ratio = 0.9
+    ytick_font_ratio = 1
     x_axis_sig_figs = 2 # Used to be 0?
     y_axis_sig_figs = 2
 
@@ -159,12 +159,12 @@ def initialize_common_defaults(args,input_dict):
             initialized_dict[name] = dict_update_nested(value,input_dict[name]) if name in input_dict else value
 
         # SORT VARIABLE INTO REGULAR VARIABLES OR SEABORN KWARGS IF IT IS NOT A SPECIAL LOCAL VARIABLE
-        elif name not in special_entries and name is not 'DFs':
+        elif name not in special_entries and name != 'DFs':
             if name in expected_keys: initialized_dict[name] = input_dict[name] if name in input_dict else value
             else: kwargs[name] = value
 
         # LEGACY CATCH, SOME PEOPLE MAY USE DFs INSTEAD OF DF AND THIS WILL CATCH THAT
-        elif name is 'DFs':
+        elif name == 'DFs':
             initialized_dict['DF'] = value
 
     return initialized_dict, kwargs
