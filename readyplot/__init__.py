@@ -123,6 +123,7 @@ def initialize_common_defaults(args,input_dict):
     legend_kwargs = {'prop': {'weight': 'bold'}, 'framealpha': 1}
     trendline_kwargs = None
     xylines_kwargs = None
+    imported_settings = {}
 
     # %% PREPARE FOR INPUT SORTING
     # EVERY VARIABLE INITIALIZED WITH A DEFAULT SO FAR IS EXPECTED IN SORTING, EVERY OTHER VARIABLE WILL BE A KWARG
@@ -136,13 +137,28 @@ def initialize_common_defaults(args,input_dict):
 
     # UNPACK THE INPUT KEYWORDS INTO LOCALS TO PREPARE FOR ITERATING
     for name, value in input_dict.items():
-        if name not in locals(): locals()[name] = value
-        del name, value
+        if name in special_entries:
+            kwargs[name] = value
+        if name not in locals():
+            locals()[name] = value
+
+    del name, value
+
+    # APPLY IMPORTED SETTINGS BEFORE POPULATING THE REST OF THE INITIALIZED_DICT, SO OTHER INPUTS CAN OVERWRITE THESE
+    if 'imported_settings' in input_dict:
+        for key, value in input_dict['imported_settings'].items():
+            initialized_dict[key] = value
+        del key, value
+    else:
+        input_dict['imported_settings'] = {}
 
     # %% SORT USER INPUTS INTO REGULAR VARIABLES AND SEABORN KWARGS, HANDLE NESTED KWARG DICTIONARIES RECURSIVELY
     for name, value in locals().items():
+        # IGNORE IMPORTED SETTINGS
+        if name == 'imported_settings' or name in input_dict['imported_settings']:
+            pass
         # IF THE VARIABLE IS A NESTED KWARG USE RECURSIVE METHOD TO RESOLVE NESTED DICTIONARIES, NOT OVERWRITE ENTIRELY
-        if name in nested_kwargs:
+        elif name in nested_kwargs:
             initialized_dict[name] = dict_update_nested(value,input_dict[name]) if name in input_dict else value
 
         # SORT VARIABLE INTO REGULAR VARIABLES OR SEABORN KWARGS IF IT IS NOT A SPECIAL LOCAL VARIABLE

@@ -27,10 +27,16 @@ class LinePlotter(BasePlotter):
         xlab,ylab,zlab = self.label_prep(locals())
 
         # %% PLOT WITH SEABORN
-        sns.lineplot(
-            x=xlab, y=ylab, data=DF, hue=zlab,
-            palette=palette, style=style, markers=markers,
-            ax=ax, **kwargs)
+        if zlab is None:
+            sns.lineplot(
+                x=xlab, y=ylab, data=DF, hue=zlab,
+                color=palette[0], style=style, markers=markers,
+                ax=ax, **kwargs)
+        else:
+            sns.lineplot(
+                x=xlab, y=ylab, data=DF, hue=zlab,
+                palette=palette, style=style, markers=markers,
+                ax=ax, **kwargs)
 
         # %% EXTRA PLOT EDITING
         self.plot_errors(xlab,ylab,zlab)

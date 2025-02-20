@@ -29,6 +29,7 @@ class BasePlotter:
 
         # ITERATE THROUGH THE SORTED INPUT DICT AND INITIALIZE WITH: self.name = value
         for name, value in input_dict.items(): setattr(self, name, value)
+        self.input_dict = input_dict
 
         # IF ANY X,Y,Z INPUTS ARE LISTS OR ARRAYS, FORCE THEM INTO DATA FRAME FORM
         if any(isinstance(i,(list,np.ndarray)) for i in (self.x,self.y,self.z)): self.DF = self.force_data_frame()
@@ -417,9 +418,11 @@ class BasePlotter:
                 setattr(self, key, value[i])
         else: setattr(self, key, value)
 
-    def get_all(self):
-        # GET ALL VARIABLES
-        output = {key: value for key, value in vars(self).items()}
+    def get_all(self,include_problematic = True):
+        # GET ALL VARIABLES, EXCLUDE POTENTIALLY PROBLEMATIC VARIABLES IF TRYING TO PORT SETTINGS TO ANOTHER PLOT
+        problematic = ['DF','x','y','z','xlab','ylab','zlab','DF_counter','max_list_x','max_list_y',
+                       'unique','marker_dict','fig','ax','plot_type','dir_name','input_dict']
+        output = {key: value for key, value in vars(self).items() if (key not in problematic or include_problematic)}
         return output
 
     def set_all(self,input_dict):
@@ -427,6 +430,10 @@ class BasePlotter:
         for key, value in input_dict.items():
             setattr(self, key, value)
 
+    def get_copy_settings(self):
+        problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings']
+        output = {key: value for key, value in self.input_dict.items() if key not in problematic}
+        return output
 
     # %% INTERNAL METHODS FOR HANDLING INPUTS, GENERAL ESTHETICS, AND SAVE HELPER FUNCTIONS
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
