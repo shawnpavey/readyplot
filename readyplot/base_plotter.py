@@ -452,10 +452,12 @@ class BasePlotter:
         return DF
 
     def format_colors(self):
+        # UPDATE SNS BACKGROUND SETTINGS
         sns.color_palette(self.sns_palette)
         sns.set_style(self.sns_style)
         sns.set_context(self.sns_context)
 
+        # HANDLE DARKMODE
         if self.darkmode:
             self.line_color = 'white'
             self.back_color = 'black'
@@ -463,8 +465,10 @@ class BasePlotter:
         else:
             sns.set_palette("deep")  # or "bright" or "pastel"
 
+        # TRANSLATE BACKGROUDN COLOR TO TRANSPARENT IF TRANSPARENCY IS SET
         self.back_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
 
+        # SET ALL PLT DEFAULT COLORS BASED ON LINE AND BACK COLOR AND GRID_COLOR
         plt.rcParams["figure.facecolor"] = self.back_color  # Background color of the plot
         plt.rcParams["axes.facecolor"] = self.back_color  # Axes background color
         plt.rcParams["axes.edgecolor"] = self.line_color  # Axes border color
@@ -472,7 +476,7 @@ class BasePlotter:
         plt.rcParams['legend.facecolor'] = self.back_color  # Legend background
         plt.rcParams["xtick.color"] = self.line_color  # X-axis tick color
         plt.rcParams["ytick.color"] = self.line_color  # Y-axis tick color
-        plt.rcParams["grid.color"] = "#444444"  # Gridline color
+        plt.rcParams["grid.color"] = self.grid_color  # Gridline color
 
     def save_name_autopopulated(self):
         # MAKE SAVE NAME FROM DF.NAME (SET DURING SET_TITLES) AND PLOT TYPE, HANDLE "/"

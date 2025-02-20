@@ -80,6 +80,7 @@ def initialize_common_defaults(args,input_dict):
     sns_palette = "deep"
     sns_style = "ticks"
     sns_context = "notebook"
+    grid_color = "#444444"
 
     # AXIS-RELATED SETTINGS
     # Lines & Axes
