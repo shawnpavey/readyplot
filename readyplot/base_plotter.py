@@ -294,13 +294,11 @@ class BasePlotter:
         else:
             pass
 
-    def fix_trailing_errors(self,tx,ty,temp_x_err,temp_y_err,c,l):
-        txel,txeh,tyel,tyeh = temp_x_err[0],temp_x_err[1],temp_y_err[0],temp_y_err[1]
-
-        if not np.isnan(txel): self.ax.plot([tx, tx-txel], [ty, ty], color=c, linewidth=l)
-        if not np.isnan(txeh): self.ax.plot([tx, tx+txeh], [ty, ty], color=c, linewidth=l)
-        if not np.isnan(tyel): self.ax.plot([tx, tx], [ty, ty-tyel], color=c, linewidth=l)
-        if not np.isnan(tyeh): self.ax.plot([tx, tx], [ty, ty+tyeh], color=c, linewidth=l)
+    def fix_trailing_errors(self,tx,ty,txe,tye,c,l):
+        if not np.isnan(txe[0]): self.ax.plot([tx, tx-txe[0]], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(txe[1]): self.ax.plot([tx, tx+txe[1]], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(tye[0]): self.ax.plot([tx, tx], [ty, ty-tye[0]], color=c, linewidth=l)
+        if not np.isnan(tye[1]): self.ax.plot([tx, tx], [ty, ty+tye[1]], color=c, linewidth=l)
 
     def resolve_err_list(self):
         # INITIALIZE OUPUTS AND STORE VARIABLES FOR KEY,VAL DICTIONARY ITERATION LATER
