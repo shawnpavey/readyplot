@@ -22,8 +22,8 @@ class LinePlotter(BasePlotter):
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
         conflict_vars,defaults_list,inputs,input_keys,outputs = self.generate_resolver_lists(locals(),kwargs)
-        DF, kwargs, palette, style, markers, ax = outputs
-        palette, style, markers, ax = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
+        DF, kwargs, palette, style, markers, ax, estimator = outputs
+        palette, style, markers, ax, estimator = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
         xlab,ylab,zlab = self.label_prep(locals())
 
         # %% PLOT WITH SEABORN
@@ -31,12 +31,12 @@ class LinePlotter(BasePlotter):
             sns.lineplot(
                 x=xlab, y=ylab, data=DF, hue=zlab,
                 color=palette[0], style=style, markers=markers,
-                ax=ax, **kwargs)
+                ax=ax, estimator=estimator, **kwargs)
         else:
             sns.lineplot(
                 x=xlab, y=ylab, data=DF, hue=zlab,
                 palette=palette, style=style, markers=markers,
-                ax=ax, **kwargs)
+                ax=ax, estimator=estimator, **kwargs)
 
         # %% EXTRA PLOT EDITING
         self.plot_errors(xlab,ylab,zlab)
@@ -50,13 +50,13 @@ class LinePlotter(BasePlotter):
     # %% CUSTOM METHODS
     # %% FIX
     def generate_resolver_lists(self,l,kwargs):
-        conflict_vars = ['DF','palette', 'style', 'markers', 'ax']
-        defaults_list = [self.colors[0:len(self.unique)], self.zlab, self.markers, self.ax]
-        kwargs, DF, palette, style, markers, ax = super().kwarg_conflict_resolver(kwargs,conflict_vars)
+        conflict_vars = ['DF','palette', 'style', 'markers', 'ax','estimator']
+        defaults_list = [self.colors[0:len(self.unique)], self.zlab, self.markers, self.ax, None]
+        kwargs, DF, palette, style, markers, ax, estimator = super().kwarg_conflict_resolver(kwargs,conflict_vars)
 
-        inputs = [palette, style, markers, ax]
-        input_keys = ['palette', 'style', 'markers', 'ax']
-        outputs =  [DF, kwargs, palette, style, markers, ax]
+        inputs = [palette, style, markers, ax, estimator]
+        input_keys = ['palette', 'style', 'markers', 'ax', 'estimator']
+        outputs =  [DF, kwargs, palette, style, markers, ax, estimator]
 
         return conflict_vars, defaults_list, inputs, input_keys, outputs
 
