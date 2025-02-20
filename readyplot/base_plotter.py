@@ -88,16 +88,8 @@ class BasePlotter:
         # MANAGE LEGEND LABELS
         self.manage_legend()
 
-
         # SET CUSTOM XY LABELS AND TITLE IF PROVIDED
-        if self.custom_x_label: self.set_xlabel(self.custom_x_label)
-        if self.custom_y_label: self.set_ylabel(self.custom_y_label)
-        
-        if self.title:
-            self.DF.name = self.title
-        else:
-            self.DF.name = ""
-        plt.title(self.DF.name,weight=self.fontweight,fontsize=self.def_font_sz)
+        self.set_titles()
 
         # MANAGE GENERAL AXES
         for axis in self.box_edges:
@@ -212,17 +204,26 @@ class BasePlotter:
         self.fig.set_figwidth(self.fig_width)
         self.fig.set_figheight(self.fig_height)
 
-    def set_xlabel(self,*args,fontweight=False, fontsize=False,**kwargs):
+    def set_title(self,*args,fontweight=False, fontsize=False, color=False, **kwargs):
         label = "" if len(args) == 0 else args[0]
         fontweight = self.fontweight if not fontweight else fontweight
         fontsize = self.def_font_sz if not fontsize else fontsize
-        self.ax.set_xlabel(label, fontweight=fontweight, fontsize=fontsize,**kwargs)
+        color = self.line_color if not color else color
+        self.ax.set_title(label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
 
-    def set_ylabel(self,*args,fontweight=False, fontsize=False,**kwargs):
+    def set_xlabel(self,*args,fontweight=False, fontsize=False, color=False, **kwargs):
         label = "" if len(args) == 0 else args[0]
         fontweight = self.fontweight if not fontweight else fontweight
         fontsize = self.def_font_sz if not fontsize else fontsize
-        self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize,**kwargs)
+        color = self.line_color if not color else color
+        self.ax.set_xlabel(label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
+
+    def set_ylabel(self,*args,fontweight=False, fontsize=False, color=False,**kwargs):
+        label = "" if len(args) == 0 else args[0]
+        fontweight = self.fontweight if not fontweight else fontweight
+        fontsize = self.def_font_sz if not fontsize else fontsize
+        color = self.line_color if not color else color
+        self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize, color=color,**kwargs)
 
     def plot_xline_yline(self):
         if self.xlines[0]:
@@ -251,6 +252,38 @@ class BasePlotter:
                                      labels[:self.handles_in_legend],
                                      **self.legend_kwargs)
             for text in plt.gca().get_legend().get_texts(): text.set_color(self.line_color)
+
+    def set_titles(self,*args,title=None,custom_x=None,custom_y=None,**kwargs):
+        # PARSE ARGS IF PROVIDED
+        if len(args) > 0:   title = args[0]
+        if len(args) > 1:  custom_x= args[1]
+        if len(args) > 2:   custom_y= args[2]
+
+        # RESOLVE INPUT TITLE WITH SELF VALUES, USE EMPTY STRING '' TO REMOVE AN EXISTING TITLE, CLEAN NONE TO '' AFTER
+        # Process title
+        if self.ax.get_title() != '' and title is None: title = self.ax.get_title()
+        elif title == '' : self.title = False
+        elif title is None: title = ''
+        # Process x
+        if self.ax.get_xlabel() != '' and custom_x is None: custom_x = self.ax.get_xlabel()
+        elif custom_x == '': self.custom_x_label = False
+        elif custom_x is None: custom_x = ''
+        # Process y
+        if self.ax.get_ylabel() != '' and custom_y is None: custom_y = self.ax.get_ylabel()
+        elif custom_y == '': self.custom_y_label = False
+        elif custom_y is None: custom_y = ''
+
+        # MANAGE SELF VARIABLES WITH CLEANED INPUTS
+        self.title = self.title if (self.title and title == '') else title
+        self.custom_x_label = self.custom_x_label if (self.custom_x_label and custom_x == '') else custom_x
+        self.custom_y_label = self.custom_y_label if (self.custom_y_label and custom_y == '') else custom_y
+
+        # CALL OTHER LOCAL FUNCTIONS TO PROPERLY HANDLE LABEL SETTING
+        self.set_xlabel(self.custom_x_label,**kwargs)
+        self.set_ylabel(self.custom_y_label,**kwargs)
+        self.set_title(self.title,**kwargs)
+
+        self.DF.name = self.title
 
     def plot_errors(self,xlab,ylab,zlab):
         # INITIALIZE VARS FOR ERROR BAR EXISTENCE AND GET AXIS TICKS IN CASE AN AXIS HAS STRING LABELS NOT NUMERIC
