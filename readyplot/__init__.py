@@ -141,16 +141,13 @@ def initialize_common_defaults(args,input_dict):
             kwargs[name] = value
         if name not in locals():
             locals()[name] = value
-
     del name, value
 
     # APPLY IMPORTED SETTINGS BEFORE POPULATING THE REST OF THE INITIALIZED_DICT, SO OTHER INPUTS CAN OVERWRITE THESE
     if 'imported_settings' in input_dict:
-        for key, value in input_dict['imported_settings'].items():
-            initialized_dict[key] = value
+        for key, value in input_dict['imported_settings'].items(): initialized_dict[key] = value
         del key, value
-    else:
-        input_dict['imported_settings'] = {}
+    else: input_dict['imported_settings'] = {}
 
     # %% SORT USER INPUTS INTO REGULAR VARIABLES AND SEABORN KWARGS, HANDLE NESTED KWARG DICTIONARIES RECURSIVELY
     for name, value in locals().items():

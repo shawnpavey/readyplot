@@ -431,6 +431,7 @@ class BasePlotter:
             setattr(self, key, value)
 
     def get_copy_settings(self):
+        # OUTPUT ALL THE INPUT SETTINGS INTO THIS GRAPH FOR REPEATABILITY WITH OTHERS
         problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings']
         output = {key: value for key, value in self.input_dict.items() if key not in problematic}
         return output
