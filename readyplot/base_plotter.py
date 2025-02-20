@@ -86,21 +86,28 @@ class BasePlotter:
         self.set_titles()
         self.manage_axes()
         return self.fig, self.ax
-    
+
+    # %% SAVE THE PLOT
     def save(self,**kwargs):
+        # IF THE FOLDER NAME DOES NOT HAVE A '.' USE SAVE NAME AUTOPOPULATED FUNCTION WHICH BUILDS A NAME
         if '.' not in self.folder_name: save_name,dir_name = self.save_name_autopopulated()
+
+        # IF A '.' IS IN THE FOLDER NAME, JUST USE THAT AS THE ENTIRE SAVE
         else:
             self.dir_name = self.folder_name.split(os.sep)[:-1]
             self.dir_name = os.path.join(os.sep,*self.dir_name) if self.folder_name[0]==os.sep else os.path.join('',*self.dir_name)
             save_name,dir_name = self.folder_name,self.dir_name
 
+        # TRY TO MAKE A DIRECTORY OR USE THE CURRENT ONE
         try: os.mkdir(dir_name)
         except FileExistsError: print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
         print(f"Directory '{dir_name}' created successfully.")
 
+        # SAVE FIGURE
         self.fig.savefig(save_name, bbox_inches='tight',transparent=self.transparent, **kwargs)
         return self.fig, self.ax
-        
+
+    # %% SHOW WITH PLT.SHOW WHICH WIPES OUT THE FIGURE
     def show(self,**kwargs):
         plt.show(self.fig,**kwargs)
         return self.fig, self.ax
@@ -436,7 +443,10 @@ class BasePlotter:
         output = {key: value for key, value in self.input_dict.items() if key not in problematic}
         return output
 
-    # %% INTERNAL METHODS FOR HANDLING INPUTS, GENERAL ESTHETICS, AND SAVE HELPER FUNCTIONS
+#%%---------------------------------------------------------------------------------------------------------------------
+# INTERNAL METHODS FOR HANDLING INPUTS, GENERAL ESTHETICS, AND SAVE HELPER FUNCTIONS
+#-----------------------------------------------------------------------------------------------------------------------
+    # %% RESOLVE VARIABLES
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
         # COMBINE INPUT KWARGS WITH GENERAL KWARGS
         if len(kwargs) != 0: kwargs = {**self.kwargs, **kwargs}
@@ -484,6 +494,7 @@ class BasePlotter:
         # RETURN TEMPORARY DATAFRAME
         return DF
 
+    # %% ESTHETICS
     def format_colors(self):
         # UPDATE SNS BACKGROUND SETTINGS
         sns.color_palette(self.sns_palette)
@@ -511,6 +522,7 @@ class BasePlotter:
         plt.rcParams["ytick.color"] = self.line_color  # Y-axis tick color
         plt.rcParams["grid.color"] = self.grid_color  # Gridline color
 
+    # %% SAVE HELPER FUNCTION
     def save_name_autopopulated(self):
         # MAKE SAVE NAME FROM DF.NAME (SET DURING SET_TITLES) AND PLOT TYPE, HANDLE "/"
         self.save_name = self.DF.name + '_' + self.plot_type
@@ -524,9 +536,11 @@ class BasePlotter:
 #%%---------------------------------------------------------------------------------------------------------------------
 # GENERAL METHODS FOR CLASS HANDLING AND PLACEHOLDERS
 #-----------------------------------------------------------------------------------------------------------------------
+    # %% PLACEHOLDER FOR CHILD CLASSES
     def just_plot(self,**kwargs):
         return self.fig, self.ax
 
+    # %% PASS METHODS TO CHILDREN
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]

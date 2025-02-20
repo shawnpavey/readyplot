@@ -152,7 +152,7 @@ def initialize_common_defaults(args,input_dict):
     # %% SORT USER INPUTS INTO REGULAR VARIABLES AND SEABORN KWARGS, HANDLE NESTED KWARG DICTIONARIES RECURSIVELY
     for name, value in locals().items():
         # IGNORE IMPORTED SETTINGS
-        if name == 'imported_settings' or name in input_dict['imported_settings']:
+        if name == 'imported_settings' or (name in input_dict['imported_settings'] and name not in input_dict):
             pass
         # IF THE VARIABLE IS A NESTED KWARG USE RECURSIVE METHOD TO RESOLVE NESTED DICTIONARIES, NOT OVERWRITE ENTIRELY
         elif name in nested_kwargs:
