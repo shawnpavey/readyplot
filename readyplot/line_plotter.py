@@ -25,7 +25,7 @@ class LinePlotter(BasePlotter):
         DF, kwargs, palette, style, markers, ax = outputs
         palette, style, markers, ax = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
         xlab,ylab,zlab = self.label_prep(locals())
-        print(kwargs)
+
         # %% PLOT WITH SEABORN
         sns.lineplot(
             x=xlab, y=ylab, data=DF, hue=zlab,

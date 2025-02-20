@@ -299,8 +299,8 @@ class BasePlotter:
 
         if not np.isnan(txel): self.ax.plot([tx, tx-txel], [ty, ty], color=c, linewidth=l)
         if not np.isnan(txeh): self.ax.plot([tx, tx+txeh], [ty, ty], color=c, linewidth=l)
-        if not np.isnan(tyel): self.ax.plot([tx, tx], [ty, ty+tyel], color=c, linewidth=l)
-        if not np.isnan(tyeh): self.ax.plot([tx, tx], [ty, ty-tyeh], color=c, linewidth=l)
+        if not np.isnan(tyel): self.ax.plot([tx, tx], [ty, ty-tyel], color=c, linewidth=l)
+        if not np.isnan(tyeh): self.ax.plot([tx, tx], [ty, ty+tyeh], color=c, linewidth=l)
 
     def resolve_err_list(self):
         # INITIALIZE OUPUTS AND STORE VARIABLES FOR KEY,VAL DICTIONARY ITERATION LATER
