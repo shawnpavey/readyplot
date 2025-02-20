@@ -12,7 +12,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF, dict_update_nested
 from matplotlib.patches import Patch
 import warnings
 from matplotlib.colors import to_rgb
@@ -225,34 +225,6 @@ class BasePlotter:
         color = self.line_color if not color else color
         self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize, color=color,**kwargs)
 
-    def plot_xline_yline(self):
-        if self.xlines[0]:
-            for line in self.xlines:
-                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-        if self.ylines[0]:
-            for line in self.ylines:
-                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-
-    def manage_legend(self):
-        # GET HANDLES AND LABELS
-        handles, labels = self.ax.get_legend_handles_labels()
-
-        # MANAGE STRANGE HISTOGRAM BEHAVIOR
-        if self.plot_type == 'hist':
-            labels,handles = self.unique.copy(),[]
-            for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
-        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
-            self.legend.set_visible(False)
-        else:
-
-            # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR
-            self.legend.set_visible(True)
-            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
-            self.legend = plt.legend(handles[:self.handles_in_legend],
-                                     labels[:self.handles_in_legend],
-                                     **self.legend_kwargs)
-            for text in plt.gca().get_legend().get_texts(): text.set_color(self.line_color)
-
     def set_titles(self,*args,title=None,custom_x=None,custom_y=None,**kwargs):
         # PARSE ARGS IF PROVIDED
         if len(args) > 0:   title = args[0]
@@ -283,7 +255,66 @@ class BasePlotter:
         self.set_ylabel(self.custom_y_label,**kwargs)
         self.set_title(self.title,**kwargs)
 
+        # UPDATE THE DATA FRAME NAME, ONLY USED IN NICHE SAVING SCENARIOS FOR AUTOMATIC FILE NAMING
         self.DF.name = self.title
+
+    def plot_xline_yline(self):
+        if self.xlines[0]:
+            for line in self.xlines:
+                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+        if self.ylines[0]:
+            for line in self.ylines:
+                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+
+    def manage_legend(self):
+        # GET HANDLES AND LABELS
+        handles, labels = self.ax.get_legend_handles_labels()
+
+        # MANAGE STRANGE HISTOGRAM BEHAVIOR
+        if self.plot_type == 'hist':
+            labels,handles = self.unique.copy(),[]
+            for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
+        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
+            self.legend.set_visible(False)
+        else:
+
+            # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR, WITHIN MANAGE LEGEND USE GLOBAL TRANSPARENCY VALUE
+            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
+            self.set_legend(handles[:self.handles_in_legend],labels[:self.handles_in_legend],**self.legend_kwargs)
+
+    def set_legend(self,handles,labels,visible=True, text_color=None,**kwargs):
+        # IF A TITLE IS PASSED ENSURE APPROPRIATE FONT, PREPARE COLOR SETTING FOR LATER
+        if 'title' in kwargs and 'title_fontsize' not in kwargs: kwargs['title_fontproperties'] = {'size':self.def_font_sz}
+        if 'title' in kwargs and 'title_fontweight' not in kwargs: kwargs['title_fontproperties'].update({'weight':self.fontweight})
+        if text_color is None: text_color = self.line_color
+
+        # UPDATE THE LEGEND KWARGS WITH ANY NEW KWARGS
+        self.legend_kwargs = dict_update_nested(self.legend_kwargs, kwargs)
+
+        # PLOT THE LEGEND
+        self.legend = self.ax.legend(handles,labels,**self.legend_kwargs)
+        self.legend.set_visible(visible)
+
+        # RESET COLORS OF ALL LEGEND TEXT TO MATCH OVERALL THEME OR INPUT COLOR
+        for text in self.legend.get_texts(): text.set_color(text_color)
+        self.legend.get_title().set_color(text_color)
+
+    def get_legend_handles_labels(self):
+        # NEATLY AND INTERNALLY HANDLE GETTING LEGEND HANDLES AND LABELS
+        handles, labels = self.ax.get_legend_handles_labels()
+        return handles, labels
+
+    def add_to_legend(self,new_handles,new_labels,visible=True, text_color=None,**kwargs):
+        # UPDATE THE LEGEND KWARGS WITH ANY NEW KWARGS
+        self.legend_kwargs = dict_update_nested(self.legend_kwargs,kwargs)
+
+        # GET OLD HANDLES AND LABELS, EXTEND WITH THE NEW INPUTS
+        handles, labels = self.get_legend_handles_labels()
+        handles.extend(new_handles)
+        labels.extend(new_labels)
+
+        # RE-PLOT THE LEGEND WITH INTERNAL set_legend() CALL
+        self.set_legend(handles,labels,visible=visible, text_color=text_color, **self.legend_kwargs)
 
     def plot_errors(self,xlab,ylab,zlab):
         # INITIALIZE VARS FOR ERROR BAR EXISTENCE AND GET AXIS TICKS IN CASE AN AXIS HAS STRING LABELS NOT NUMERIC
@@ -295,7 +326,7 @@ class BasePlotter:
         y_ticks = self.ax.get_yticks()
         y_labels = self.ax.get_yticklabels()
 
-        # START LOOP IF ANY ERROR KEYWORDS HACE BEEN PASSED< CREATE A TEMPORARY DF PER GROUP
+        # START LOOP IF ANY ERROR KEYWORDS HAVE BEEN PASSED< CREATE A TEMPORARY DF PER GROUP
         if any(error_var is not None for error_var in err_vars):
             for i,group in enumerate(self.unique):
                 try:
@@ -332,11 +363,11 @@ class BasePlotter:
             pass
 
     def fix_trailing_errors(self,tx,ty,txe,tye,c,l):
-        # FOR EACH ERROR, PLOT A LINE CONNECTING IT TO THE MAIN POINT IF IT EXISTS
-        if not np.isnan(txe[0]): self.ax.plot([tx, tx-txe[0]], [ty, ty], color=c, linewidth=l)
-        if not np.isnan(txe[1]): self.ax.plot([tx, tx+txe[1]], [ty, ty], color=c, linewidth=l)
-        if not np.isnan(tye[0]): self.ax.plot([tx, tx], [ty, ty-tye[0]], color=c, linewidth=l)
-        if not np.isnan(tye[1]): self.ax.plot([tx, tx], [ty, ty+tye[1]], color=c, linewidth=l)
+        # FOR EACH ERROR, PLOT A LINE CONNECTING IT TO THE MAIN POINT IF IT EXISTS WITHOUT THE HI/LOW COUNTERPART
+        if not np.isnan(txe[0]) and np.isnan(txe[1]): self.ax.plot([tx, tx-txe[0]], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(txe[1]) and np.isnan(txe[0]): self.ax.plot([tx, tx+txe[1]], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(tye[0]) and np.isnan(tye[1]): self.ax.plot([tx, tx], [ty, ty-tye[0]], color=c, linewidth=l)
+        if not np.isnan(tye[1]) and np.isnan(tye[0]): self.ax.plot([tx, tx], [ty, ty+tye[1]], color=c, linewidth=l)
 
     def resolve_err_list(self):
         # INITIALIZE OUPUTS AND STORE VARIABLES FOR KEY,VAL DICTIONARY ITERATION LATER
