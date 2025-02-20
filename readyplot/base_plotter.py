@@ -77,68 +77,31 @@ class BasePlotter:
 
     # %% PRE FORMAT THE PLOT
     def pre_format(self):
-        # UPDATE COLORS FROM LINE AND BACK COLORS AS WELL AS SNS PREFERENCES, USES RCPARAMS A LOT
         self.format_colors()
+        self.create_figure()
+        self.set_xlabel()
+        self.set_ylabel()
+        self.plot_xline_yline()
 
-        # CREATE THE FIGURE AND START TRACKING FIG, AX, LEGEND
-        self.fig = plt.figure(dpi=self.dpi)
-        self.ax = self.fig.add_subplot(111)
-        self.legend = self.ax.legend()
-        self.fig.set_figwidth(self.fig_width)
-        self.fig.set_figheight(self.fig_height)
-
-        # CREATE EMPTY LABELS WITH PROPER FONTWEIGHT AND SIZE
-        plt.xlabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
-        plt.ylabel("",fontweight=self.fontweight,fontsize=self.def_font_sz)
-
-        # PRE-POPULATE XLINES AND YLINES IF THEY ARE GIVEN
-        if self.xlines is not None or self.ylines is not None: self.plot_xline_yline()
-
-    def plot_xline_yline(self):
-        if self.xlines[0]:
-            for line in self.xlines:
-                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-        if self.ylines[0]:
-            for line in self.ylines:
-                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-
-
+    # %% POST FORMAT THE PLOT
     def post_format(self):
-        handles, labels = self.ax.get_legend_handles_labels()
+        # MANAGE LEGEND LABELS
+        self.manage_legend()
 
-        if self.plot_type == 'hist':
-            labels = self.unique.copy()
-            handles = []
-            counter = 0
-            for lab in labels:
-                handles.append(Patch(color=self.colors[counter],label=lab))
-                counter +=1
 
-        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) <2):
-            self.legend.set_visible(False)
-        else:
-            self.legend.set_visible(True)
-            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
-            self.legend = plt.legend(
-                handles[:self.handles_in_legend],
-                labels[:self.handles_in_legend], **self.legend_kwargs)
-
-            for text in plt.gca().get_legend().get_texts():
-                text.set_color(self.line_color)
-
-        if self.custom_x_label:
-            plt.xlabel(self.custom_x_label)
-        if self.custom_y_label:
-            plt.ylabel(self.custom_y_label)
-        
-        for axis in self.box_edges:
-            self.ax.spines[axis].set_linewidth(self.def_line_w)
+        # SET CUSTOM XY LABELS AND TITLE IF PROVIDED
+        if self.custom_x_label: self.set_xlabel(self.custom_x_label)
+        if self.custom_y_label: self.set_ylabel(self.custom_y_label)
         
         if self.title:
             self.DF.name = self.title
         else:
             self.DF.name = ""
         plt.title(self.DF.name,weight=self.fontweight,fontsize=self.def_font_sz)
+
+        # MANAGE GENERAL AXES
+        for axis in self.box_edges:
+            self.ax.spines[axis].set_linewidth(self.def_line_w)
         sns.despine()
         for tick in self.ax.get_xticklabels():
             tick.set_fontweight(self.fontweight)
@@ -147,7 +110,7 @@ class BasePlotter:
             tick.set_fontweight(self.fontweight)
             tick.set_fontsize(self.def_font_sz*self.ytick_font_ratio)
 
-         
+        # MANAGE X AXIS
         xtexts = []
         for label in self.ax.get_xticklabels():
             xtexts.append(label.get_text())
@@ -158,7 +121,8 @@ class BasePlotter:
                 x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
                 self.ax.set_xlim(x_min,x_max)
                 self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
-        
+
+        # MANAGE Y AXIS
         ytexts = []
         for label in self.ax.get_yticklabels():
             ytexts.append(label.get_text())  
@@ -172,6 +136,7 @@ class BasePlotter:
             except AttributeError:
                 pass
 
+        # MANAGE EXPONENTS
         tx = self.ax.xaxis.get_offset_text()
         tx.set_fontweight(self.fontweight)
         tx.set_fontsize(self.def_font_sz*0.9)
@@ -240,6 +205,53 @@ class BasePlotter:
     def just_plot(self,**kwargs):
         pass
 
+    def create_figure(self):
+        self.fig = plt.figure(dpi=self.dpi)
+        self.ax = self.fig.add_subplot(111)
+        self.legend = self.ax.legend()
+        self.fig.set_figwidth(self.fig_width)
+        self.fig.set_figheight(self.fig_height)
+
+    def set_xlabel(self,*args,fontweight=False, fontsize=False,**kwargs):
+        label = "" if len(args) == 0 else args[0]
+        fontweight = self.fontweight if not fontweight else fontweight
+        fontsize = self.def_font_sz if not fontsize else fontsize
+        self.ax.set_xlabel(label, fontweight=fontweight, fontsize=fontsize,**kwargs)
+
+    def set_ylabel(self,*args,fontweight=False, fontsize=False,**kwargs):
+        label = "" if len(args) == 0 else args[0]
+        fontweight = self.fontweight if not fontweight else fontweight
+        fontsize = self.def_font_sz if not fontsize else fontsize
+        self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize,**kwargs)
+
+    def plot_xline_yline(self):
+        if self.xlines[0]:
+            for line in self.xlines:
+                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+        if self.ylines[0]:
+            for line in self.ylines:
+                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+
+    def manage_legend(self):
+        # GET HANDLES AND LABELS
+        handles, labels = self.ax.get_legend_handles_labels()
+
+        # MANAGE STRANGE HISTOGRAM BEHAVIOR
+        if self.plot_type == 'hist':
+            labels,handles = self.unique.copy(),[]
+            for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
+        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
+            self.legend.set_visible(False)
+        else:
+
+            # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR
+            self.legend.set_visible(True)
+            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
+            self.legend = plt.legend(handles[:self.handles_in_legend],
+                                     labels[:self.handles_in_legend],
+                                     **self.legend_kwargs)
+            for text in plt.gca().get_legend().get_texts(): text.set_color(self.line_color)
+
     def plot_errors(self,xlab,ylab,zlab):
         err_vars = [ self.yerror_vals,self.hi_yerror_vals,self.low_yerror_vals,
                  self.xerror_vals,self.hi_xerror_vals,self.low_xerror_vals]
@@ -273,10 +285,22 @@ class BasePlotter:
 
                     temp_x_err = np.array([row['x_errs'][0],row['x_errs'][1]])
                     temp_y_err = np.array([row['y_errs'][0],row['y_errs'][1]])
+
+                    linewidth = getattr(self, 'linewidth', self.def_line_w)
+                    self.fix_trailing_errors(tempx, tempy, temp_x_err, temp_y_err, self.colors[i],linewidth)
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
-                                     capsize = self.capsize,color=self.colors[i])
+                                     capsize = self.capsize,color=self.colors[i],linewidth=linewidth,capthick=linewidth)
+
         else:
             pass
+
+    def fix_trailing_errors(self,tx,ty,temp_x_err,temp_y_err,c,l):
+        txel,txeh,tyel,tyeh = temp_x_err[0],temp_x_err[1],temp_y_err[0],temp_y_err[1]
+
+        if not np.isnan(txel): self.ax.plot([tx, tx-txel], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(txeh): self.ax.plot([tx, tx+txeh], [ty, ty], color=c, linewidth=l)
+        if not np.isnan(tyel): self.ax.plot([tx, tx], [ty, ty+tyel], color=c, linewidth=l)
+        if not np.isnan(tyeh): self.ax.plot([tx, tx], [ty, ty-tyeh], color=c, linewidth=l)
 
     def resolve_err_list(self):
         # INITIALIZE OUPUTS AND STORE VARIABLES FOR KEY,VAL DICTIONARY ITERATION LATER
@@ -294,14 +318,20 @@ class BasePlotter:
         # ITERATE AND GET X AND Y ERRORS TO BE LIST VALUES WITH LOW AND HIGH, SET NONES TO NP.NAN
         for i, row in self.DF.iterrows():
             # Process x
-            low_x,hi_x = (self.xerror_vals[i],self.xerror_vals[i]) if self.xerror_vals is not None else np.nan,np.nan
-            low_x = self.low_xerror_vals[i] if self.low_xerror_vals is not None else np.nan
-            hi_x = self.hi_xerror_vals[i] if self.hi_xerror_vals is not None else np.nan
+            if self.low_xerror_vals is None and self.hi_xerror_vals is None:
+                low_x = self.xerror_vals[i] if self.xerror_vals is not None else np.nan
+                hi_x = self.xerror_vals[i] if self.xerror_vals is not None else np.nan
+            else:
+                low_x = self.low_xerror_vals[i] if self.low_xerror_vals is not None else np.nan
+                hi_x = self.hi_xerror_vals[i] if self.hi_xerror_vals is not None else np.nan
 
             # Process y
-            low_y,hi_y = (self.yerror_vals[i],self.yerror_vals[i]) if self.yerror_vals is not None else np.nan,np.nan
-            low_y = self.low_yerror_vals[i] if self.low_yerror_vals is not None else np.nan
-            hi_y = self.hi_yerror_vals[i] if self.hi_yerror_vals is not None else np.nan
+            if self.low_yerror_vals is None and self.hi_yerror_vals is None:
+                low_y = self.yerror_vals[i] if self.yerror_vals is not None else np.nan
+                hi_y = self.yerror_vals[i] if self.yerror_vals is not None else np.nan
+            else:
+                low_y = self.low_yerror_vals[i] if self.low_yerror_vals is not None else np.nan
+                hi_y = self.hi_yerror_vals[i] if self.hi_yerror_vals is not None else np.nan
 
             # Build output lists
             output_x.append([low_x,hi_x])
