@@ -28,18 +28,13 @@ class BasePlotter:
         warnings.simplefilter("ignore", category=UserWarning)
 
         # ITERATE THROUGH THE SORTED INPUT DICT AND INITIALIZE WITH: self.name = value
-        for name, value in input_dict.items():
-            setattr(self, name, value)
+        for name, value in input_dict.items(): setattr(self, name, value)
 
         # IF ANY X,Y,Z INPUTS ARE LISTS OR ARRAYS, FORCE THEM INTO DATA FRAME FORM
-        if any(isinstance(i,(list,np.ndarray)) for i in (self.x,self.y,self.z)):
-            self.DF = self.force_data_frame()
+        if any(isinstance(i,(list,np.ndarray)) for i in (self.x,self.y,self.z)): self.DF = self.force_data_frame()
 
         # INITIALIZE REQUIRED BACKGROUND VARIABLES
-        self.DF_counter = 0
-        self.kwargs = kwargs
-        self.max_list_x = []
-        self.max_list_y = []
+        self.DF_counter,self.kwargs,self.max_list_x,self.max_list_y = 0,kwargs,[],[]
 
         # POPULATE SOME BACKGROUND VARIABLES
         self.__dict__.update(**kwargs)
@@ -82,147 +77,78 @@ class BasePlotter:
         self.set_xlabel()
         self.set_ylabel()
         self.plot_xline_yline()
+        return self.fig,self.ax
 
     # %% POST FORMAT THE PLOT
     def post_format(self):
-        # MANAGE LEGEND LABELS
         self.manage_legend()
-
-        # SET CUSTOM XY LABELS AND TITLE IF PROVIDED
         self.set_titles()
-
-        # MANAGE GENERAL AXES
-        for axis in self.box_edges:
-            self.ax.spines[axis].set_linewidth(self.def_line_w)
-        sns.despine()
-        for tick in self.ax.get_xticklabels():
-            tick.set_fontweight(self.fontweight)
-            tick.set_fontsize(self.def_font_sz*self.xtick_font_ratio)
-        for tick in self.ax.get_yticklabels():
-            tick.set_fontweight(self.fontweight)
-            tick.set_fontsize(self.def_font_sz*self.ytick_font_ratio)
-
-        # MANAGE X AXIS
-        xtexts = []
-        for label in self.ax.get_xticklabels():
-            xtexts.append(label.get_text())
-        if all([numeric_checker(tick) for tick in xtexts]):
-            if self.plot_type != 'box_whisker':
-                self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
-                x_min, x_max = self.ax.get_xlim()
-                x_min,x_max,xbins = min_maxer(x_min,x_max,cap0=self.low_x_cap0)
-                self.ax.set_xlim(x_min,x_max)
-                self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
-
-        # MANAGE Y AXIS
-        ytexts = []
-        for label in self.ax.get_yticklabels():
-            ytexts.append(label.get_text())  
-        if all([numeric_checker(tick) for tick in ytexts]):
-            try:
-                self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
-                y_min, y_max = self.ax.get_ylim()
-                y_min,y_max,ybins = min_maxer(y_min,y_max,cap0=self.low_y_cap0)
-                self.ax.set_ylim(y_min,y_max)
-                self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
-            except AttributeError:
-                pass
-
-        # MANAGE EXPONENTS
-        tx = self.ax.xaxis.get_offset_text()
-        tx.set_fontweight(self.fontweight)
-        tx.set_fontsize(self.def_font_sz*0.9)
-        tx.set_position((1.05,self.x_exp_location))
-        
-        ty = self.ax.yaxis.get_offset_text()
-        ty.set_fontweight(self.fontweight)
-        ty.set_fontsize(self.def_font_sz*0.9)
-        ty.set_position((self.y_exp_location,1.05))
+        self.manage_axes()
+        return self.fig, self.ax
     
     def save(self,**kwargs):
-        if '.' not in self.folder_name:
-            xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
-
-            if self.title is None:
-                if xlab and ylab:
-                    if is_mostly_strings(self.DF[self.ylab]):
-                        dependent_var_list = self.xlab.split(' ')
-                    elif is_mostly_strings(self.DF[self.xlab]):
-                        dependent_var_list = self.ylab.split(' ')
-                    else:
-                        # Assume y is the dependent variable
-                        dependent_var_list = self.ylab.split(' ')
-                else:
-                    temp_string = str((xlab if xlab is not None else "") + (ylab if ylab is not None else ""))
-                    dependent_var_list= temp_string.split(' ')
-                self.dependent_var_name = ''
-                for seg in dependent_var_list:
-                    if "/" not in seg:
-                        self.dependent_var_name += seg + '_'
-                    else:
-                        self.dependent_var_name += 'per' + '_'
-            else:
-                self.dependent_var_name = '_'
-            self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
-            self.save_name.replace('/', "per")
-
-            try:
-                os.mkdir(self.folder_name)
-                print(f"Directory '{self.folder_name}' created successfully.")
-            except FileExistsError:
-                print(f"Directory '{self.folder_name}' already exists overwriting and/or adding data.")
-
-            self.fig.savefig(Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png')),bbox_inches='tight',
-                             transparent=self.transparent,**kwargs)
+        if '.' not in self.folder_name: save_name,dir_name = self.save_name_autopopulated()
         else:
-            if self.folder_name[0] == os.sep:
-                full_path = os.sep
-            else:
-                full_path = ''
             self.dir_name = self.folder_name.split(os.sep)[:-1]
-            self.dir_name = os.path.join(full_path,*self.dir_name)
-            print(self.dir_name)
-            try:
-                os.mkdir(self.dir_name)
-                print(f"Directory '{self.dir_name}' created successfully.")
-            except FileExistsError:
-                print(f"Directory '{self.dir_name}' already exists, overwriting and/or adding data.")
-            self.fig.savefig(self.folder_name, bbox_inches='tight', **kwargs)
+            self.dir_name = os.path.join(os.sep,*self.dir_name) if self.folder_name[0]==os.sep else os.path.join('',*self.dir_name)
+            save_name,dir_name = self.folder_name,self.dir_name
+
+        try: os.mkdir(dir_name)
+        except FileExistsError: print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
+        print(f"Directory '{dir_name}' created successfully.")
+
+        self.fig.savefig(save_name, bbox_inches='tight',transparent=self.transparent, **kwargs)
         return self.fig, self.ax
         
     def show(self,**kwargs):
         plt.show(self.fig,**kwargs)
-        return self.fig
+        return self.fig, self.ax
     
     def just_plot(self,**kwargs):
-        pass
+        return self.fig, self.ax
 
     def create_figure(self):
+        # CREATE FIGURE AND AX
         self.fig = plt.figure(dpi=self.dpi)
         self.ax = self.fig.add_subplot(111)
+
+        # INITIALIZE LEGEND
         self.legend = self.ax.legend()
+
+        # SET FIGURE DIMENSIONS
         self.fig.set_figwidth(self.fig_width)
         self.fig.set_figheight(self.fig_height)
 
+        return self.fig, self.ax
+
     def set_title(self,*args,fontweight=False, fontsize=False, color=False, **kwargs):
+        # PARSE ARGS AND KWARGS
         label = "" if len(args) == 0 else args[0]
         fontweight = self.fontweight if not fontweight else fontweight
         fontsize = self.def_font_sz if not fontsize else fontsize
         color = self.line_color if not color else color
+
+        # CREATE TITLE
         self.ax.set_title(label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
 
     def set_xlabel(self,*args,fontweight=False, fontsize=False, color=False, **kwargs):
+        # PARSE ARGS AND KWARGS
         label = "" if len(args) == 0 else args[0]
         fontweight = self.fontweight if not fontweight else fontweight
         fontsize = self.def_font_sz if not fontsize else fontsize
         color = self.line_color if not color else color
+
+        # CREATE XLABEL
         self.ax.set_xlabel(label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
 
     def set_ylabel(self,*args,fontweight=False, fontsize=False, color=False,**kwargs):
+        # PARSE ARGS AND KWARGS
         label = "" if len(args) == 0 else args[0]
         fontweight = self.fontweight if not fontweight else fontweight
         fontsize = self.def_font_sz if not fontsize else fontsize
         color = self.line_color if not color else color
+
+        # CREATE YLABEL
         self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize, color=color,**kwargs)
 
     def set_titles(self,*args,title=None,custom_x=None,custom_y=None,**kwargs):
@@ -409,6 +335,60 @@ class BasePlotter:
         self.DF['y_errs'] = [arr for arr in output_y]
         return output_x,output_y
 
+    def manage_axes(self):
+        # MANAGE GENERAL AXES
+        for axis in self.box_edges:
+            self.ax.spines[axis].set_linewidth(self.def_line_w)
+        sns.despine()
+        for tick in self.ax.get_xticklabels():
+            tick.set_fontweight(self.fontweight)
+            tick.set_fontsize(self.def_font_sz * self.xtick_font_ratio)
+        for tick in self.ax.get_yticklabels():
+            tick.set_fontweight(self.fontweight)
+            tick.set_fontsize(self.def_font_sz * self.ytick_font_ratio)
+
+        self.manage_x_axis()
+        self.manage_y_axis()
+
+    def manage_x_axis(self):
+        # MANAGE X AXIS
+        xtexts = []
+        for label in self.ax.get_xticklabels():
+            xtexts.append(label.get_text())
+        if all([numeric_checker(tick) for tick in xtexts]):
+            if self.plot_type != 'box_whisker':
+                self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
+                x_min, x_max = self.ax.get_xlim()
+                x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
+                self.ax.set_xlim(x_min, x_max)
+                self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
+        # MANAGE EXPONENTS
+        tx = self.ax.xaxis.get_offset_text()
+        tx.set_fontweight(self.fontweight)
+        tx.set_fontsize(self.def_font_sz * 0.9)
+        tx.set_position((1.05, self.x_exp_location))
+
+    def manage_y_axis(self):
+        # MANAGE Y AXIS
+        ytexts = []
+        for label in self.ax.get_yticklabels():
+            ytexts.append(label.get_text())
+        if all([numeric_checker(tick) for tick in ytexts]):
+            try:
+                self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
+                y_min, y_max = self.ax.get_ylim()
+                y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
+                self.ax.set_ylim(y_min, y_max)
+                self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
+            except AttributeError:
+                pass
+
+        # MANAGE EXPONENTS
+        ty = self.ax.yaxis.get_offset_text()
+        ty.set_fontweight(self.fontweight)
+        ty.set_fontsize(self.def_font_sz * 0.9)
+        ty.set_position((self.y_exp_location, 1.05))
+
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
         if len(kwargs) != 0:
             kwargs = {**self.kwargs, **kwargs}
@@ -479,6 +459,37 @@ class BasePlotter:
         plt.rcParams["xtick.color"] = self.line_color  # X-axis tick color
         plt.rcParams["ytick.color"] = self.line_color  # Y-axis tick color
         plt.rcParams["grid.color"] = "#444444"  # Gridline color
+
+    def save_name_autopopulated(self):
+        xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
+
+        if self.title is None:
+            if xlab and ylab:
+                if is_mostly_strings(self.DF[self.ylab]):
+                    dependent_var_list = self.xlab.split(' ')
+                elif is_mostly_strings(self.DF[self.xlab]):
+                    dependent_var_list = self.ylab.split(' ')
+                else:
+                    # Assume y is the dependent variable
+                    dependent_var_list = self.ylab.split(' ')
+            else:
+                temp_string = str((xlab if xlab is not None else "") + (ylab if ylab is not None else ""))
+                dependent_var_list = temp_string.split(' ')
+            self.dependent_var_name = ''
+            for seg in dependent_var_list:
+                if "/" not in seg:
+                    self.dependent_var_name += seg + '_'
+                else:
+                    self.dependent_var_name += 'per' + '_'
+        else:
+            self.dependent_var_name = '_'
+        self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
+        self.save_name.replace('/', "per")
+
+        save_name = Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png'))
+        dir_name = self.folder_name
+
+        return save_name,dir_name
 
     def __getattr__(self, name):
         if name in self.__dict__:
