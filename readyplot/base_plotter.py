@@ -393,9 +393,8 @@ class BasePlotter:
                 x_min, x_max = self.ax.get_xlim()
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                 if x_min > 10**self.sci_x_lims[0] and x_max < 10**self.sci_x_lims[1]:
-                    # self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                     x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
-                    #x_min = 0 if self.DF[self.xlab].min() >= 0 else x_min
+                    #x_min = 0 if self.DF[self.xlab].min() >= 0 else x_min # MAYBE ADD A SNAP TO 0 IF CLOSE EVENTUALLY, NOT QUITE THERE
                     self.ax.set_xlim(x_min, x_max)
                     self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
                 else:
@@ -421,9 +420,8 @@ class BasePlotter:
                 y_min, y_max = self.ax.get_ylim()
                 self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                 if y_min > 10**self.sci_y_lims[0] and y_max < 10**self.sci_y_lims[1]:
-                    # self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                     y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
-                    #y_min = 0 if self.DF[self.ylab].min() >= 0 else y_min
+                    #y_min = 0 if self.DF[self.ylab].min() >= 0 else y_min # MAYBE ADD A SNAP TO 0 IF CLOSE EVENTUALLY, NOT QUITE THERE
                     self.ax.set_ylim(y_min, y_max)
                     self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
                 else:
