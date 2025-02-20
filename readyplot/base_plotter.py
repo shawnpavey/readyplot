@@ -103,10 +103,11 @@ class BasePlotter:
     def show(self,**kwargs):
         plt.show(self.fig,**kwargs)
         return self.fig, self.ax
-    
-    def just_plot(self,**kwargs):
-        return self.fig, self.ax
 
+#%%---------------------------------------------------------------------------------------------------------------------
+# ORGANIZED METHODS
+#-----------------------------------------------------------------------------------------------------------------------
+    # %% FIGURE CREATION
     def create_figure(self):
         # CREATE FIGURE AND AX
         self.fig = plt.figure(dpi=self.dpi)
@@ -121,6 +122,7 @@ class BasePlotter:
 
         return self.fig, self.ax
 
+    # %% TITLES AND AXIS LABELS
     def set_title(self,*args,fontweight=False, fontsize=False, color=False, **kwargs):
         # PARSE ARGS AND KWARGS
         label = "" if len(args) == 0 else args[0]
@@ -186,6 +188,7 @@ class BasePlotter:
         elif self.custom_y_label != '' and self.custom_y_label is not None: self.DF.name = self.custom_y_label
         elif self.custom_x_label != '' and self.custom_x_label is not None: self.DF.name = self.custom_x_label
 
+    # %% PLOTING XLINE AND YLINE ANNOTATIONS
     def plot_xline_yline(self):
         if self.xlines[0]:
             for line in self.xlines:
@@ -194,6 +197,7 @@ class BasePlotter:
             for line in self.ylines:
                 self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
 
+    # %% LEGEND METHODS
     def manage_legend(self):
         # GET HANDLES AND LABELS
         handles, labels = self.ax.get_legend_handles_labels()
@@ -244,6 +248,12 @@ class BasePlotter:
         # RE-PLOT THE LEGEND WITH INTERNAL set_legend() CALL
         self.set_legend(handles,labels,visible=visible, text_color=text_color, **self.legend_kwargs)
 
+    def get_legend(self):
+        # SIMPLE WAY TO GET THE LEGEND OBJECT OUT OF READYPLOT
+        if self.legend is not None: return self.legend
+        else: pass
+
+    # %% ERROR BARS
     def plot_errors(self,xlab,ylab,zlab):
         # INITIALIZE VARS FOR ERROR BAR EXISTENCE AND GET AXIS TICKS IN CASE AN AXIS HAS STRING LABELS NOT NUMERIC
         err_vars = [ self.yerror_vals,self.hi_yerror_vals,self.low_yerror_vals,
@@ -337,6 +347,7 @@ class BasePlotter:
         self.DF['y_errs'] = [arr for arr in output_y]
         return output_x,output_y
 
+    # %% AXIS AND TICK MANAGEMENT
     def manage_axes(self):
         # MANAGE GENERAL AXES
         for axis in self.box_edges:
@@ -391,6 +402,7 @@ class BasePlotter:
         ty.set_fontsize(self.def_font_sz * 0.9)
         ty.set_position((self.y_exp_location, 1.05))
 
+    # %% INTERNAL METHODS FOR HANDLING INPUTS, GENERAL ESTHETICS, AND SAVE HELPER FUNCTIONS
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
         if len(kwargs) != 0:
             kwargs = {**self.kwargs, **kwargs}
@@ -463,35 +475,20 @@ class BasePlotter:
         plt.rcParams["grid.color"] = "#444444"  # Gridline color
 
     def save_name_autopopulated(self):
-        xlab, ylab, zlab = check_labels_in_DF(self.DF, self.xlab, self.ylab, self.zlab)
+        # MAKE SAVE NAME FROM DF.NAME (SET DURING SET_TITLES) AND PLOT TYPE, HANDLE "/"
+        self.save_name = self.DF.name + '_' + self.plot_type
+        self.save_name = self.save_name.replace("/", "_per_")
 
-        if self.title is None:
-            if xlab and ylab:
-                if is_mostly_strings(self.DF[self.ylab]):
-                    dependent_var_list = self.xlab.split(' ')
-                elif is_mostly_strings(self.DF[self.xlab]):
-                    dependent_var_list = self.ylab.split(' ')
-                else:
-                    # Assume y is the dependent variable
-                    dependent_var_list = self.ylab.split(' ')
-            else:
-                temp_string = str((xlab if xlab is not None else "") + (ylab if ylab is not None else ""))
-                dependent_var_list = temp_string.split(' ')
-            self.dependent_var_name = ''
-            for seg in dependent_var_list:
-                if "/" not in seg:
-                    self.dependent_var_name += seg + '_'
-                else:
-                    self.dependent_var_name += 'per' + '_'
-        else:
-            self.dependent_var_name = '_'
-        self.save_name = self.DF.name + self.dependent_var_name + self.plot_type
-        self.save_name.replace('/', "per")
-
+        # MAKE AND RETURN SAVE NAME AND DIRECTORY NAME
         save_name = Path(os.path.join(self.folder_name + os.sep, self.save_name + '.png'))
         dir_name = self.folder_name
-
         return save_name,dir_name
+
+#%%---------------------------------------------------------------------------------------------------------------------
+# GENERAL METHODS FOR CLASS HANDLING AND PLACEHOLDERS
+#-----------------------------------------------------------------------------------------------------------------------
+    def just_plot(self,**kwargs):
+        return self.fig, self.ax
 
     def __getattr__(self, name):
         if name in self.__dict__:
@@ -501,8 +498,3 @@ class BasePlotter:
                 return base.__dict__[name].__get__(self)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
-    def get_legend(self):
-        if self.legend is not None:
-            return self.legend
-        else:
-            pass
