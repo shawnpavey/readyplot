@@ -253,6 +253,7 @@ class BasePlotter:
             for text in plt.gca().get_legend().get_texts(): text.set_color(self.line_color)
 
     def plot_errors(self,xlab,ylab,zlab):
+        # INITIALIZE VARS FOR ERROR BAR EXISTENCE AND GET AXIS TICKS IN CASE AN AXIS HAS STRING LABELS NOT NUMERIC
         err_vars = [ self.yerror_vals,self.hi_yerror_vals,self.low_yerror_vals,
                  self.xerror_vals,self.hi_xerror_vals,self.low_xerror_vals]
 
@@ -261,6 +262,7 @@ class BasePlotter:
         y_ticks = self.ax.get_yticks()
         y_labels = self.ax.get_yticklabels()
 
+        # START LOOP IF ANY ERROR KEYWORDS HACE BEEN PASSED< CREATE A TEMPORARY DF PER GROUP
         if any(error_var is not None for error_var in err_vars):
             for i,group in enumerate(self.unique):
                 try:
@@ -268,6 +270,7 @@ class BasePlotter:
                 except KeyError:
                     tempDF = self.DF
 
+                # GET THE X,Y POSITION OF EVERY POINT, IF THE X OR Y IS A STRING, MAP BY AXIS TICKS
                 for j,row in tempDF.iterrows():
                     tempx = row[xlab]
                     tempy = row[ylab]
@@ -283,18 +286,20 @@ class BasePlotter:
                                 tempy = y_ticks[i]
                                 break
 
+                    # PLOT ERROR BARS AND FIX THE ISSUE WHERE ONLY A HIGH OR LOW ERROR LEADS TO MISSING CONNECTION
                     temp_x_err = np.array([row['x_errs'][0],row['x_errs'][1]])
                     temp_y_err = np.array([row['y_errs'][0],row['y_errs'][1]])
-
                     linewidth = getattr(self, 'linewidth', self.def_line_w)
                     self.fix_trailing_errors(tempx, tempy, temp_x_err, temp_y_err, self.colors[i],linewidth)
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
                                      capsize = self.capsize,color=self.colors[i],linewidth=linewidth,capthick=linewidth)
 
+        # PASS IF NO ERROR KEYWORDS HAVE BEEN PASSED
         else:
             pass
 
     def fix_trailing_errors(self,tx,ty,txe,tye,c,l):
+        # FOR EACH ERROR, PLOT A LINE CONNECTING IT TO THE MAIN POINT IF IT EXISTS
         if not np.isnan(txe[0]): self.ax.plot([tx, tx-txe[0]], [ty, ty], color=c, linewidth=l)
         if not np.isnan(txe[1]): self.ax.plot([tx, tx+txe[1]], [ty, ty], color=c, linewidth=l)
         if not np.isnan(tye[0]): self.ax.plot([tx, tx], [ty, ty-tye[0]], color=c, linewidth=l)
