@@ -173,8 +173,8 @@ class BasePlotter:
 
         # MANAGE SELF VARIABLES WITH CLEANED INPUTS
         self.title = self.title if (self.title and title == '') else title
-        self.custom_x_label = self.custom_x_label if (self.custom_x_label and custom_x == '') else custom_x
         self.custom_y_label = self.custom_y_label if (self.custom_y_label and custom_y == '') else custom_y
+        self.custom_x_label = self.custom_x_label if (self.custom_x_label and custom_x == '') else custom_x
 
         # CALL OTHER LOCAL FUNCTIONS TO PROPERLY HANDLE LABEL SETTING
         self.set_xlabel(self.custom_x_label,**kwargs)
