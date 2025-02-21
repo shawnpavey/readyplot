@@ -24,6 +24,7 @@ class BarPlotter(BasePlotter):
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
+        self.ensure_fig_ax_exist()
         self.DF[self.xlab] = self.DF[self.xlab].astype(str)
         conflict_vars,defaults_list,inputs,input_keys,outputs = self.generate_resolver_lists(locals(),kwargs)
         DF,kwargs, markers,palette,dodge,ax,capsize,linewidth,width = outputs

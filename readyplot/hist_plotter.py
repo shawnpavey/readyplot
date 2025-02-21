@@ -21,6 +21,7 @@ class HistPlotter(BasePlotter):
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
+        self.ensure_fig_ax_exist()
         kwargs, DF, palette, ax, legend = self.generate_resolver_lists(locals(), kwargs)
         xlab, ylab, zlab, palette = self.label_prep(locals())
 

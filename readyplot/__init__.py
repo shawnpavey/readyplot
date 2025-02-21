@@ -14,6 +14,7 @@ from .line_plotter import LinePlotter
 import pandas as pd
 import numpy as np
 from .utils import dict_update_nested
+from matplotlib import pyplot as plt
 
 #%%---------------------------------------------------------------------------------------------------------------------
 # MAIN INITIALIZATION

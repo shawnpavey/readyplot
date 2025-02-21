@@ -74,7 +74,7 @@ class BasePlotter:
     # %% PRE FORMAT THE PLOT
     def pre_format(self):
         self.format_colors()
-        self.create_figure()
+        self.manage_figure()
         self.set_xlabel()
         self.set_ylabel()
         self.plot_xline_yline()
@@ -115,11 +115,16 @@ class BasePlotter:
 #%%---------------------------------------------------------------------------------------------------------------------
 # ORGANIZED METHODS
 #-----------------------------------------------------------------------------------------------------------------------
-    # %% FIGURE CREATION
-    def create_figure(self):
-        # CREATE FIGURE AND AX
-        self.fig = plt.figure(dpi=self.dpi)
-        self.ax = self.fig.add_subplot(111)
+    # %% FIGURE CREATION OR ACCESS A FIGURE IF STEPS PERFORMED OUT OF ORDER, CAN TURN THIS OFF WITH use_existing_figure
+    def manage_figure(self,use_existing_figure=True):
+        # CREATE FIGURE AND AX IF NONE EXISTS OR USE_EXISTING FIGURE SET TO FALSE
+        if use_existing_figure:
+            if hasattr(self, 'fig'): self.fig.set_dpi(self.dpi)
+            else: self.fig = plt.figure(dpi=self.dpi)
+            if not hasattr(self, 'ax'): self.ax = self.fig.add_subplot(111)
+        else:
+            self.fig = plt.figure(dpi=self.dpi)
+            self.ax = self.fig.add_subplot(111)
 
         # INITIALIZE LEGEND
         self.legend = self.ax.legend()
@@ -215,7 +220,8 @@ class BasePlotter:
             labels,handles = self.unique.copy(),[]
             for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
         if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
-            self.legend.set_visible(False)
+            try: self.legend.set_visible(False)
+            except: pass
         else:
 
             # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR, WITHIN MANAGE LEGEND USE GLOBAL TRANSPARENCY VALUE
@@ -521,6 +527,15 @@ class BasePlotter:
 
         # RETURN TEMPORARY DATAFRAME
         return DF
+
+    def ensure_fig_ax_exist(self):
+        # CREATE A FIG IF IT DOESN'T EXIST
+        if not hasattr(self, 'fig'):
+            self.fig = plt.figure(dpi=self.dpi)
+            self.ax = self.fig.add_subplot(111)
+        # CREATE AN AX IF IT DOESN'T EXIST
+        if not hasattr(self, 'ax'):
+            self.ax = self.fig.add_subplot(111)
 
     # %% ESTHETICS
     def format_colors(self):

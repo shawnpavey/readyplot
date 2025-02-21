@@ -21,6 +21,7 @@ class LinePlotter(BasePlotter):
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
+        self.ensure_fig_ax_exist()
         conflict_vars,defaults_list,inputs,input_keys,outputs = self.generate_resolver_lists(locals(),kwargs)
         DF, kwargs, palette, style, markers, ax, estimator = outputs
         palette, style, markers, ax, estimator = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
