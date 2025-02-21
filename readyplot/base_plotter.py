@@ -395,7 +395,7 @@ class BasePlotter:
         for label in self.ax.get_xticklabels():
             xtexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in xtexts]):
-            if self.plot_type != 'box_whisker':
+            if self.plot_type != 'box_whisker' and self.plot_type != 'bar':
                 x_min, x_max = self.ax.get_xlim()
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                 if x_min > 10**self.sci_x_lims[0] and x_max < 10**self.sci_x_lims[1]:
