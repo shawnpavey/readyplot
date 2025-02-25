@@ -185,3 +185,32 @@ def dict_update_nested(default_dictionary, input_dictionary):
         else:
             default_dictionary[key] = value
     return default_dictionary
+
+def is_transparent(color):
+    """
+    Checks if a given color is transparent.
+
+    :param color: Color (string, hex, or tuple)
+    :return: True if the color is transparent (alpha == 0), else False
+    """
+    import matplotlib.colors as mcolors
+    # If the color is a string, convert it to RGBA
+    if isinstance(color, str):
+        try:
+            rgba = mcolors.to_rgba(color)
+        except ValueError:
+            raise ValueError(f"Invalid color string: {color}")
+
+    # If it's a tuple, it's already in RGBA format, just use it directly
+    elif isinstance(color, tuple):
+        rgba = color
+
+    # If it's hex, convert to RGBA
+    elif isinstance(color, str) and color.startswith("#"):
+        rgba = mcolors.hex2color(color) + (1,)  # Add alpha=1 for opaque
+
+    else:
+        raise ValueError(f"Unsupported color format: {color}")
+
+    # Return True if alpha (last value) is 0 (transparent)
+    return rgba[3] == 0

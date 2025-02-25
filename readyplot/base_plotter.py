@@ -12,7 +12,8 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF, dict_update_nested
+from numpy.core._exceptions import UFuncTypeError
+from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF, dict_update_nested, is_transparent
 from matplotlib.patches import Patch
 import warnings
 from matplotlib.colors import to_rgb
@@ -116,13 +117,22 @@ class BasePlotter:
 # ORGANIZED METHODS
 #-----------------------------------------------------------------------------------------------------------------------
     # %% FIGURE CREATION OR ACCESS A FIGURE IF STEPS PERFORMED OUT OF ORDER, CAN TURN THIS OFF WITH use_existing_figure
-    def manage_figure(self,use_existing_figure=True):
-        # CREATE FIGURE AND AX IF NONE EXISTS OR USE_EXISTING FIGURE SET TO FALSE
+    def manage_figure(self,use_existing_figure=True, subplot_loc = (1,1,1)):
+        # CREATE FIGURE AND AX IF NONE EXISTS OR USE_EXISTING FIGURE UNLESS SET TO FALSE
         if use_existing_figure:
-            if hasattr(self, 'fig'): self.fig.set_dpi(self.dpi)
-            else: self.fig = plt.figure(dpi=self.dpi)
-            if not hasattr(self, 'ax'): self.ax = self.fig.add_subplot(111)
+            # USE INPUT_FIGURE IF PROVIDED
+            if self.input_fig is not None: self.fig = self.input_fig
+            if hasattr(self,'fig'): self.fig.set_dpi(self.dpi)
+            elif self.input_ax is None: self.fig = plt.figure(dpi=self.dpi)
+
+            # USE INPUT_AX IF PROVIDED, RESOLVE NEW FIGURE LOCATION
+            if self.input_ax is not None:
+                self.ax = self.input_ax
+                self.fig = self.ax.get_figure()
+            elif not self.fig.axes: self.ax = self.fig.add_subplot(*subplot_loc)
+            else: self.ax = self.fig.add_subplot(*subplot_loc)
         else:
+            # CREATE NEW FIG AND AX
             self.fig = plt.figure(dpi=self.dpi)
             self.ax = self.fig.add_subplot(111)
 
@@ -226,6 +236,7 @@ class BasePlotter:
 
             # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR, WITHIN MANAGE LEGEND USE GLOBAL TRANSPARENCY VALUE
             self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
+            if is_transparent(self.back_color): self.legend_kwargs['framealpha'] = 0
             self.set_legend(handles[:self.handles_in_legend],labels[:self.handles_in_legend],**self.legend_kwargs)
 
     def set_legend(self,handles,labels,visible=True, text_color=None,**kwargs):
@@ -284,10 +295,8 @@ class BasePlotter:
         # START LOOP IF ANY ERROR KEYWORDS HAVE BEEN PASSED< CREATE A TEMPORARY DF PER GROUP
         if any(error_var is not None for error_var in err_vars):
             for i,group in enumerate(self.unique):
-                try:
-                    tempDF = self.DF[self.DF[zlab] == group]
-                except KeyError:
-                    tempDF = self.DF
+                try: tempDF = self.DF[self.DF[zlab] == group]
+                except KeyError: tempDF = self.DF
 
                 # GET THE X,Y POSITION OF EVERY POINT, IF THE X OR Y IS A STRING, MAP BY AXIS TICKS
                 for j,row in tempDF.iterrows():
@@ -314,7 +323,12 @@ class BasePlotter:
                     if tempy+temp_y_err[1] > y_max and self.error_lim_affect:
                         y_max = tempy+temp_y_err[1]
                         self.ax.set_ylim(y_min,y_max)
-                        print('GotHere',y_max)
+                    if tempx - temp_x_err[0] < x_min and self.error_lim_affect:
+                        x_min = tempx - temp_x_err[0]
+                        self.ax.set_xlim(x_min, x_max)
+                    if tempy - temp_y_err[0] < y_min and self.error_lim_affect:
+                        y_min = tempy - temp_y_err[0]
+                        self.ax.set_ylim(y_min, y_max)
                     linewidth = getattr(self, 'linewidth', self.def_line_w)
                     self.fix_trailing_errors(tempx, tempy, temp_x_err, temp_y_err, self.colors[i],linewidth)
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
@@ -385,9 +399,11 @@ class BasePlotter:
         for tick in self.ax.get_yticklabels():
             tick.set_fontweight(self.fontweight)
             tick.set_fontsize(self.def_font_sz * self.ytick_font_ratio)
+        try: self.manage_x_axis()
+        except UFuncTypeError: pass
+        try: self.manage_y_axis()
+        except UFuncTypeError: pass
 
-        self.manage_x_axis()
-        self.manage_y_axis()
 
     def manage_x_axis(self):
         # MANAGE X AXIS
@@ -395,19 +411,27 @@ class BasePlotter:
         for label in self.ax.get_xticklabels():
             xtexts.append(label.get_text())
         if all([numeric_checker(tick) for tick in xtexts]):
-            if self.plot_type != 'box_whisker' and self.plot_type != 'bar':
+            try:
                 x_min, x_max = self.ax.get_xlim()
+                abs_max = x_max if abs(x_max) > abs(x_min) else x_min
+                self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
-                if x_min > 10**self.sci_x_lims[0] and x_max < 10**self.sci_x_lims[1]:
+                if abs(abs_max) < 10**self.sci_x_lims[0] or abs(abs_max) > 10**self.sci_x_lims[1]:
                     x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
-                    #x_min = 0 if self.DF[self.xlab].min() >= 0 else x_min # MAYBE ADD A SNAP TO 0 IF CLOSE EVENTUALLY, NOT QUITE THERE
                     self.ax.set_xlim(x_min, x_max)
                     self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
                 else:
+                    self.ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
+                    self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
                     if self.DF[self.xlab].min() < x_min: x_min = self.DF[self.xlab].min()
                     if self.DF[self.xlab].max() >= x_max: x_max = self.DF[self.xlab].max()*1.05
-                    if x_min > 0: x_min = 0
-                    self.ax.set_ylim(x_min*1.03, x_max*1.03)
+                    self.ax.set_xlim(x_min*1.03, x_max*1.03)
+
+            except AttributeError:pass
+            except KeyError:pass
+
+            if abs(x_min) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(0, x_max)
+            elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
 
 
         # MANAGE EXPONENTS
@@ -424,19 +448,25 @@ class BasePlotter:
         if all([numeric_checker(tick) for tick in ytexts]):
             try:
                 y_min, y_max = self.ax.get_ylim()
+                abs_max = y_max if abs(y_max) > abs(y_min) else y_min
+                self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
-                if y_min > 10**self.sci_y_lims[0] and y_max < 10**self.sci_y_lims[1]:
+                if abs(abs_max) < 10**self.sci_y_lims[0] or abs(abs_max) > 10**self.sci_y_lims[1]:
                     y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
-                    #y_min = 0 if self.DF[self.ylab].min() >= 0 else y_min # MAYBE ADD A SNAP TO 0 IF CLOSE EVENTUALLY, NOT QUITE THERE
                     self.ax.set_ylim(y_min, y_max)
                     self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
                 else:
+                    self.ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
+                    self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
                     if self.DF[self.ylab].min() < y_min: y_min = self.DF[self.ylab].min()
                     if self.DF[self.ylab].max() >= y_max: y_max = self.DF[self.ylab].max()*1.1
-                    if y_min > 0: y_min = 0
                     self.ax.set_ylim(y_min*1.03, y_max*1.03)
+
             except AttributeError:pass
             except KeyError:pass
+
+            if abs(y_min) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(0, y_max)
+            elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
 
         # MANAGE EXPONENTS
         ty = self.ax.yaxis.get_offset_text()
@@ -471,10 +501,11 @@ class BasePlotter:
         for key, value in input_dict.items():
             setattr(self, key, value)
 
-    def get_copy_settings(self):
+    def get_copy_settings(self,include_problematic = False):
         # OUTPUT ALL THE INPUT SETTINGS INTO THIS GRAPH FOR REPEATABILITY WITH OTHERS
         problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings']
-        output = {key: value for key, value in self.input_dict.items() if key not in problematic}
+        if include_problematic: output = {key: value for key, value in self.input_dict.items()}
+        else: output = {key: value for key, value in self.input_dict.items() if key not in problematic}
         return output
 
 #%%---------------------------------------------------------------------------------------------------------------------
@@ -552,7 +583,7 @@ class BasePlotter:
         else:
             sns.set_palette("deep")  # or "bright" or "pastel"
 
-        # TRANSLATE BACKGROUDN COLOR TO TRANSPARENT IF TRANSPARENCY IS SET
+        # TRANSLATE BACKGROUND COLOR TO TRANSPARENT IF TRANSPARENCY IS SET
         self.back_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
 
         # SET ALL PLT DEFAULT COLORS BASED ON LINE AND BACK COLOR AND GRID_COLOR

@@ -40,7 +40,7 @@ class LinePlotter(BasePlotter):
                 ax=ax, estimator=estimator, **kwargs)
 
         # %% EXTRA PLOT EDITING
-        self.plot_errors(xlab,ylab,zlab)
+        if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
 #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------------------

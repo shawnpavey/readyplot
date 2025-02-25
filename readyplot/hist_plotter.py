@@ -25,6 +25,8 @@ class HistPlotter(BasePlotter):
         kwargs, DF, palette, ax, legend = self.generate_resolver_lists(locals(), kwargs)
         xlab, ylab, zlab, palette = self.label_prep(locals())
 
+        print(kwargs)
+
         # %% PLOT WITH SEABORN
         sns.histplot(
             x=xlab,y=ylab, data=DF,
@@ -32,7 +34,7 @@ class HistPlotter(BasePlotter):
             ax=ax, fill=not self.apply_color_lines_only,**kwargs)
 
         # %% EXTRA PLOT EDITING
-        self.plot_errors(xlab, ylab, zlab)
+        if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
 #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------------------

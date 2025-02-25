@@ -11,6 +11,7 @@ from .boxwhisker_plotter import BoxWhiskerPlotter
 from .hist_plotter import HistPlotter
 from .scatter_plotter import ScatterPlotter
 from .line_plotter import LinePlotter
+from .subplots import SubPlots
 import pandas as pd
 import numpy as np
 from .utils import dict_update_nested
@@ -47,7 +48,7 @@ def initialize_common_defaults(args,input_dict):
     # Input Handles
     input_fig = None
     input_ax = None
-    plot_type = 'bar'
+    plot_type = None
 
     # Output Fig
     folder_name = "OUTPUT_FIGURES"
@@ -64,6 +65,7 @@ def initialize_common_defaults(args,input_dict):
     xerror_vals = None
     hi_xerror_vals = None
     low_xerror_vals = None
+    err_names = ['xerror_vals','yerror_vals','low_xerror_vals','hi_xerror_vals','low_yerror_vals','hi_yerror_vals']
     error_lim_affect = False
 
     # General Text
@@ -90,7 +92,7 @@ def initialize_common_defaults(args,input_dict):
     def_line_w = 1.5
     xtick_font_ratio = 1
     ytick_font_ratio = 1
-    x_axis_sig_figs = 2 # Used to be 0?
+    x_axis_sig_figs = 2
     y_axis_sig_figs = 2
 
     # Scientific Notation
@@ -200,11 +202,12 @@ def parse_args(l):
 
     # IF NO ARGS (OR MORE THAN 3) PROVIDED
     else:
-        if 'excel_path' in input_dict and 'sheet_name' in input_dict:
+        if ('excel_path' in input_dict and input_dict['excel_path'] is not None) and (
+                'sheet_name' in input_dict and input_dict['sheet_name'] is not None):
             input_dict['DF'] = pd.read_excel(input_dict['excel_path'], sheet_name=input_dict['sheet_name'])
-        elif 'excel_path' in input_dict:
+        elif 'excel_path' in input_dict and input_dict['excel_path'] is not None:
             input_dict['DF'] = pd.read_excel(input_dict['excel_path'])
-        elif 'csv_path' in input_dict:
+        elif 'csv_path' in input_dict and input_dict['csv_path'] is not None:
             input_dict['DF'] = pd.read_csv(input_dict['csv_path'])
 
     return input_dict
@@ -283,6 +286,10 @@ def scatter(*args,**kwargs):
     initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return ScatterPlotter(initialized_inputs,**new_kwargs)
 
+# %% SUB PLOTS
+def subplots(*args,**kwargs):
+    return SubPlots(*args,**kwargs)
+
 # %% EXPLICITLY STATE HOW TO IMPORT THE ENTIRE MODULE (eg: import *)
 __all__ = ['boxwhisker',
            'scatter',
@@ -293,4 +300,5 @@ __all__ = ['boxwhisker',
            'ScatterPlotter',
            'LinePlotter',
            'BarPlotter',
-           'HistPlotter']
+           'HistPlotter',
+           'SubPlots']
