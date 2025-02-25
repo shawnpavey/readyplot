@@ -423,9 +423,6 @@ class BasePlotter:
                 else:
                     self.ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
                     self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
-                    if self.DF[self.xlab].min() < x_min: x_min = self.DF[self.xlab].min()
-                    if self.DF[self.xlab].max() >= x_max: x_max = self.DF[self.xlab].max()*1.05
-                    self.ax.set_xlim(x_min*1.03, x_max*1.03)
 
             except AttributeError:pass
             except KeyError:pass
@@ -458,9 +455,6 @@ class BasePlotter:
                 else:
                     self.ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
                     self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
-                    if self.DF[self.ylab].min() < y_min: y_min = self.DF[self.ylab].min()
-                    if self.DF[self.ylab].max() >= y_max: y_max = self.DF[self.ylab].max()*1.1
-                    self.ax.set_ylim(y_min*1.03, y_max*1.03)
 
             except AttributeError:pass
             except KeyError:pass
