@@ -47,7 +47,7 @@ class SubPlots(BasePlotter):
 
         if len(self.input_args) != 0 and len(args) == 0:  args = self.input_args
 
-        if 'figsize' not in kwargs: self.figsize = [2,2]
+        if 'figsize' not in kwargs: self.figsize=(4,3)
 
         if not hasattr(self, 'shape'): self.shape = (1,len(args))
         self.empty_locator = np.zeros(shape=self.shape)
