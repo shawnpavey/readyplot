@@ -91,6 +91,7 @@ class SubPlots(BasePlotter):
 
             for rp in rps:
                 current_settings = rp.get_copy_settings(include_problematic=True)
+                print(current_settings)
                 current_settings = dict_update_nested(current_settings,individual_kwargs_list[self.abs_counter])
 
                 if self.shape[0] == 1: current_settings['input_ax'] = self.axs[col]

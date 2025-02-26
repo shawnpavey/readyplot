@@ -46,7 +46,6 @@ class BasePlotter:
         except: pass
         try: self.max_list_y.append(self.DF[self.ylab].max())
         except: pass
-        self.internal_xlines,self.internal_ylines, self.internal_patches, self.internal_lines = [],[],[], []
 
         # FORCE SOME INPUTS TO BE LISTS IF THEY AREN'T ALREADY
         if not isinstance(self.colors, list): self.colors = [self.colors]
@@ -65,6 +64,10 @@ class BasePlotter:
             while len(self.unique) > len(self.markers): self.markers.extend(self.markers)
             self.marker_dict = dict(zip(self.unique,self.markers))
         except TypeError: self.marker_dict = {}
+
+        # RESOLVE INPUTS FOR SUBPLOTS SUCH AS EXISTING LEGENDS AND OBJECTS
+        try: self.add_to_legend([],[])
+        except: pass
 
     # %% PLOT
     def plot(self,save=True,**kwargs):
@@ -140,7 +143,7 @@ class BasePlotter:
             self.ax = self.fig.add_subplot(111)
 
         # INITIALIZE LEGEND
-        self.legend = self.ax.legend()
+        if self.legend is None: self.legend = self.ax.legend()
 
         # SET FIGURE DIMENSIONS
         self.fig.set_figwidth(self.fig_width)
@@ -514,6 +517,10 @@ class BasePlotter:
         problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings']
         if include_problematic: output = {key: value for key, value in self.input_dict.items()}
         else: output = {key: value for key, value in self.input_dict.items() if key not in problematic}
+        current_settings = self.get_all()
+        for key, value in self.input_dict.items():
+            if key in self.get_all().items():
+                output[key] = current_settings[key]
         return output
 
 #%%---------------------------------------------------------------------------------------------------------------------

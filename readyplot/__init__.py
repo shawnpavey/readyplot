@@ -106,6 +106,10 @@ def initialize_common_defaults(args,input_dict):
     # XLines and YLines
     xlines = [None]
     ylines = [None]
+    internal_xlines = []
+    internal_ylines = []
+    internal_patches = []
+    internal_lines = []
 
     # NICHE FEATURES GENERALLY PLOT-TYPE DEPENDENT
     # Legend Tool for Strip-Plot Overlay
@@ -124,6 +128,7 @@ def initialize_common_defaults(args,input_dict):
 
     # DICTIONARIES TO PASS AS KWARGS TO OTHER PACKAGES
     # Grouped Kwargs
+    legend = None
     legend_kwargs = {'prop': {'weight': 'bold'}, 'framealpha': 1}
     trendline_kwargs = None
     xylines_kwargs = None
