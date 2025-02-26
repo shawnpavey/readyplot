@@ -6,6 +6,10 @@ A utility file, utils, which holds many common small functions that are often ma
 """
 #%% IMPORT PACKAGES
 def numeric_checker(string):
+    import re
+    string = re.sub(r'−', '-', string)
+    string.replace("–", "")
+    string.replace("-", "")
     try:
         float(string)
         output = True
@@ -214,3 +218,42 @@ def is_transparent(color):
 
     # Return True if alpha (last value) is 0 (transparent)
     return rgba[3] == 0
+
+
+def count_number_characters(x):
+    s = str(x).lstrip('.').lstrip('-')
+    if '.' in s:
+        s = s.replace('.', '')
+    return len(s)
+
+
+def delete_ticks_by_sig_figs(ax,max_sig_figs = 2,x_or_y = 'y'):
+    if x_or_y not in ['x', 'y']:
+        raise ValueError("x_or_y must be 'x' or 'y'")
+
+        # Select the ticks and labels based on x_or_y argument
+    if x_or_y == 'y':
+        ticks = ax.yaxis.get_ticklines()
+        labels = ax.get_yticklabels()
+    else:
+        ticks = ax.get_xticks()
+        labels = ax.get_xticklabels()
+
+    counter = 0
+    for label in labels:
+        if count_number_characters(label.get_text()) > max_sig_figs:
+            while label.get_text()[-1] == '0' and count_number_characters(label.get_text()) > max_sig_figs:
+                label.set_text(label.get_text()[:-1])
+
+            if count_number_characters(label.get_text()) > max_sig_figs:
+                label.set_color((0, 0, 0, 0))
+            else: print('Its been fixed', label.get_text(),label)
+
+            counter += 1
+
+    label_counter = 0
+    for tick in ticks:
+        tick.set_color(labels[int(label_counter)].get_color())
+        label_counter += 0.5
+
+

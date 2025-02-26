@@ -13,7 +13,8 @@ from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
 from numpy.core._exceptions import UFuncTypeError
-from .utils import numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF, dict_update_nested, is_transparent
+from .utils import (numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF,
+                    dict_update_nested, is_transparent, delete_ticks_by_sig_figs)
 from matplotlib.patches import Patch
 import warnings
 from matplotlib.colors import to_rgb
@@ -417,16 +418,23 @@ class BasePlotter:
                 self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                 if abs(abs_max) < 10**self.sci_x_lims[0] or abs(abs_max) > 10**self.sci_x_lims[1]:
-                    x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
-                    self.ax.set_xlim(x_min, x_max)
-                    self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
+
+                    x_min, x_max = self.ax.get_xlim()
+                    if abs(x_min) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(0, x_max)
+                    elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
+                    x_min, x_max = self.ax.get_xlim()
+
+                    # x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
+                    # self.ax.set_xlim(x_min, x_max)
+                    # self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
                 else:
-                    self.ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
-                    self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
+                    self.ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
+                    #self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
 
             except AttributeError:pass
             except KeyError:pass
 
+            x_min, x_max = self.ax.get_xlim()
             if abs(x_min) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
 
@@ -449,16 +457,25 @@ class BasePlotter:
                 self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                 if abs(abs_max) < 10**self.sci_y_lims[0] or abs(abs_max) > 10**self.sci_y_lims[1]:
-                    y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
-                    self.ax.set_ylim(y_min, y_max)
-                    self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
+
+                    y_min, y_max = self.ax.get_ylim()
+                    if abs(y_min) < abs(0.2 * (y_max - y_min)):self.ax.set_ylim(0, y_max)
+                    elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
+                    y_min, y_max = self.ax.get_ylim()
+
+                    #delete_ticks_by_sig_figs(self.ax, max_sig_figs=self.y_axis_sig_figs,x_or_y='y')
+
+                    # y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
+                    # self.ax.set_ylim(y_min, y_max)
+                    # self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
                 else:
-                    self.ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
-                    self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+                    self.ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
+                    #self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
 
             except AttributeError:pass
             except KeyError:pass
 
+            y_min, y_max = self.ax.get_ylim()
             if abs(y_min) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(0, y_max)
             elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
 
