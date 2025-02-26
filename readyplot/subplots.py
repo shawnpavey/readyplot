@@ -13,6 +13,7 @@ import os
 from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF, dict_update_nested
 from matplotlib.colors import to_rgb
+import matplotlib.patches as patches
 from pathlib import Path
 import matplotlib.lines as mlines
 
@@ -326,6 +327,9 @@ class SubPlots(BasePlotter):
         if not isinstance(args, list): args = list(args)
         for arg in args:
             self.ax.add_patch(arg)
+    def add_rectangle(self,*args,**kwargs):
+        rect = patches.Rectangle((args[0], args[1]), args[2], args[3], **kwargs)
+        self.ax.add_patch(rect)
     def add_line(self,*args,**kwargs):
         line = mlines.Line2D(args[0], args[1], **kwargs)
         self.ax.add_line(line)
