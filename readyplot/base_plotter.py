@@ -14,7 +14,9 @@ import matplotlib.ticker as ticker
 from pathlib import Path
 from .utils import (numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF,
                     dict_update_nested, is_transparent, delete_ticks_by_sig_figs)
+import matplotlib.patches as patches
 from matplotlib.patches import Patch
+import matplotlib.lines as mlines
 import warnings
 from matplotlib.colors import to_rgb
 
@@ -44,6 +46,7 @@ class BasePlotter:
         except: pass
         try: self.max_list_y.append(self.DF[self.ylab].max())
         except: pass
+        self.internal_xlines,self.internal_ylines, self.internal_patches, self.internal_lines = [],[],[], []
 
         # FORCE SOME INPUTS TO BE LISTS IF THEY AREN'T ALREADY
         if not isinstance(self.colors, list): self.colors = [self.colors]
@@ -212,13 +215,22 @@ class BasePlotter:
         elif self.custom_x_label != '' and self.custom_x_label is not None: self.DF.name = self.custom_x_label
 
     # %% PLOTING XLINE AND YLINE ANNOTATIONS
-    def plot_xline_yline(self):
-        if self.xlines[0]:
-            for line in self.xlines:
-                self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
-        if self.ylines[0]:
-            for line in self.ylines:
-                self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+    def plot_xline_yline(self,xlines=[None],ylines=[None],**kwargs):
+        if xlines[0] is None and ylines[0] is None:
+            xlines = self.xlines
+            ylines = self.ylines
+        else:
+            xlines = xlines
+            ylines = ylines
+
+        if xlines[0]:
+            for line in xlines:
+                temp_line = self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+                self.internal_xlines.append(temp_line)
+        if ylines[0]:
+            for line in ylines:
+                temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+                self.internal_ylines.append(temp_line)
 
     # %% LEGEND METHODS
     def manage_legend(self):
@@ -624,30 +636,137 @@ class BasePlotter:
 #-----------------------------------------------------------------------------------------------------------------------
     # %% AXES
     def xlim(self,*args,**kwargs):
-        plt.xlim(*args,**kwargs)
+        self.fig.xlim(*args,**kwargs)
     def ylim(self,*args,**kwargs):
-        plt.ylim(*args,**kwargs)
+        self.fig.ylim(*args,**kwargs)
     def set_xlim(self,*args,**kwargs):
         self.ax.set_xlim(*args,**kwargs)
     def set_ylim(self,*args,**kwargs):
         self.ax.set_ylim(*args,**kwargs)
+    def get_xlim(self, *args, **kwargs):
+        self.ax.get_xlim(*args, **kwargs)
+    def get_ylim(self, *args, **kwargs):
+        self.ax.get_ylim(*args, **kwargs)
+
     def xticks(self,*args,**kwargs):
-        plt.xticks(*args,**kwargs)
+        self.fig.xticks(*args,**kwargs)
     def yticks(self,*args,**kwargs):
-        plt.yticks(*args,**kwargs)
+        self.fig.yticks(*args,**kwargs)
+    def get_xticks(self, *args, **kwargs):
+        self.ax.get_xticks(*args, **kwargs)
+    def get_yticks(self, *args, **kwargs):
+        self.ax.get_yticks(*args, **kwargs)
+    def get_xticklabels(self, *args, **kwargs):
+        self.ax.get_xticklabels(*args, **kwargs)
+    def get_yticklabels(self, *args, **kwargs):
+        self.ax.get_yticklabels(*args, **kwargs)
+
     def gca(self,*args,**kwargs):
         plt.gca(*args,**kwargs)
     def gcf(self,*args,**kwargs):
         plt.gcf(*args,**kwargs)
+
     def axhline(self,*args,**kwargs):
-        plt.axhline(*args,**kwargs)
+        self.fig.axhline(*args,**kwargs)
     def axvline(self,*args,**kwargs):
-        plt.axvline(*args,**kwargs)
+        self.fig.axvline(*args,**kwargs)
     def grid(self,*args,**kwargs):
         self.ax.grid(*args,**kwargs)
 
-    # %% TITLES, LABELS
+    def set_facecolor(self,*args,**kwargs):
+        self.ax.set_facecolor(*args,**kwargs)
+    def get_facecolor(self,*args,**kwargs):
+        self.ax.get_facecolor(*args,**kwargs)
 
-    # %% LEGENDS
+    # %% TITLES, LABELS
+    def title(self,*args,**kwargs):
+        self.set_title(*args,**kwargs)
+    def xlabel(self,*args,**kwargs):
+        self.set_xlabel(*args,**kwargs)
+    def ylabel(self,*args,**kwargs):
+        self.set_ylabel(*args,**kwargs)
+    def get_title(self, *args, **kwargs):
+        self.ax.get_title(*args, **kwargs)
+    def get_xlabel(self, *args, **kwargs):
+        self.ax.get_xlabel(*args, **kwargs)
+    def get_ylabel(self, *args, **kwargs):
+        self.ax.get_ylabel(*args, **kwargs)
+
+    # %% LEGENDS + ANNOTATIONS
+    def create_legend(self,*args,**kwargs):
+        self.legend = self.ax.legend(*args, **kwargs)
+
+    def text(self,*args,**kwargs):
+        self.fig.text(*args,**kwargs)
+    def figtext(self,*args,**kwargs):
+        self.fig.figtext(*args,**kwargs)
+    def annotate(self,*args,**kwargs):
+        self.fig.annotate(*args,**kwargs)
+    def get_texts(self,*args,**kwargs):
+        self.fig.get_texts(*args,**kwargs)
+
+    def set_xlines(self,xlines):
+        if not isinstance(xlines,list): xlines = [xlines]
+        for line in self.internal_xlines: line.remove()
+        self.internal_xlines = []
+        self.xlines = xlines
+        self.plot_xline_yline()
+    def set_ylines(self,ylines):
+        if not isinstance(ylines, list): ylines = [ylines]
+        for line in self.internal_ylines: line.remove()
+        self.internal_ylines = []
+        self.ylines = ylines
+        self.plot_xline_yline()
+    def add_xlines(self,xlines):
+        if not isinstance(xlines, list): xlines = [xlines]
+        self.xlines.extend(xlines)
+        self.plot_xline_yline(xlines=xlines)
+    def add_ylines(self,ylines):
+        if not isinstance(ylines, list): ylines = [ylines]
+        self.ylines.extend(ylines)
+        self.plot_xline_yline(ylines=ylines)
+    def get_xlines(self,*args,**kwargs):
+        return self.internal_xlines
+    def get_ylines(self,*args,**kwargs):
+        return self.internal_ylines
+    def set_patches(self,*args,**kwargs):
+        if not isinstance(args, list): args = list(args)
+        for patch in self.internal_patches: patch.remove()
+        self.internal_patches = []
+        for arg in args:
+            temp_patch = self.ax.add_patch(arg)
+            self.internal_patches.append(temp_patch)
+    def add_patches(self,*args,**kwargs):
+        if not isinstance(args, list): args = list(args)
+        for arg in args:
+            self.ax.add_patch(arg)
+            self.internal_patches.append(arg)
+    def add_rectangle(self,*args,**kwargs):
+        rect = patches.Rectangle((args[0], args[1]), args[2], args[3], **kwargs)
+        self.ax.add_patch(rect)
+        self.internal_patches.append(rect)
+    def get_patches(self,*args,**kwargs):
+        return self.internal_patches
+    def add_line(self,*args,**kwargs):
+        line = mlines.Line2D(args[0], args[1], **kwargs)
+        temp_line = self.ax.add_line(line)
+        self.internal_lines.append(temp_line)
+
 
     # %% FIGURE AND LAYOUT CUSTOMIZATION
+    def set_aspect(self,*args,**kwargs):
+        self.ax.set_aspect(*args,**kwargs)
+        self.fig_height = self.get_figheight()
+        self.fig_width = self.get_figwidth()
+    def get_aspect(self, *args, **kwargs):
+        self.ax.get_aspect(*args, **kwargs)
+    def set_figheight(self,val,**kwargs):
+        self.fig_height = val
+        self.fig.set_figheight(self.fig_height,**kwargs)
+    def set_figwidth(self,val,**kwargs):
+        self.fig_width = val
+        self.fig.set_figwidth(self.fig_width,**kwargs)
+    def get_figheight(self,*args,**kwargs):
+        self.fig.get_figheight(*args,**kwargs)
+    def get_figwidth(self,*args,**kwargs):
+        self.fig.get_figwidth(*args,**kwargs)

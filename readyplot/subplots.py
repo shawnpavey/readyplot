@@ -14,6 +14,7 @@ from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF, dict_update_nested
 from matplotlib.colors import to_rgb
 from pathlib import Path
+import matplotlib.lines as mlines
 
 #%%---------------------------------------------------------------------------------------------------------------------
 # CHILD CLASS MAIN
@@ -29,7 +30,7 @@ class SubPlots(BasePlotter):
         elif len(args) == 2: self.shape = (args[0],args[1])
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
-    def plot(self,*temp_args,save=True,folder_name = "OUTPUT_FIGURES",adjust_mismatch=True,**kwargs):
+    def plot(self,*temp_args,save=True,folder_name = "OUTPUT_FIGURES",adjust_mismatch=True,ax_num=0,**kwargs):
         from .__init__ import bar, boxwhisker, hist, line, scatter
         kwargs = dict_update_nested(self.input_kwargs,kwargs)
         setattr(self,'folder_name',folder_name)
@@ -77,6 +78,7 @@ class SubPlots(BasePlotter):
             print('SKIPPED LOADING SETTINGS')
 
         self.fig, self.axs = plt.subplots(self.shape[0], self.shape[1],**kwargs)
+        self.set_ax_from_collection(ax_num=ax_num)
 
         self.counter = 0
         self.abs_counter = 0
@@ -169,6 +171,14 @@ class SubPlots(BasePlotter):
 
         return row, col
 
+    def get_subplot_coordinates(self,sub_num):
+        nrows,ncols = self.shape[0], self.shape[1]
+        if sub_num < 0 or sub_num >= nrows * ncols:
+            raise ValueError(f"Invalid subplot number. It should be between 1 and {nrows * ncols}.")
+        row = sub_num // ncols
+        col = sub_num % ncols
+        return row, col
+
     def kwarg_conflict_resolver(self, kwargs, conflict_vars):
         # COMBINE INPUT KWARGS WITH GENERAL KWARGS
         if len(kwargs) != 0: kwargs = {**self.kwargs, **kwargs}
@@ -219,3 +229,119 @@ class SubPlots(BasePlotter):
 
     def get_rps(self):
         return self.rps
+
+    def set_ax_from_collection(self,ax_num=0):
+        row, col = self.get_subplot_coordinates(ax_num)
+        self.ax = self.axs[row][col]
+
+#%%---------------------------------------------------------------------------------------------------------------------
+# EXTRA MATPLOTLIB TYPE FUNCTIONS WHICH USERS MIGHT EXPECT TO NEED
+#-----------------------------------------------------------------------------------------------------------------------
+    # %% AXES
+    def xlim(self,*args,**kwargs):
+        self.set_xlim(*args,**kwargs)
+    def ylim(self,*args,**kwargs):
+        self.set_ylim(*args,**kwargs)
+    def set_xlim(self,*args,**kwargs):
+        self.ax.set_xlim(*args,**kwargs)
+    def set_ylim(self,*args,**kwargs):
+        self.ax.set_ylim(*args,**kwargs)
+    def get_xlim(self,*args,**kwargs):
+        self.ax.get_xlim(*args,**kwargs)
+    def get_ylim(self,*args,**kwargs):
+        self.ax.get_ylim(*args,**kwargs)
+
+    def xticks(self,*args,**kwargs):
+        self.fig.xticks(*args,**kwargs)
+    def yticks(self,*args,**kwargs):
+        self.fig.yticks(*args,**kwargs)
+    def get_xticks(self,*args,**kwargs):
+        self.ax.get_xticks(*args,**kwargs)
+    def get_yticks(self,*args,**kwargs):
+        self.ax.get_yticks(*args,**kwargs)
+    def get_xticklabels(self,*args,**kwargs):
+        self.ax.get_xticklabels(*args,**kwargs)
+    def get_yticklabels(self,*args,**kwargs):
+        self.ax.get_yticklabels(*args,**kwargs)
+
+    def gca(self,*args,**kwargs):
+        plt.gca(*args,**kwargs)
+    def gcf(self,*args,**kwargs):
+        plt.gcf(*args,**kwargs)
+
+    def axhline(self,*args,**kwargs):
+        self.ax.axhline(*args,**kwargs)
+    def axvline(self,*args,**kwargs):
+        self.ax.axvline(*args,**kwargs)
+    def grid(self,*args,**kwargs):
+        self.ax.grid(*args,**kwargs)
+
+    def set_aspect(self,*args,**kwargs):
+        self.ax.set_aspect(*args,**kwargs)
+    def get_aspect(self,*args,**kwargs):
+        self.ax.get_aspect(*args,**kwargs)
+
+    def set_facecolor(self,*args,**kwargs):
+        self.ax.set_facecolor(*args,**kwargs)
+    def get_facecolor(self,*args,**kwargs):
+        self.ax.get_facecolor(*args,**kwargs)
+
+    def set_position(self,*args,**kwargs):
+        self.ax.set_position(*args,**kwargs)
+    def get_position(self,*args,**kwargs):
+        self.ax.get_position(*args,**kwargs)
+
+    # %% TITLES, LABELS
+    def title(self,*args,**kwargs):
+        self.ax.set_title(*args,**kwargs)
+    def get_title(self,*args,**kwargs):
+        self.ax.get_title(*args,**kwargs)
+    def xlabel(self,*args,**kwargs):
+        self.ax.set_xlabel(*args,**kwargs)
+    def get_xlabel(self,*args,**kwargs):
+        self.ax.get_xlabel(*args,**kwargs)
+    def ylabel(self,*args,**kwargs):
+        self.ax.set_ylabel(*args,**kwargs)
+    def get_ylabel(self,*args,**kwargs):
+        self.ax.get_ylabel(*args,**kwargs)
+
+    # %% LEGENDS
+    def legend(self,*args,**kwargs):
+        self.ax.legend(*args,**kwargs)
+    def get_legend(self,*args,**kwargs):
+        self.ax.get_legend(*args,**kwargs)
+    def text(self,*args,**kwargs):
+        self.fig.text(*args,**kwargs)
+    def get_texts(self,*args,**kwargs):
+        self.fig.get_texts(*args,**kwargs)
+    def figtext(self,*args,**kwargs):
+        self.fig.figtext(*args,**kwargs)
+    def annotate(self,*args,**kwargs):
+        self.fig.annotate(*args,**kwargs)
+    def suptitle(self,*args,**kwargs):
+        self.fig.suptitle(*args,**kwargs)
+    def get_suptitle(self,*args,**kwargs):
+        self.fig.get_suptitle(*args,**kwargs)
+    def add_patch(self,*args,**kwargs):
+        if not isinstance(args, list): args = list(args)
+        for arg in args:
+            self.ax.add_patch(arg)
+    def add_line(self,*args,**kwargs):
+        line = mlines.Line2D(args[0], args[1], **kwargs)
+        self.ax.add_line(line)
+
+    # %% FIGURE AND LAYOUT CUSTOMIZATION
+    def set_figheight(self,val,**kwargs):
+        self.fig_height = val
+        self.fig.set_figheight(self.fig_height,**kwargs)
+    def get_figheight(self,*args,**kwargs):
+        self.fig.get_figheight(*args,**kwargs)
+    def set_figwidth(self,val,**kwargs):
+        self.fig_width = val
+        self.fig.set_figwidth(self.fig_width,**kwargs)
+    def get_figwidth(self,*args,**kwargs):
+        self.fig.get_figwidth(*args,**kwargs)
+    def show(self):
+        self.fig.show()
+    def draw(self):
+        self.fig.draw()
