@@ -12,7 +12,6 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
-from numpy.core._exceptions import UFuncTypeError
 from .utils import (numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF,
                     dict_update_nested, is_transparent, delete_ticks_by_sig_figs)
 from matplotlib.patches import Patch
@@ -401,9 +400,9 @@ class BasePlotter:
             tick.set_fontweight(self.fontweight)
             tick.set_fontsize(self.def_font_sz * self.ytick_font_ratio)
         try: self.manage_x_axis()
-        except UFuncTypeError: pass
+        except TypeError: pass
         try: self.manage_y_axis()
-        except UFuncTypeError: pass
+        except TypeError: pass
 
 
     def manage_x_axis(self):
@@ -418,24 +417,18 @@ class BasePlotter:
                 self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='x', style='sci', scilimits=self.sci_x_lims)
                 if abs(abs_max) < 10**self.sci_x_lims[0] or abs(abs_max) > 10**self.sci_x_lims[1]:
-
                     x_min, x_max = self.ax.get_xlim()
                     if abs(x_min) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(0, x_max)
                     elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
                     x_min, x_max = self.ax.get_xlim()
-
-                    # x_min, x_max, xbins = min_maxer(x_min, x_max, cap0=self.low_x_cap0)
-                    # self.ax.set_xlim(x_min, x_max)
-                    # self.ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=xbins))
                 else:
                     self.ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
-                    #self.ax.xaxis.set_major_formatter(ticker.ScalarFormatter())
 
             except AttributeError:pass
             except KeyError:pass
 
             x_min, x_max = self.ax.get_xlim()
-            if abs(x_min) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(0, x_max)
+            if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker']: self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
 
 
@@ -457,20 +450,12 @@ class BasePlotter:
                 self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
                 self.ax.ticklabel_format(axis='y', style='sci', scilimits=self.sci_y_lims)
                 if abs(abs_max) < 10**self.sci_y_lims[0] or abs(abs_max) > 10**self.sci_y_lims[1]:
-
                     y_min, y_max = self.ax.get_ylim()
                     if abs(y_min) < abs(0.2 * (y_max - y_min)):self.ax.set_ylim(0, y_max)
                     elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
                     y_min, y_max = self.ax.get_ylim()
-
-                    #delete_ticks_by_sig_figs(self.ax, max_sig_figs=self.y_axis_sig_figs,x_or_y='y')
-
-                    # y_min, y_max, ybins = min_maxer(y_min, y_max, cap0=self.low_y_cap0)
-                    # self.ax.set_ylim(y_min, y_max)
-                    # self.ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=ybins))
                 else:
                     self.ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
-                    #self.ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
 
             except AttributeError:pass
             except KeyError:pass
@@ -634,3 +619,35 @@ class BasePlotter:
                 return base.__dict__[name].__get__(self)
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
+#%%---------------------------------------------------------------------------------------------------------------------
+# EXTRA MATPLOTLIB TYPE FUNCTIONS WHICH USERS MIGHT EXPECT TO NEED
+#-----------------------------------------------------------------------------------------------------------------------
+    # %% AXES
+    def xlim(self,*args,**kwargs):
+        plt.xlim(*args,**kwargs)
+    def ylim(self,*args,**kwargs):
+        plt.ylim(*args,**kwargs)
+    def set_xlim(self,*args,**kwargs):
+        self.ax.set_xlim(*args,**kwargs)
+    def set_ylim(self,*args,**kwargs):
+        self.ax.set_ylim(*args,**kwargs)
+    def xticks(self,*args,**kwargs):
+        plt.xticks(*args,**kwargs)
+    def yticks(self,*args,**kwargs):
+        plt.yticks(*args,**kwargs)
+    def gca(self,*args,**kwargs):
+        plt.gca(*args,**kwargs)
+    def gcf(self,*args,**kwargs):
+        plt.gcf(*args,**kwargs)
+    def axhline(self,*args,**kwargs):
+        plt.axhline(*args,**kwargs)
+    def axvline(self,*args,**kwargs):
+        plt.axvline(*args,**kwargs)
+    def grid(self,*args,**kwargs):
+        self.ax.grid(*args,**kwargs)
+
+    # %% TITLES, LABELS
+
+    # %% LEGENDS
+
+    # %% FIGURE AND LAYOUT CUSTOMIZATION
