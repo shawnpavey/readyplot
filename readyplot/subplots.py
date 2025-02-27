@@ -32,7 +32,7 @@ class SubPlots(BasePlotter):
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def plot(self,*temp_args,save=True,folder_name = "OUTPUT_FIGURES",adjust_mismatch=True,ax_num=0,**kwargs):
-        from .__init__ import bar, boxwhisker, hist, line, scatter
+        from .__init__ import bar, boxwhisker, hist, line, scatter, strip
         kwargs = dict_update_nested(self.input_kwargs,kwargs)
         setattr(self,'folder_name',folder_name)
         args = []
@@ -109,6 +109,7 @@ class SubPlots(BasePlotter):
                 elif rp.get('plot_type') == 'hist': new_rp = hist(**current_settings)
                 elif rp.get('plot_type') == 'line': new_rp = line(**current_settings)
                 elif rp.get('plot_type') == 'scatter': new_rp = scatter(**current_settings)
+                elif rp.get('plot_type') == 'strip': new_rp = strip(**current_settings)
                 else: new_rp = None
                 new_rp.plot(save=False)
 
@@ -234,7 +235,9 @@ class SubPlots(BasePlotter):
 
     def set_ax_from_collection(self,ax_num=0):
         row, col = self.get_subplot_coordinates(ax_num)
-        self.ax = self.axs[row][col]
+        if self.shape[0] == 1: self.ax = self.axs[col]
+        elif self.shape[1] == 1: self.ax = self.axs[row]
+        else: self.ax = self.axs[row][col]
 
 #%%---------------------------------------------------------------------------------------------------------------------
 # EXTRA MATPLOTLIB TYPE FUNCTIONS WHICH USERS MIGHT EXPECT TO NEED

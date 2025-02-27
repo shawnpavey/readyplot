@@ -105,38 +105,39 @@ class BarPlotter(BasePlotter):
             self.hatches.extend(self.hatches)
         counter = 0
 
-        for bar in self.ax.patches:
-            hue_group = bar.get_label()
-            match_rgba_to_color(bar.get_facecolor(), self.colors)
-            current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
-            bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
+        for bar in self.ax.patches :
+            if bar not in self.internal_patches:
+                hue_group = bar.get_label()
+                match_rgba_to_color(bar.get_facecolor(), self.colors)
+                current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
+                bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
 
-            if self.apply_color_lines_only:
-                bar.set_edgecolor(current_face_color)
-                bar_face_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
-                bar.set_facecolor(bar_face_color)
-            elif self.plot_line_palette:
-                bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
-            else:
-                bar.set_edgecolor(self.line_color)
+                if self.apply_color_lines_only:
+                    bar.set_edgecolor(current_face_color)
+                    bar_face_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
+                    bar.set_facecolor(bar_face_color)
+                elif self.plot_line_palette:
+                    bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
+                else:
+                    bar.set_edgecolor(self.line_color)
 
-            hatch_pattern = self.hatches[self.colors.index(current_face_color)]
-            hatch_density = 1
-            bar.set_hatch(f"{hatch_pattern * hatch_density}")
-            bar.set_linewidth(self.def_line_w)
+                hatch_pattern = self.hatches[self.colors.index(current_face_color)]
+                hatch_density = 1
+                bar.set_hatch(f"{hatch_pattern * hatch_density}")
+                bar.set_linewidth(self.def_line_w)
 
-            if self.apply_color_lines_only:
-                try:
-                    ax.lines[counter].set_color(current_face_color)
-                except IndexError:
-                    pass
-            elif self.plot_line_palette:
-                try:
-                    ax.lines[counter].set_color(self.plot_line_palette[self.colors.index(current_face_color)])
-                except IndexError:
-                    pass
+                if self.apply_color_lines_only:
+                    try:
+                        ax.lines[counter].set_color(current_face_color)
+                    except IndexError:
+                        pass
+                elif self.plot_line_palette:
+                    try:
+                        ax.lines[counter].set_color(self.plot_line_palette[self.colors.index(current_face_color)])
+                    except IndexError:
+                        pass
 
-            counter +=1
+                counter +=1
 
 
 

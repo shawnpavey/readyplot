@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-A child class for the base plotter which produces bar charts with potential scatter overlays
+A child class for the base plotter which produces stripplots
 @author: Shawn Pavey
 """
 # %% IMPORT PACKAGES
@@ -17,10 +17,10 @@ import warnings
 # CHILD CLASS MAIN
 #-----------------------------------------------------------------------------------------------------------------------
 # %% INITIALIZE CHILD CLASS
-class BarPlotter(BasePlotter):
+class StripPlotter(BasePlotter):
     def __init__(self, input_dict,**kwargs):
         super().__init__(input_dict,**kwargs)
-        self.plot_type = 'bar'
+        self.plot_type = 'strip'
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def just_plot(self,**kwargs):
@@ -33,15 +33,28 @@ class BarPlotter(BasePlotter):
 
         # %% PLOT WITH SEABORN
         sns.barplot(
-            x=xlab,y=ylab,data=DF,hue=zlab,
-            palette=palette,linewidth=linewidth,capsize=capsize,width=width,dodge=dodge,
-            ax=ax, err_kws={'color': self.line_color,'linewidth': self.def_line_w},**kwargs)
+            x=xlab, y=ylab, data=DF, hue=zlab,
+            palette=palette, linewidth=linewidth, capsize=capsize, width=width, dodge=dodge,
+            ax=ax, err_kws={'color': self.line_color, 'linewidth': self.def_line_w}, **kwargs)
+        self.hatches_and_colors(locals())
+
+        for i, u in enumerate(self.unique):
+            marker = self.markers[i]
+            tempDF = DF.copy()
+            for v in self.unique:
+                tempDF[ylab], tempDF.loc[tempDF[zlab] == v, ylab] = (
+                    tempDF[ylab].astype(float), float("inf")) if v != u else (
+                tempDF[ylab], tempDF.loc[tempDF[zlab] == v, ylab])
+
+            sns.stripplot(
+                x=xlab, y=ylab, data=tempDF, hue=zlab,
+                palette=palette, linewidth=linewidth, dodge=dodge, marker=marker,
+                ax=ax, **kwargs)
 
         # %% EXTRA PLOT EDITING
         if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
-        self.local_scatter(locals())
-        self.hatches_and_colors(locals())
-        plt.xlabel(" ")
+        self.ax.set_xlabel(" ")
+
 
 #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
@@ -69,74 +82,21 @@ class BarPlotter(BasePlotter):
         plt.ylim(DF[ylab].min(), DF[ylab].max())
         return xlab,ylab,zlab,dodge
 
-    def local_scatter(self,l):
-        palette,xlab,ylab,zlab,dodge,ax = l['palette'],l['xlab'],l['ylab'],l['zlab'],l['dodge'],l['ax']
-        dark_palette = []
-
-        try:
-            unique = self.DF[self.zlab].unique()
-        except KeyError:
-            unique = ['placeholder']
-
-        if self.apply_color_lines_only:
-            dark_palette = palette
-        elif self.plot_line_palette:
-            dark_palette = self.plot_line_palette
-        else:
-            for i in range(len(unique)):
-                dark_palette.append(self.line_color)
-
-        for i, category in enumerate(unique):
-            df_copy = self.DF.copy()
-            if unique[0] != 'placeholder':
-                df_copy.loc[df_copy[self.zlab] != category, self.ylab] = np.nan
-
-            try:
-                sns.stripplot(
-                    data=df_copy, x=xlab, y=ylab, hue=zlab,
-                    dodge=dodge, palette=dark_palette,
-                    marker=self.marker_dict[category], ax=ax,legend=False)
-            except KeyError:
-                pass
-
     def hatches_and_colors(self,l):
         ax = l['ax']
-        while len(self.unique) > len(self.hatches):
-            self.hatches.extend(self.hatches)
         counter = 0
-
         for bar in self.ax.patches:
-            hue_group = bar.get_label()
-            match_rgba_to_color(bar.get_facecolor(), self.colors)
-            current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
-            bar.set_hatch(self.hatches[self.colors.index(current_face_color)])
+            if bar not in self.internal_patches:
+                hue_group = bar.get_label()
+                match_rgba_to_color(bar.get_facecolor(), self.colors)
+                current_face_color =  match_rgba_to_color(bar.get_facecolor(), self.colors)
 
-            if self.apply_color_lines_only:
-                bar.set_edgecolor(current_face_color)
-                bar_face_color = to_rgb(self.back_color) + tuple([0]) if self.transparent else self.back_color
-                bar.set_facecolor(bar_face_color)
-            elif self.plot_line_palette:
-                bar.set_edgecolor(self.plot_line_palette[self.colors.index(current_face_color)])
-            else:
-                bar.set_edgecolor(self.line_color)
+                bar.set_edgecolor('#FFFFFF00')
+                bar.set_facecolor('#FFFFFF00')
 
-            hatch_pattern = self.hatches[self.colors.index(current_face_color)]
-            hatch_density = 1
-            bar.set_hatch(f"{hatch_pattern * hatch_density}")
-            bar.set_linewidth(self.def_line_w)
+                try: ax.lines[counter].set_color(current_face_color)
+                except IndexError: pass
 
-            if self.apply_color_lines_only:
-                try:
-                    ax.lines[counter].set_color(current_face_color)
-                except IndexError:
-                    pass
-            elif self.plot_line_palette:
-                try:
-                    ax.lines[counter].set_color(self.plot_line_palette[self.colors.index(current_face_color)])
-                except IndexError:
-                    pass
-
-            counter +=1
-
+                counter +=1
 
 

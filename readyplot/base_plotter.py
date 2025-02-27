@@ -320,12 +320,20 @@ class BasePlotter:
         if not hasattr(self, 'copied_legend'):
             handles, labels = self.ax.get_legend_handles_labels()
 
+            if self.plot_type == 'strip':
+                temp_handles, temp_labels = [],[]
+                for i in range(len(self.unique)):
+                    temp_handles.append(handles[i*(len(self.unique)+1)+len(self.unique)])
+                    temp_labels.append(labels[i*(len(self.unique)+1)+len(self.unique)])
+                handles,labels = temp_handles,temp_labels
+                self.handles, self.labels = handles,labels
+
             # MANAGE STRANGE HISTOGRAM BEHAVIOR
             if self.plot_type == 'hist':
                 labels,handles = self.unique.copy(),[]
                 for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
             if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
-                try: self.legend.set_visible(False)
+                try: self.set_legend([],[],visible=False)#self.legend.set_visible(False)
                 except: pass
             else:
 
@@ -334,7 +342,8 @@ class BasePlotter:
                 if is_transparent(self.back_color): self.legend_kwargs['framealpha'] = 0
                 self.set_legend(handles[:self.handles_in_legend],labels[:self.handles_in_legend],**self.legend_kwargs)
 
-            self.handles,self.labels = self.get_legend_handles_labels()
+            if self.plot_type != 'strip': self.handles,self.labels = self.get_legend_handles_labels()
+            if self.plot_type in ['strip','boxwhisker','bar'] and len(self.unique)<2: self.add_to_legend([],[],visible=False)
 
         else:
             self.set_legend(self.handles,self.labels)
@@ -543,7 +552,7 @@ class BasePlotter:
             except KeyError:pass
 
             x_min, x_max = self.ax.get_xlim()
-            if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker']: self.ax.set_xlim(0, x_max)
+            if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker','strip']: self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
 
 

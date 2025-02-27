@@ -11,6 +11,7 @@ from .boxwhisker_plotter import BoxWhiskerPlotter
 from .hist_plotter import HistPlotter
 from .scatter_plotter import ScatterPlotter
 from .line_plotter import LinePlotter
+from .strip_plotter import StripPlotter
 from .subplots import SubPlots
 import pandas as pd
 import numpy as np
@@ -294,6 +295,11 @@ def scatter(*args,**kwargs):
     initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
     return ScatterPlotter(initialized_inputs,**new_kwargs)
 
+# %% STRIP PLOTS
+def strip(*args,**kwargs):
+    initialized_inputs, new_kwargs = initialize_common_defaults(args,kwargs)
+    return StripPlotter(initialized_inputs,**new_kwargs)
+
 # %% SUB PLOTS
 def subplots(*args,**kwargs):
     return SubPlots(*args,**kwargs)
@@ -304,9 +310,11 @@ __all__ = ['boxwhisker',
            'line',
            'bar',
            'hist',
+           'strip',
            'BoxWhiskerPlotter',
            'ScatterPlotter',
            'LinePlotter',
            'BarPlotter',
            'HistPlotter',
+           'StripPlotter',
            'SubPlots']
