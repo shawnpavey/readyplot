@@ -31,7 +31,8 @@ class StripPlotter(BasePlotter):
         palette, linewidth, width = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
         xlab,ylab,zlab,dodge = self.label_prep(locals())
 
-        # %% PLOT WITH SEABORN
+        # %% PLOT WITH SEABORN, FIRST INVISIBLE BAR PLOTS FOR ERRORS, THEN STRIPPLOT ITERATION FOR MARKER HANDLING
+        self.pre_lines = self.ax.get_lines()
         sns.barplot(
             x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, linewidth=linewidth, capsize=capsize, width=width, dodge=dodge,
@@ -53,7 +54,8 @@ class StripPlotter(BasePlotter):
 
         # %% EXTRA PLOT EDITING
         if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
-        self.ax.set_xlabel(" ")
+        if self.custom_x_label is None: self.ax.set_xlabel("")
+        else: self.ax.set_xlabel(self.custom_x_label)
 
 
 #%%---------------------------------------------------------------------------------------------------------------------
@@ -85,6 +87,7 @@ class StripPlotter(BasePlotter):
     def hatches_and_colors(self,l):
         ax = l['ax']
         counter = 0
+        lines = [line for line in ax.lines if line not in self.pre_lines]
         for bar in self.ax.patches:
             if bar not in self.internal_patches:
                 hue_group = bar.get_label()
@@ -94,7 +97,7 @@ class StripPlotter(BasePlotter):
                 bar.set_edgecolor('#FFFFFF00')
                 bar.set_facecolor('#FFFFFF00')
 
-                try: ax.lines[counter].set_color(current_face_color)
+                try: lines[counter].set_color(current_face_color)
                 except IndexError: pass
 
                 counter +=1

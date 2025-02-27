@@ -32,12 +32,14 @@ class SubPlots(BasePlotter):
 
     # %% DEFINE PLOTTER, PREPARE INPUTS
     def plot(self,*temp_args,save=True,folder_name = "OUTPUT_FIGURES",adjust_mismatch=True,ax_num=0,**kwargs):
+        # INITIATE
         from .__init__ import bar, boxwhisker, hist, line, scatter, strip
         kwargs = dict_update_nested(self.input_kwargs,kwargs)
         setattr(self,'folder_name',folder_name)
         args = []
         individual_kwargs_list = []
 
+        # HANDLE ARGS
         for ar in temp_args:
             if isinstance(ar,dict):
                 individual_kwargs_list[-1] = ar
@@ -45,16 +47,18 @@ class SubPlots(BasePlotter):
                 args.append(ar)
                 individual_kwargs_list.append({})
 
+        # HANDLE KWARGS AND SET SELF ITEMS
         for name, value in kwargs.items(): setattr(self, name, value)
-
         if len(self.input_args) != 0 and len(args) == 0:  args = self.input_args
 
+        # INITIALIZE SOME DEFAULTS
         if 'figsize' not in kwargs: self.figsize=(4,3)
 
         if not hasattr(self, 'shape'): self.shape = (1,len(args))
         self.empty_locator = np.zeros(shape=self.shape)
 
         try:
+            # LOAD SETTINGS FROM THE FIRST PLOT TO CONTROL FIGURE THEME
             template_plot = args[0][0] if isinstance(args[0], list) or isinstance(args[0], tuple) else args[0]
             first_plot_settings = template_plot.get_copy_settings()
 
@@ -78,6 +82,7 @@ class SubPlots(BasePlotter):
         except AttributeError:
             print('SKIPPED LOADING SETTINGS')
 
+        # INITIALIZE SUBPLOTS
         self.fig, self.axs = plt.subplots(self.shape[0], self.shape[1],**kwargs)
         self.set_ax_from_collection(ax_num=ax_num)
 
@@ -85,15 +90,19 @@ class SubPlots(BasePlotter):
         self.abs_counter = 0
         self.rps = []
 
+        # ITERATE THROUGH THE EMPTY SUBPLOT POSITIONS
         for ar in args:
             row, col = self.get_next_position()
             rps = ar if isinstance(ar, list) or isinstance(ar, tuple) else [ar]
 
+            # IF MULTIPLE READYPLOTS ARE PASSED IN A LIST TO ONE POSITION, STACK THEM, ELSE JUST APPLY FOR SINGLE
             for rp in rps:
+                # COPY SETTINGS
                 current_settings = rp.get_copy_settings(include_problematic=True)
-                current_settings['first_time_legend'] = True
                 current_settings = dict_update_nested(current_settings,individual_kwargs_list[self.abs_counter])
 
+                # HANDLE SOME UNIQUE VARIABLES FOR PROPER BEHAVIOR
+                current_settings['first_time_legend'] = True
                 if self.shape[0] == 1: current_settings['input_ax'] = self.axs[col]
                 elif self.shape[1] == 1: current_settings['input_ax'] = self.axs[row]
                 else: current_settings['input_ax'] = self.axs[row, col]
@@ -101,9 +110,11 @@ class SubPlots(BasePlotter):
                 if first_plot_settings['transparent']: current_settings['transparent'] = True
                 if first_plot_settings['darkmode']: current_settings['darkmode'] = True
 
+                # DELETE SOME PROBLEMATIC VARIABLES THAT MAY HAVE BEEN FETCHED LIKE FIG AND AX
                 if 'fig' in current_settings: del current_settings['fig']
                 if 'ax' in current_settings: del current_settings['ax']
 
+                # CREATE A NEW READYPLOT ITEM WITH COPIED SETTINGS BASED ON PLOT TYPE
                 if rp.get('plot_type') == 'bar': new_rp = bar(**current_settings)
                 elif rp.get('plot_type') == 'boxwhisker': new_rp = boxwhisker(**current_settings)#,input_ax=self.axs[row,col])
                 elif rp.get('plot_type') == 'hist': new_rp = hist(**current_settings)
@@ -112,17 +123,16 @@ class SubPlots(BasePlotter):
                 elif rp.get('plot_type') == 'strip': new_rp = strip(**current_settings)
                 else: new_rp = None
                 new_rp.plot(save=False)
-
                 self.rps.append(new_rp)
 
-
             self.empty_locator[row][col] = 1
-
             self.abs_counter += 1
 
+        # SET FIGURE SIZE BASED ON THE INPUT FIGSIZE AND THE TILE SHAPE
         self.fig.set_size_inches(self.figsize[0]*self.shape[1],self.figsize[1]*self.shape[0])
         plt.tight_layout()
 
+        # FIND ALL THE EMPTY AXES AND SET THEM TO BE INVISIBELE
         while self.abs_counter < self.shape[0]*self.shape[1]:
             row, col = self.get_next_position()
 
@@ -140,6 +150,7 @@ class SubPlots(BasePlotter):
 
             self.abs_counter += 1
 
+        # LOCATE EMPTY AXES
         for row in range(self.empty_locator.shape[0]):
             if np.any(self.empty_locator[row][:] == 0):
                 filled_axes = []
@@ -147,34 +158,39 @@ class SubPlots(BasePlotter):
                     if self.empty_locator[row,col] == 1:
                         filled_axes.append(self.axs[row,col])
 
+                # GET WIDTH OF SUBPLOTS
                 first_pos = self.axs[0,0].get_position()
                 second_pos = self.axs[0,1].get_position()
                 sub_width = second_pos.x0 - first_pos.x0
 
-                current_pos = filled_axes[0].get_position()
-                current_x = current_pos.x0 + ((self.shape[1] - len(filled_axes))/2) * sub_width
-                for ax in filled_axes:
-                    pos = ax.get_position()
-                    ax.set_position([current_x, pos.y0, pos.width, pos.height])
-                    current_x += sub_width
+                # CENTER EXISTING SUBPLOTS TO FILL THE SPACE
+                if len(filled_axes) > 0:
+                    current_pos = filled_axes[0].get_position()
+                    current_x = current_pos.x0 + ((self.shape[1] - len(filled_axes))/2) * sub_width
+                    for ax in filled_axes:
+                        pos = ax.get_position()
+                        ax.set_position([current_x, pos.y0, pos.width, pos.height])
+                        current_x += sub_width
 
-
+        # SAVE AND RETURN FIG AND AXES
         if save: self.save()
-
         return self.fig, self.axs
 
+#%%---------------------------------------------------------------------------------------------------------------------
+# LOCAL METHODS
+#-----------------------------------------------------------------------------------------------------------------------
     def get_next_position(self):
-        # Calculate the row and column indices based on the counter
+        # CALCULATE ROW AND COLUMN INDICES BASED ON COUNTER
         rows, cols = self.shape
-        row = self.counter // cols  # Integer division to find the row
-        col = self.counter % cols  # Modulo to find the column
+        row = self.counter // cols
+        col = self.counter % cols
 
-        # Increment the counter, and wrap around when it exceeds the total number of subplots
+        # INCREMENT AND WRAP AROUND WHEN COLS EXCEEDED
         self.counter = (self.counter + 1) % (rows * cols)
-
         return row, col
 
     def get_subplot_coordinates(self,sub_num):
+        # GET COORDINATES BASED ON THE NUMBER OF THE FIGURE
         nrows,ncols = self.shape[0], self.shape[1]
         if sub_num < 0 or sub_num >= nrows * ncols:
             raise ValueError(f"Invalid subplot number. It should be between 1 and {nrows * ncols}.")

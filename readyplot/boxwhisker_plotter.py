@@ -58,8 +58,10 @@ class BoxWhiskerPlotter(BasePlotter):
         if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
         self.legend_fixer(locals())
         self.local_scatter(locals())
+        if self.custom_x_label is None: self.ax.set_xlabel("")
+        else: self.ax.set_xlabel(self.custom_x_label)
 
-#%%---------------------------------------------------------------------------------------------------------------------
+    #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------------------
     # %% LOAD ALL PARENT METHODS UNLESS THEY EXIST HERE

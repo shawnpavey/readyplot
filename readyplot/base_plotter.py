@@ -175,7 +175,8 @@ class BasePlotter:
         color = self.line_color if not color else color
 
         # CREATE XLABEL
-        self.ax.set_xlabel(label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
+        self.custom_x_label = label
+        self.ax.set_xlabel(self.custom_x_label, fontweight=fontweight, fontsize=fontsize, color=color, **kwargs)
 
     def set_ylabel(self,*args,fontweight=False, fontsize=False, color=False,**kwargs):
         # PARSE ARGS AND KWARGS
@@ -185,7 +186,8 @@ class BasePlotter:
         color = self.line_color if not color else color
 
         # CREATE YLABEL
-        self.ax.set_ylabel(label, fontweight=fontweight, fontsize=fontsize, color=color,**kwargs)
+        self.custom_y_label = label
+        self.ax.set_ylabel(self.custom_y_label, fontweight=fontweight, fontsize=fontsize, color=color,**kwargs)
 
     def set_titles(self,*args,title=None,custom_x=None,custom_y=None,**kwargs):
         # PARSE ARGS IF PROVIDED
@@ -244,6 +246,7 @@ class BasePlotter:
                 temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder)
                 self.internal_ylines.append(temp_line)
 
+    # %% PLOTTING COPIED XLINES AND YLINES FOR INSTANCE IN A SUBPLOT
     def plot_copied_xlines_ylines(self):
         excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
                              'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
@@ -264,6 +267,7 @@ class BasePlotter:
             temp_list.append(temp_line)
         self.internal_ylines = temp_list
 
+    # %% PLOTTING COPIED LINES FOR INSTANCE IN A SUBPLOT
     def plot_copied_lines(self):
         excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
                              'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
@@ -277,6 +281,7 @@ class BasePlotter:
             temp_list.append(temp_line)
         self.internal_xlines = temp_list
 
+    # %% PLOTTING COPIED PATCHES FOR INSTANCE IN A SUBPLOT
     def plot_copied_patches(self,zorder=2,**kwargs):
         included_keywords = ['agg_filter','antialiased','aa', 'capstyle', 'clip_box', 'clip_on', 'clip_path', 'color',
                              'edgecolor', 'facecolor', 'fill', 'hatch', 'joinstyle', 'label', 'linestyle', 'linewidth',
@@ -888,8 +893,8 @@ class BasePlotter:
     # %% FIGURE AND LAYOUT CUSTOMIZATION
     def set_aspect(self,*args,**kwargs):
         self.ax.set_aspect(*args,**kwargs)
-        self.fig_height = self.get_figheight()
-        self.fig_width = self.get_figwidth()
+        # self.fig_height = self.get_figheight()
+        # self.fig_width = self.get_figwidth()
     def get_aspect(self, *args, **kwargs):
         self.ax.get_aspect(*args, **kwargs)
     def set_figheight(self,val,**kwargs):
