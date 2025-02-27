@@ -65,7 +65,7 @@ class BasePlotter:
             self.marker_dict = dict(zip(self.unique,self.markers))
         except TypeError: self.marker_dict = {}
 
-        # RESOLVE INPUTS FOR SUBPLOTS SUCH AS EXISTING LEGENDS AND OBJECTS
+        # RESOLVE INPUTS FOR SUBPLOTS SUCH AS EXISTING LEGENDS
         try: self.add_to_legend([],[])
         except: pass
 
@@ -85,6 +85,8 @@ class BasePlotter:
         self.set_xlabel()
         self.set_ylabel()
         self.plot_xline_yline()
+        self.plot_copied_lines()
+        self.plot_copied_patches()
         return self.fig,self.ax
 
     # %% POST FORMAT THE PLOT
@@ -144,6 +146,9 @@ class BasePlotter:
 
         # INITIALIZE LEGEND
         if self.legend is None: self.legend = self.ax.legend()
+        else:
+            if self.first_time_legend: self.plot_copied_legend()
+        self.first_time_legend = False
 
         # SET FIGURE DIMENSIONS
         self.fig.set_figwidth(self.fig_width)
@@ -218,41 +223,121 @@ class BasePlotter:
         elif self.custom_x_label != '' and self.custom_x_label is not None: self.DF.name = self.custom_x_label
 
     # %% PLOTING XLINE AND YLINE ANNOTATIONS
-    def plot_xline_yline(self,xlines=[None],ylines=[None],**kwargs):
-        if xlines[0] is None and ylines[0] is None:
+    def plot_xline_yline(self,xlines=[None],ylines=[None],zorder=2,**kwargs):
+        if (xlines[0] is None and len(self.internal_xlines) == 0) and (ylines[0] is None and len(self.internal_ylines) == 0):
             xlines = self.xlines
             ylines = self.ylines
+            zorder = 1
+        elif (xlines[0] is None and ylines[0] is None) and (len(self.internal_xlines) > 0 or len(self.internal_ylines) > 0):
+            self.plot_copied_xlines_ylines()
         else:
             xlines = xlines
             ylines = ylines
+            zorder = 3
 
-        if xlines[0]:
+        if xlines[0] is not None:
             for line in xlines:
-                temp_line = self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+                temp_line = self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder)
                 self.internal_xlines.append(temp_line)
-        if ylines[0]:
+        if ylines[0] is not None:
             for line in ylines:
-                temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--')
+                temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder)
                 self.internal_ylines.append(temp_line)
+
+    def plot_copied_xlines_ylines(self):
+        excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
+                             'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
+                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata']
+        temp_list = []
+        for line in self.internal_xlines:
+            filtered_properties = {key: value for key, value in line.properties().items() if
+                                   key not in excluded_keywords}
+            temp_line = self.ax.axvline(x=line.properties()['xdata'][0], **filtered_properties)
+            temp_list.append(temp_line)
+        self.internal_xlines = temp_list
+
+        temp_list = []
+        for line in self.internal_ylines:
+            filtered_properties = {key: value for key, value in line.properties().items() if
+                                   key not in excluded_keywords}
+            temp_line = self.ax.axhline(y=line.properties()['ydata'][0], **filtered_properties)
+            temp_list.append(temp_line)
+        self.internal_ylines = temp_list
+
+    def plot_copied_lines(self):
+        excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
+                             'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
+                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata']
+        temp_list = []
+        for line in self.internal_lines:
+            filtered_properties = {key: value for key, value in line.properties().items() if
+                                   key not in excluded_keywords}
+            temp = mlines.Line2D(line.properties()['xdata'],line.properties()['ydata'], **filtered_properties)
+            temp_line = self.ax.add_line(temp)
+            temp_list.append(temp_line)
+        self.internal_xlines = temp_list
+
+    def plot_copied_patches(self,zorder=2,**kwargs):
+        included_keywords = ['agg_filter','antialiased','aa', 'capstyle', 'clip_box', 'clip_on', 'clip_path', 'color',
+                             'edgecolor', 'facecolor', 'fill', 'hatch', 'joinstyle', 'label', 'linestyle', 'linewidth',
+                             'picker', 'snap', 'url', 'visible',
+                             'angle','rotation_point']
+
+        temp_list = []
+        for patch in self.internal_patches:
+            filtered_properties = {key: value for key, value in patch.properties().items() if key in included_keywords}
+            filtered_properties['zorder'] = zorder
+
+            if isinstance(patch, patches.Rectangle):
+                corners = patch.properties()['corners']
+                xy = tuple(corners[0])
+                width = corners[1][0] - corners[0][0]
+                height = corners[3][1] - corners[0][1]
+                rec_args = xy,width,height
+                new_patch = patches.Rectangle(*rec_args,**filtered_properties)
+            elif isinstance(patch, patches.Circle):
+                xy = patch.properties()['center']
+                radius = patch.properties()['width']/2
+                circle_args = xy, radius
+                new_patch = patches.Circle(*circle_args,**filtered_properties)
+            elif isinstance(patch, patches.Polygon):
+                path = patch.properties()['path']
+                xy = [tuple(pos) for pos in path.vertices]
+                poly_args = xy[:-1]
+                new_patch = patches.Polygon(poly_args,**filtered_properties)
+            else:
+                print ('PATCH TYPE NOT CURRENTLY SUPPORTED, SUBMIT REQUEST ON GITHUB TO ADD')
+                return
+
+            temp_patch = self.ax.add_patch(new_patch)
+            temp_list.append(temp_patch)
+
+        self.internal_patches = temp_list
 
     # %% LEGEND METHODS
     def manage_legend(self):
         # GET HANDLES AND LABELS
-        handles, labels = self.ax.get_legend_handles_labels()
+        if not hasattr(self, 'copied_legend'):
+            handles, labels = self.ax.get_legend_handles_labels()
 
-        # MANAGE STRANGE HISTOGRAM BEHAVIOR
-        if self.plot_type == 'hist':
-            labels,handles = self.unique.copy(),[]
-            for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
-        if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
-            try: self.legend.set_visible(False)
-            except: pass
+            # MANAGE STRANGE HISTOGRAM BEHAVIOR
+            if self.plot_type == 'hist':
+                labels,handles = self.unique.copy(),[]
+                for counter, lab in enumerate(labels): handles.append(Patch(color=self.colors[counter], label=lab))
+            if not labels and not handles or (self.plot_type == 'hist' and len(self.unique) < 2):
+                try: self.legend.set_visible(False)
+                except: pass
+            else:
+
+                # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR, WITHIN MANAGE LEGEND USE GLOBAL TRANSPARENCY VALUE
+                self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
+                if is_transparent(self.back_color): self.legend_kwargs['framealpha'] = 0
+                self.set_legend(handles[:self.handles_in_legend],labels[:self.handles_in_legend],**self.legend_kwargs)
+
+            self.handles,self.labels = self.get_legend_handles_labels()
+
         else:
-
-            # CREATE THE LEGEND AND CATCH ALL TEXT TO ADJUST COLOR, WITHIN MANAGE LEGEND USE GLOBAL TRANSPARENCY VALUE
-            self.legend_kwargs['framealpha'] = 0 if self.transparent else 1
-            if is_transparent(self.back_color): self.legend_kwargs['framealpha'] = 0
-            self.set_legend(handles[:self.handles_in_legend],labels[:self.handles_in_legend],**self.legend_kwargs)
+            self.set_legend(self.handles,self.labels)
 
     def set_legend(self,handles,labels,visible=True, text_color=None,**kwargs):
         # IF A TITLE IS PASSED ENSURE APPROPRIATE FONT, PREPARE COLOR SETTING FOR LATER
@@ -286,7 +371,22 @@ class BasePlotter:
         labels.extend(new_labels)
 
         # RE-PLOT THE LEGEND WITH INTERNAL set_legend() CALL
-        self.set_legend(handles,labels,visible=visible, text_color=text_color, **self.legend_kwargs)
+        if self.legend is not None:
+            self.set_legend(handles,labels,visible=visible, text_color=text_color, **self.legend_kwargs)
+
+    def plot_copied_legend(self):
+        included_keywords = ['loc', 'numpoints', 'markerscale',
+        'markerfirst', 'reverse', 'scatterpoints', 'scatteryoffsets', 'prop',
+        'fontsize', 'labelcolor', 'borderpad', 'labelspacing', 'handlelength',
+        'handleheight', 'handletextpad', 'borderaxespad', 'columnspacing', 'ncols',
+        'mode', 'fancybox', 'shadow', 'title', 'title_fontsize', 'framealpha',
+        'edgecolor', 'facecolor', 'bbox_to_anchor', 'bbox_transform', 'frameon',
+        'handler_map', 'title_fontproperties', 'alignment', 'ncol', 'draggable']
+        filtered_properties = {key: value for key, value in self.legend.properties().items() if key in included_keywords}
+        handles, labels = self.handles,self.labels
+        legend = self.ax.legend(handles,labels,**filtered_properties)
+        self.legend = legend
+        self.copied_legend = [handles,labels]
 
     def get_legend(self):
         # SIMPLE WAY TO GET THE LEGEND OBJECT OUT OF READYPLOT
@@ -514,12 +614,12 @@ class BasePlotter:
 
     def get_copy_settings(self,include_problematic = False):
         # OUTPUT ALL THE INPUT SETTINGS INTO THIS GRAPH FOR REPEATABILITY WITH OTHERS
-        problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings']
+        problematic = ['DF', 'x', 'y', 'z', 'xlab', 'ylab', 'zlab','imported_settings','legend','first_time_legend']
         if include_problematic: output = {key: value for key, value in self.input_dict.items()}
         else: output = {key: value for key, value in self.input_dict.items() if key not in problematic}
         current_settings = self.get_all()
-        for key, value in self.input_dict.items():
-            if key in self.get_all().items():
+        for key, value in output.items():
+            if key in self.get_all():
                 output[key] = current_settings[key]
         return output
 
@@ -726,11 +826,13 @@ class BasePlotter:
         self.plot_xline_yline()
     def add_xlines(self,xlines):
         if not isinstance(xlines, list): xlines = [xlines]
-        self.xlines.extend(xlines)
+        if self.xlines[0] is None: self.xlines = xlines
+        else: self.xlines.extend(xlines)
         self.plot_xline_yline(xlines=xlines)
     def add_ylines(self,ylines):
         if not isinstance(ylines, list): ylines = [ylines]
-        self.ylines.extend(ylines)
+        if self.ylines[0] is None: self.ylines = ylines
+        else: self.ylines.extend(ylines)
         self.plot_xline_yline(ylines=ylines)
     def get_xlines(self,*args,**kwargs):
         return self.internal_xlines
@@ -752,12 +854,26 @@ class BasePlotter:
         rect = patches.Rectangle((args[0], args[1]), args[2], args[3], **kwargs)
         self.ax.add_patch(rect)
         self.internal_patches.append(rect)
+    def add_circle(self,*args,**kwargs):
+        if len(args) > 1: radius = args[1]
+        else:
+            radius = kwargs['radius']
+            del kwargs['radius']
+        circle = patches.Circle(args[0], radius = radius, **kwargs)
+        self.ax.add_patch(circle)
+        self.internal_patches.append(circle)
+    def add_polygon(self,*args,**kwargs):
+        poly = patches.Plygon(args[0], **kwargs)
+        self.ax.add_patch(poly)
+        self.internal_patches.append(poly)
     def get_patches(self,*args,**kwargs):
         return self.internal_patches
     def add_line(self,*args,**kwargs):
-        line = mlines.Line2D(args[0], args[1], **kwargs)
+        line = mlines.Line2D(args[0],args[1],**kwargs)
         temp_line = self.ax.add_line(line)
         self.internal_lines.append(temp_line)
+    def get_lines(self,*args,**kwargs):
+        return self.internal_lines
 
 
     # %% FIGURE AND LAYOUT CUSTOMIZATION

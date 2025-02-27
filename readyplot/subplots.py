@@ -91,7 +91,7 @@ class SubPlots(BasePlotter):
 
             for rp in rps:
                 current_settings = rp.get_copy_settings(include_problematic=True)
-                print(current_settings)
+                current_settings['first_time_legend'] = True
                 current_settings = dict_update_nested(current_settings,individual_kwargs_list[self.abs_counter])
 
                 if self.shape[0] == 1: current_settings['input_ax'] = self.axs[col]
@@ -309,9 +309,39 @@ class SubPlots(BasePlotter):
 
     # %% LEGENDS
     def legend(self,*args,**kwargs):
-        self.ax.legend(*args,**kwargs)
+        included_keywords = ['loc', 'numpoints', 'markerscale',
+                             'markerfirst', 'reverse', 'scatterpoints', 'scatteryoffsets', 'prop',
+                             'fontsize', 'labelcolor', 'borderpad', 'labelspacing', 'handlelength',
+                             'handleheight', 'handletextpad', 'borderaxespad', 'columnspacing', 'ncols',
+                             'mode', 'fancybox', 'shadow', 'title', 'title_fontsize', 'framealpha',
+                             'edgecolor', 'facecolor', 'bbox_transform', 'frameon',
+                             'handler_map', 'title_fontproperties', 'alignment', 'ncol', 'draggable']
+        filtered_properties = {}
+        for key,value in self.ax.get_legend().properties().items():
+            if key in included_keywords: filtered_properties[key] = value
+            if key == 'title': filtered_properties[key] = value.get_text()
+        filtered_properties = dict_update_nested(filtered_properties, kwargs)
+
+        handles, labels = self.ax.get_legend_handles_labels()
+
+        text_color = self.ax.get_legend().get_texts()[0].get_color()
+        text_fontweight = self.ax.get_legend().get_texts()[0].get_fontweight()
+        text_fontsize = self.ax.get_legend().get_texts()[0].get_fontsize()
+
+        legend = self.ax.legend(handles,labels,**filtered_properties)
+
+        for text in legend.get_texts():
+            text.set_color(text_color)
+            text.set_fontweight(text_fontweight)
+            text.set_fontsize(text_fontsize)
+
+        legend.get_title().set_color(text_color)
+        legend.get_title().set_fontweight(text_fontweight)
+
+        return legend
     def get_legend(self,*args,**kwargs):
-        self.ax.get_legend(*args,**kwargs)
+        self.legend = self.ax.get_legend(*args,**kwargs)
+        return self.legend
     def text(self,*args,**kwargs):
         self.fig.text(*args,**kwargs)
     def get_texts(self,*args,**kwargs):

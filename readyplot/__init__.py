@@ -49,6 +49,9 @@ def initialize_common_defaults(args,input_dict):
     input_fig = None
     input_ax = None
     plot_type = None
+    first_time_legend = True
+    handles = None
+    labels = None
 
     # Output Fig
     folder_name = "OUTPUT_FIGURES"
