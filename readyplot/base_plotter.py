@@ -564,13 +564,8 @@ class BasePlotter:
             if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker','strip']: self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
         elif hasattr(self,'width'):
-            print(self.ax.margins()[0])
-            self.ax.margins(x=self.ax.margins()[0])
-            self.ax.margins(x=(1-self.width)/(len(self.DF[self.xlab].unique())))
-            print(len(self.DF[self.xlab].unique()))
-                              #+((1 - self.width) / 4)/(len(self.DF[self.xlab].unique())))
-            print(self.ax.margins()[0])
-
+            self.x_margin = (1-self.width)/(len(self.DF[self.xlab].unique()))
+            self.ax.margins(x=self.x_margin)
 
         # MANAGE EXPONENTS
         tx = self.ax.xaxis.get_offset_text()
@@ -603,9 +598,9 @@ class BasePlotter:
             y_min, y_max = self.ax.get_ylim()
             if abs(y_min) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(0, y_max)
             elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
-        elif hasattr(self,'width'):
-            try: self.ax.margins(y=(1 - self.width / 2))
-            except: pass
+        elif hasattr(self, 'width'):
+            self.y_margin = (1 - self.width) / (len(self.DF[self.ylab].unique()))
+            self.ax.margins(y=self.y_margin)
 
         # MANAGE EXPONENTS
         ty = self.ax.yaxis.get_offset_text()
