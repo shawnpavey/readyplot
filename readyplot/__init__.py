@@ -96,8 +96,8 @@ def initialize_common_defaults(args,input_dict):
     def_line_w = 1.5
     xtick_font_ratio = 1
     ytick_font_ratio = 1
-    x_axis_sig_figs = 2
-    y_axis_sig_figs = 2
+    x_axis_sig_figs = 3
+    y_axis_sig_figs = 3
 
     # Scientific Notation
     x_exp_location = 0

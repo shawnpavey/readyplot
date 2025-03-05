@@ -556,7 +556,7 @@ class BasePlotter:
                     elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
                     x_min, x_max = self.ax.get_xlim()
                 else:
-                    self.ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
+                    pass#self.ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.x_axis_sig_figs}g}'))
 
             except AttributeError:pass
             except KeyError:pass
@@ -594,7 +594,7 @@ class BasePlotter:
                     elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
                     y_min, y_max = self.ax.get_ylim()
                 else:
-                    self.ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
+                    pass#self.ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda val, pos: f'{val:.{self.y_axis_sig_figs}g}'))
 
             except AttributeError:pass
             except KeyError:pass
