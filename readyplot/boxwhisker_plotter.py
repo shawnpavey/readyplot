@@ -61,6 +61,7 @@ class BoxWhiskerPlotter(BasePlotter):
         self.local_scatter(locals())
         if self.custom_x_label is None: self.ax.set_xlabel("")
         else: self.ax.set_xlabel(self.custom_x_label)
+        super().just_plot()
 
     #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS

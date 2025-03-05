@@ -41,6 +41,7 @@ class LinePlotter(BasePlotter):
 
         # %% EXTRA PLOT EDITING
         if any(getattr(self, attr) is not None for attr in self.err_names): self.plot_errors(xlab, ylab, zlab)
+        super().just_plot()
 #%%---------------------------------------------------------------------------------------------------------------------
 # LOCAL METHODS
 #-----------------------------------------------------------------------------------------------------------------------

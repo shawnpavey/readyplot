@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import os
 import seaborn as sns
+import matplotlib
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
@@ -84,9 +85,6 @@ class BasePlotter:
         self.manage_figure()
         self.set_xlabel()
         self.set_ylabel()
-        self.plot_xline_yline()
-        self.plot_copied_lines()
-        self.plot_copied_patches()
         return self.fig,self.ax
 
     # %% POST FORMAT THE PLOT
@@ -239,18 +237,18 @@ class BasePlotter:
 
         if xlines[0] is not None:
             for line in xlines:
-                temp_line = self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder)
+                temp_line = self.ax.axvline(x=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder,**kwargs)
                 self.internal_xlines.append(temp_line)
         if ylines[0] is not None:
             for line in ylines:
-                temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder)
+                temp_line = self.ax.axhline(y=line,color=self.line_color,linewidth=self.def_line_w,linestyle='--',zorder=zorder,**kwargs)
                 self.internal_ylines.append(temp_line)
 
     # %% PLOTTING COPIED XLINES AND YLINES FOR INSTANCE IN A SUBPLOT
-    def plot_copied_xlines_ylines(self):
+    def plot_copied_xlines_ylines(self,zorder=None,**kwargs):
         excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
                              'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
-                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata']
+                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata','zorder']
         temp_list = []
         for line in self.internal_xlines:
             filtered_properties = {key: value for key, value in line.properties().items() if
@@ -263,35 +261,38 @@ class BasePlotter:
         for line in self.internal_ylines:
             filtered_properties = {key: value for key, value in line.properties().items() if
                                    key not in excluded_keywords}
+            if zorder is not None: filtered_properties['zorder'] = zorder
             temp_line = self.ax.axhline(y=line.properties()['ydata'][0], **filtered_properties)
             temp_list.append(temp_line)
         self.internal_ylines = temp_list
 
     # %% PLOTTING COPIED LINES FOR INSTANCE IN A SUBPLOT
-    def plot_copied_lines(self):
+    def plot_copied_lines(self,zorder=None):
         excluded_keywords = ['bbox', 'label', 'picker', 'transform', 'axes',
                              'children', 'path', 'path_effects', 'tightbbox', 'transformed_clip_path_and_affine',
-                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata']
+                             'window_extent', 'xydata', 'figure', 'data', 'xdata', 'ydata','zorder']
         temp_list = []
         for line in self.internal_lines:
             filtered_properties = {key: value for key, value in line.properties().items() if
                                    key not in excluded_keywords}
+            if zorder is not None: filtered_properties['zorder'] = zorder
             temp = mlines.Line2D(line.properties()['xdata'],line.properties()['ydata'], **filtered_properties)
             temp_line = self.ax.add_line(temp)
             temp_list.append(temp_line)
         self.internal_xlines = temp_list
 
     # %% PLOTTING COPIED PATCHES FOR INSTANCE IN A SUBPLOT
-    def plot_copied_patches(self,zorder=2,**kwargs):
+    def plot_copied_patches(self,zorder=None,**kwargs):
         included_keywords = ['agg_filter','antialiased','aa', 'capstyle', 'clip_box', 'clip_on', 'clip_path', 'color',
                              'edgecolor', 'facecolor', 'fill', 'hatch', 'joinstyle', 'label', 'linestyle', 'linewidth',
-                             'picker', 'snap', 'url', 'visible',
-                             'angle','rotation_point']
+                             'picker', 'snap', 'url', 'visible','in_layout',
+                             'angle','rotation_point','zorder']
 
         temp_list = []
         for patch in self.internal_patches:
             filtered_properties = {key: value for key, value in patch.properties().items() if key in included_keywords}
-            filtered_properties['zorder'] = zorder
+
+            if zorder is not None: filtered_properties['zorder'] = zorder
 
             if isinstance(patch, patches.Rectangle):
                 corners = patch.properties()['corners']
@@ -564,8 +565,11 @@ class BasePlotter:
             if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker','strip']: self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
         elif hasattr(self,'width'):
-            self.x_margin = (1-self.width)/(len(self.DF[self.xlab].unique()))
-            self.ax.margins(x=self.x_margin)
+            self.x_margin = (1-self.width)/2
+            lims = self.ax.get_xlim()
+            self.ax.margins(x=0)
+            self.ax.set_xlim(lims[0]-self.x_margin, lims[1]+self.x_margin)
+
 
         # MANAGE EXPONENTS
         tx = self.ax.xaxis.get_offset_text()
@@ -599,8 +603,10 @@ class BasePlotter:
             if abs(y_min) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(0, y_max)
             elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
         elif hasattr(self, 'width'):
-            self.y_margin = (1 - self.width) / (len(self.DF[self.ylab].unique()))
-            self.ax.margins(y=self.y_margin)
+            self.y_margin = (1 - self.width) / 2
+            lims = self.ax.get_ylim()
+            self.ax.margins(y=0)
+            self.ax.set_xlim(lims[0] - self.y_margin, lims[1] + self.y_margin)
 
         # MANAGE EXPONENTS
         ty = self.ax.yaxis.get_offset_text()
@@ -750,6 +756,13 @@ class BasePlotter:
 #-----------------------------------------------------------------------------------------------------------------------
     # %% PLACEHOLDER FOR CHILD CLASSES
     def just_plot(self,**kwargs):
+        xlims = self.ax.get_xlim()
+        ylims = self.ax.get_ylim()
+        self.plot_xline_yline()
+        self.plot_copied_lines()
+        self.plot_copied_patches()
+        self.ax.set_xlim(xlims)
+        self.ax.set_ylim(ylims)
         return self.fig, self.ax
 
     # %% PASS METHODS TO CHILDREN
@@ -873,8 +886,20 @@ class BasePlotter:
         for arg in args:
             self.ax.add_patch(arg)
             self.internal_patches.append(arg)
+
+    def mini_kwarg_resolver(self,key,def_val,kwargs):
+        if key not in kwargs:
+            output = def_val
+        else:
+            output = kwargs[key]
+            del kwargs[key]
+        return output, kwargs
+
     def add_rectangle(self,*args,**kwargs):
-        rect = patches.Rectangle((args[0], args[1]), args[2], args[3], **kwargs)
+        clip_on, kwargs = self.mini_kwarg_resolver('clip_on',True,kwargs)
+        in_layout, kwargs = self.mini_kwarg_resolver('in_layout',True,kwargs)
+
+        rect = patches.Rectangle((args[0], args[1]), args[2], args[3], clip_on=clip_on,in_layout=in_layout, **kwargs)
         self.ax.add_patch(rect)
         self.internal_patches.append(rect)
     def add_circle(self,*args,**kwargs):
