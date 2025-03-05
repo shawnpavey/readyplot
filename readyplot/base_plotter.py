@@ -410,8 +410,11 @@ class BasePlotter:
     # %% ERROR BARS
     def plot_errors(self,xlab,ylab,zlab):
         # INITIALIZE VARS FOR ERROR BAR EXISTENCE AND GET AXIS TICKS IN CASE AN AXIS HAS STRING LABELS NOT NUMERIC
-        err_vars = [ self.yerror_vals,self.hi_yerror_vals,self.low_yerror_vals,
-                 self.xerror_vals,self.hi_xerror_vals,self.low_xerror_vals]
+        err_xvars = [self.xerror_vals,self.hi_xerror_vals,self.low_xerror_vals]
+        err_yvars = [self.yerror_vals, self.hi_yerror_vals, self.low_yerror_vals]
+        err_vars = err_xvars.copy()
+        err_vars.extend(err_yvars)
+        print(err_vars)
 
         x_ticks = self.ax.get_xticks()
         x_labels = self.ax.get_xticklabels()
@@ -446,24 +449,25 @@ class BasePlotter:
                     # PLOT ERROR BARS AND FIX THE ISSUE WHERE ONLY A HIGH OR LOW ERROR LEADS TO MISSING CONNECTION
                     temp_x_err = np.array([row['x_errs'][0],row['x_errs'][1]])
                     temp_y_err = np.array([row['y_errs'][0],row['y_errs'][1]])
-                    if tempx+temp_x_err[1] > x_max and self.error_lim_affect:
+                    if tempx+temp_x_err[1] > x_max and self.error_lim_affect and any(a is not None for a in err_xvars):
                         x_max = tempx+temp_x_err[1]
                         self.ax.set_xlim(x_min,x_max)
-                    if tempy+temp_y_err[1] > y_max and self.error_lim_affect:
+                    if tempy+temp_y_err[1] > y_max and self.error_lim_affect and any(a is not None for a in err_yvars):
                         y_max = tempy+temp_y_err[1]
                         self.ax.set_ylim(y_min,y_max)
-                    if tempx - temp_x_err[0] < x_min and self.error_lim_affect:
+                    if tempx - temp_x_err[0] < x_min and self.error_lim_affect  and any(a is not None for a in err_xvars):
                         x_min = tempx - temp_x_err[0]
                         self.ax.set_xlim(x_min, x_max)
-                    if tempy - temp_y_err[0] < y_min and self.error_lim_affect:
+                    if tempy - temp_y_err[0] < y_min and self.error_lim_affect and any(a is not None for a in err_yvars):
                         y_min = tempy - temp_y_err[0]
                         self.ax.set_ylim(y_min, y_max)
                     linewidth = getattr(self, 'linewidth', self.def_line_w)
                     self.fix_trailing_errors(tempx, tempy, temp_x_err, temp_y_err, self.colors[i],linewidth)
                     self.ax.errorbar(tempx,tempy,xerr=temp_x_err.reshape(2,1),yerr=temp_y_err.reshape(2,1),
                                      capsize = self.capsize,color=self.colors[i],linewidth=linewidth,capthick=linewidth)
-                    self.ax.set_xlim(x_min, x_max)
-                    self.ax.set_ylim(y_min, y_max)
+
+                    if any(a is not None for a in err_xvars): self.ax.set_xlim(x_min, x_max)
+                    if any(a is not None for a in err_yvars): self.ax.set_ylim(y_min, y_max)
 
         # PASS IF NO ERROR KEYWORDS HAVE BEEN PASSED
         else:
@@ -559,6 +563,13 @@ class BasePlotter:
             x_min, x_max = self.ax.get_xlim()
             if abs(x_min) < abs(0.2 * (x_max - x_min)) and self.plot_type not in ['bar','boxwhisker','strip']: self.ax.set_xlim(0, x_max)
             elif abs(x_max) < abs(0.2 * (x_max - x_min)): self.ax.set_xlim(x_min, 0)
+        elif hasattr(self,'width'):
+            print(self.ax.margins()[0])
+            self.ax.margins(x=self.ax.margins()[0])
+            self.ax.margins(x=(1-self.width)/(len(self.DF[self.xlab].unique())))
+            print(len(self.DF[self.xlab].unique()))
+                              #+((1 - self.width) / 4)/(len(self.DF[self.xlab].unique())))
+            print(self.ax.margins()[0])
 
 
         # MANAGE EXPONENTS
@@ -592,6 +603,9 @@ class BasePlotter:
             y_min, y_max = self.ax.get_ylim()
             if abs(y_min) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(0, y_max)
             elif abs(y_max) < abs(0.2 * (y_max - y_min)): self.ax.set_ylim(y_min, 0)
+        elif hasattr(self,'width'):
+            try: self.ax.margins(y=(1 - self.width / 2))
+            except: pass
 
         # MANAGE EXPONENTS
         ty = self.ax.yaxis.get_offset_text()

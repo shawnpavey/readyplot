@@ -30,6 +30,7 @@ class BarPlotter(BasePlotter):
         DF,kwargs, markers,palette,dodge,ax,capsize,linewidth,width = outputs
         palette, linewidth, width = super().var_existence_check(inputs,input_keys,defaults_list, kwargs=kwargs)
         xlab,ylab,zlab,dodge = self.label_prep(locals())
+        self.width = width
 
         # %% PLOT WITH SEABORN
         sns.barplot(

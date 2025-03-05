@@ -32,6 +32,7 @@ class BoxWhiskerPlotter(BasePlotter):
         palette,boxprops,showfliers,showmeans,meanprops,linecolor,linewidth,width,dodge,ax = super().var_existence_check(
             inputs,input_keys,defaults_list, kwargs=kwargs)
         DF,xlab,ylab,zlab,dodge = self.label_prep(locals())
+        self.width = width
 
         # %% PLOT WITH SEABORN
         for i,u in enumerate(self.unique):
