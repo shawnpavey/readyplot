@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from pathlib import Path
 from .utils import (numeric_checker, min_maxer, is_mostly_strings, ensure_data_frame, check_labels_in_DF,
-                    dict_update_nested, is_transparent, delete_ticks_by_sig_figs)
+                    dict_update_nested, is_transparent, delete_ticks_by_sig_figs, mini_kwarg_resolver)
 import matplotlib.patches as patches
 from matplotlib.patches import Patch
 import matplotlib.lines as mlines
@@ -887,17 +887,9 @@ class BasePlotter:
             self.ax.add_patch(arg)
             self.internal_patches.append(arg)
 
-    def mini_kwarg_resolver(self,key,def_val,kwargs):
-        if key not in kwargs:
-            output = def_val
-        else:
-            output = kwargs[key]
-            del kwargs[key]
-        return output, kwargs
-
     def add_rectangle(self,*args,**kwargs):
-        clip_on, kwargs = self.mini_kwarg_resolver('clip_on',True,kwargs)
-        in_layout, kwargs = self.mini_kwarg_resolver('in_layout',True,kwargs)
+        clip_on, kwargs = mini_kwarg_resolver('clip_on',True,kwargs)
+        in_layout, kwargs = mini_kwarg_resolver('in_layout',True,kwargs)
 
         rect = patches.Rectangle((args[0], args[1]), args[2], args[3], clip_on=clip_on,in_layout=in_layout, **kwargs)
         self.ax.add_patch(rect)

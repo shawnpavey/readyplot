@@ -159,6 +159,13 @@ def check_labels_in_DF(DF,xlab,ylab,zlab):
         outputs.append(lab)
     return outputs
 
+def mini_kwarg_resolver(key,def_val,kwargs):
+    if key not in kwargs:
+        output = def_val
+    else:
+        output = kwargs[key]
+        del kwargs[key]
+    return output, kwargs
 
 def find_closest(dictionary, x_pos):
     # Initialize variables to track the closest key and value
