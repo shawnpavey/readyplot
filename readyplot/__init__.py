@@ -41,9 +41,9 @@ def initialize_common_defaults(args,input_dict):
     csv_path = None
 
     # Groups (xlab,ylab,zlab maybe created above during prepare_data_frame_col_names)
-    colors = ['g', 'r', 'b', 'y', 'c', 'm', 'k', 'w']
+    colors = ['#199940', 'r', 'b', 'y', 'c', 'm', 'k', 'w']
     markers = ['o', 's', 'D', 'p', 'h', '*', 'x', '+', '^', 'v', '>', '<']
-    hatches = ['//', '...', '--', '++', 'OO', '**']
+    hatches = ['....', '---', '//', '++', 'OO', '**']
     style = None
 
     # Input Handles
