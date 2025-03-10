@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from matplotlib.patches import Rectangle
-from spyder_kernels.utils import mpl
 
 from .base_plotter import BasePlotter
 from .utils import check_labels_in_DF, match_rgba_to_color, find_closest
