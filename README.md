@@ -17,9 +17,9 @@ is for the defaults to be fine-tuned such that the user doesn't need to specify 
 options such as figure width and height. Nothing feels quite as good as watching your output folder auto-populate
 with readyplot figures which are perfect for both data exploration and publication!
 
-|              bar()               |             boxwhisker()             |          hist()          |line()|scatter()|
-|:--------------------------------:|:------------------------------------:|:------------------------:|:----:|:--:|
-| ![Bar](readyplot/images/Bar.png) | ![Boxwhisker](readyplot/images/Boxwhisker.png) | ![Hist](readyplot/images/Hist.png) |  ![Line](readyplot/images/Line.png) |![Scatter](readyplot/images/Scatter.png)|
+|              bar()               |             boxwhisker()             |          hist()          |line()|scatter()| subplots()                               |
+|:--------------------------------:|:------------------------------------:|:------------------------:|:----:|:--:|------------------------------------------|
+| ![Bar](readyplot/images/Bar.png) | ![Boxwhisker](readyplot/images/Boxwhisker.png) | ![Hist](readyplot/images/Hist.png) |  ![Line](readyplot/images/Line.png) |![Scatter](readyplot/images/Scatter.png)| ![SubPlot](readyplot/images/20240715_4154_01.avi_SUB.png) |
 
 # Installation
 
