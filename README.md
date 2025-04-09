@@ -159,5 +159,8 @@ and calling readyplot with a different 'ylab' each time
 ---
 # Conclusion
 Happy plotting! Feel free to suggest additional features or plot types if needed! Readyplot currently includes most
-plotting types I use on a daily basis, but I'd be happy to expand readyplot to match the community's needs.
+plotting types I use on a daily basis, but I'd be happy to expand readyplot to match the community's needs. This is a
+passion project which was mostly created within a couple weeks and I hope to get back to improving it within the next
+year. I haven't had time to fully populate the wiki, but am happy to provide sample templates for whatever you need
+if you reach out. My code is decently commented so your favorite AI helper may also provide some insight into use cases.
                                 
