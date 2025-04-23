@@ -103,7 +103,11 @@ class SubPlots(BasePlotter):
 
                 # HANDLE SOME UNIQUE VARIABLES FOR PROPER BEHAVIOR
                 current_settings['first_time_legend'] = True
-                if self.shape[0] == 1: current_settings['input_ax'] = self.axs[col]
+                if self.shape[0] == 1:
+                    try:
+                        current_settings['input_ax'] = self.axs[col]
+                    except:
+                        current_settings['input_ax'] = self.axs
                 elif self.shape[1] == 1: current_settings['input_ax'] = self.axs[row]
                 else: current_settings['input_ax'] = self.axs[row, col]
 
@@ -251,7 +255,11 @@ class SubPlots(BasePlotter):
 
     def set_ax_from_collection(self,ax_num=0):
         row, col = self.get_subplot_coordinates(ax_num)
-        if self.shape[0] == 1: self.ax = self.axs[col]
+        if self.shape[0] == 1:
+            try:
+                self.ax = self.axs[col]
+            except:
+                self.ax = self.axs
         elif self.shape[1] == 1: self.ax = self.axs[row]
         else: self.ax = self.axs[row][col]
 
