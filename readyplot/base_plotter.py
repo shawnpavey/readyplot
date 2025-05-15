@@ -787,22 +787,22 @@ class BasePlotter:
     def set_ylim(self,*args,**kwargs):
         self.ax.set_ylim(*args,**kwargs)
     def get_xlim(self, *args, **kwargs):
-        self.ax.get_xlim(*args, **kwargs)
+        return self.ax.get_xlim(*args, **kwargs)
     def get_ylim(self, *args, **kwargs):
-        self.ax.get_ylim(*args, **kwargs)
+        return self.ax.get_ylim(*args, **kwargs)
 
     def xticks(self,*args,**kwargs):
         self.fig.xticks(*args,**kwargs)
     def yticks(self,*args,**kwargs):
         self.fig.yticks(*args,**kwargs)
     def get_xticks(self, *args, **kwargs):
-        self.ax.get_xticks(*args, **kwargs)
+        return self.ax.get_xticks(*args, **kwargs)
     def get_yticks(self, *args, **kwargs):
-        self.ax.get_yticks(*args, **kwargs)
+        return self.ax.get_yticks(*args, **kwargs)
     def get_xticklabels(self, *args, **kwargs):
-        self.ax.get_xticklabels(*args, **kwargs)
+        return self.ax.get_xticklabels(*args, **kwargs)
     def get_yticklabels(self, *args, **kwargs):
-        self.ax.get_yticklabels(*args, **kwargs)
+        return self.ax.get_yticklabels(*args, **kwargs)
 
     def gca(self,*args,**kwargs):
         plt.gca(*args,**kwargs)
@@ -819,7 +819,7 @@ class BasePlotter:
     def set_facecolor(self,*args,**kwargs):
         self.ax.set_facecolor(*args,**kwargs)
     def get_facecolor(self,*args,**kwargs):
-        self.ax.get_facecolor(*args,**kwargs)
+        return self.ax.get_facecolor(*args,**kwargs)
 
     # %% TITLES, LABELS
     def title(self,*args,**kwargs):
@@ -829,11 +829,11 @@ class BasePlotter:
     def ylabel(self,*args,**kwargs):
         self.set_ylabel(*args,**kwargs)
     def get_title(self, *args, **kwargs):
-        self.ax.get_title(*args, **kwargs)
+        return self.ax.get_title(*args, **kwargs)
     def get_xlabel(self, *args, **kwargs):
-        self.ax.get_xlabel(*args, **kwargs)
+        return self.ax.get_xlabel(*args, **kwargs)
     def get_ylabel(self, *args, **kwargs):
-        self.ax.get_ylabel(*args, **kwargs)
+        return self.ax.get_ylabel(*args, **kwargs)
 
     # %% LEGENDS + ANNOTATIONS
     def create_legend(self,*args,**kwargs):
@@ -846,7 +846,7 @@ class BasePlotter:
     def annotate(self,*args,**kwargs):
         self.fig.annotate(*args,**kwargs)
     def get_texts(self,*args,**kwargs):
-        self.fig.get_texts(*args,**kwargs)
+        return self.fig.get_texts(*args,**kwargs)
 
     def set_xlines(self,xlines):
         if not isinstance(xlines,list): xlines = [xlines]
@@ -922,7 +922,7 @@ class BasePlotter:
         # self.fig_height = self.get_figheight()
         # self.fig_width = self.get_figwidth()
     def get_aspect(self, *args, **kwargs):
-        self.ax.get_aspect(*args, **kwargs)
+        return self.ax.get_aspect(*args, **kwargs)
     def set_figheight(self,val,**kwargs):
         self.fig_height = val
         self.fig.set_figheight(self.fig_height,**kwargs)
@@ -930,6 +930,6 @@ class BasePlotter:
         self.fig_width = val
         self.fig.set_figwidth(self.fig_width,**kwargs)
     def get_figheight(self,*args,**kwargs):
-        self.fig.get_figheight(*args,**kwargs)
+        return self.fig.get_figheight(*args,**kwargs)
     def get_figwidth(self,*args,**kwargs):
-        self.fig.get_figwidth(*args,**kwargs)
+        return self.fig.get_figwidth(*args,**kwargs)
