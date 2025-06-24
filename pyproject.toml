@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "readyplot"
-version = "1.4.8"
+version = "1.4.9"
 description = "Publication-ready data visualization"
 readme = "README.md"
 dependencies = [
