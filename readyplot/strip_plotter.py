@@ -34,11 +34,11 @@ class StripPlotter(BasePlotter):
 
         # %% PLOT WITH SEABORN, FIRST INVISIBLE BAR PLOTS FOR ERRORS, THEN STRIPPLOT ITERATION FOR MARKER HANDLING
         self.pre_lines = self.ax.get_lines()
-        sns.barplot(
+        sns.barplot(legend=False,
             x=xlab, y=ylab, data=DF, hue=zlab,
             palette=palette, linewidth=linewidth, capsize=capsize, width=width, dodge=dodge,
             ax=ax, err_kws={'color': self.line_color, 'linewidth': self.def_line_w}, **kwargs)
-        sns.pointplot(
+        sns.pointplot(legend=False,
             data=DF, x=xlab, y=ylab, hue=zlab,
             palette=palette, dodge=(0.8-0.8/len(self.unique)), errorbar=None,linestyle="none",
             marker="_", markersize=20, markeredgewidth=self.def_line_w,

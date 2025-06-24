@@ -329,8 +329,8 @@ class BasePlotter:
             if self.plot_type == 'strip':
                 temp_handles, temp_labels = [],[]
                 for i in range(len(self.unique)):
-                    temp_handles.append(handles[i*(len(self.unique)+1)+2*len(self.unique)])
-                    temp_labels.append(labels[i*(len(self.unique)+1)+2*len(self.unique)])
+                    temp_handles.append(handles[i*(len(self.unique)+1)])#+2*len(self.unique)])
+                    temp_labels.append(labels[i*(len(self.unique)+1)])#+2*len(self.unique)])
                 handles,labels = temp_handles,temp_labels
                 self.handles, self.labels = handles,labels
 
