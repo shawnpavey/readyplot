@@ -382,6 +382,14 @@ class BasePlotter:
 
         # GET OLD HANDLES AND LABELS, EXTEND WITH THE NEW INPUTS
         handles, labels = self.get_legend_handles_labels()
+
+        if self.plot_type == 'strip':
+            temp_handles, temp_labels = [], []
+            for i in range(len(self.unique)):
+                temp_handles.append(handles[i * (len(self.unique) + 1)])  # +2*len(self.unique)])
+                temp_labels.append(labels[i * (len(self.unique) + 1)])  # +2*len(self.unique)])
+            handles, labels = temp_handles, temp_labels
+
         handles.extend(new_handles)
         labels.extend(new_labels)
 
