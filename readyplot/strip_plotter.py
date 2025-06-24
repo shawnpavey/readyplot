@@ -40,7 +40,7 @@ class StripPlotter(BasePlotter):
             ax=ax, err_kws={'color': self.line_color, 'linewidth': self.def_line_w}, **kwargs)
         sns.pointplot(
             data=DF, x=xlab, y=ylab, hue=zlab,
-            palette=palette, dodge=(2*0.8/len(self.unique)), errorbar=None,linestyle="none",
+            palette=palette, dodge=(0.8-0.8/len(self.unique)), errorbar=None,linestyle="none",
             marker="_", markersize=20, markeredgewidth=self.def_line_w,
             ax=ax, **kwargs
         )
