@@ -34,14 +34,14 @@ class StripPlotter(BasePlotter):
 
         # %% PLOT WITH SEABORN, FIRST INVISIBLE BAR PLOTS FOR ERRORS, THEN STRIPPLOT ITERATION FOR MARKER HANDLING
         self.pre_lines = self.ax.get_lines()
-        sns.barplot(legend=False,
-            x=xlab, y=ylab, data=DF, hue=zlab,
-            palette=palette, linewidth=linewidth, capsize=capsize, width=width, dodge=dodge,
-            ax=ax, err_kws={'color': self.line_color, 'linewidth': self.def_line_w}, **kwargs)
+        # sns.barplot(legend=False,
+        #     x=xlab, y=ylab, data=DF, hue=zlab,
+        #     palette=palette, linewidth=linewidth, capsize=capsize, width=width, dodge=dodge,
+        #     ax=ax, err_kws={'color': self.line_color, 'linewidth': self.def_line_w}, **kwargs)
         sns.pointplot(legend=False,
-            data=DF, x=xlab, y=ylab, hue=zlab,
-            palette=palette, dodge=(0.8-0.8/len(self.unique)), errorbar=None,linestyle="none",
-            marker="_", markeredgewidth=self.def_line_w, markersize=50*capsize,
+            data=DF, x=xlab, y=ylab, hue=zlab, capsize=capsize*0.9*0.7*2/len(self.unique), #capsize is user ratio * pad * smaller than mean*default gorup size/number of hues
+            palette=palette, dodge=(0.8-0.8/len(self.unique)), errorbar='sd',linestyle="none",
+            marker="_", markeredgewidth=self.def_line_w, markersize=20*5*0.9*capsize/len(self.unique)/len(self.DF[self.xlab].unique())/0.133,err_kws={'linewidth': self.def_line_w},
             ax=ax, **kwargs
         )
         self.hatches_and_colors(locals())
