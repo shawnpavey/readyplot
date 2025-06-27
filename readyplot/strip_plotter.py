@@ -41,7 +41,7 @@ class StripPlotter(BasePlotter):
         sns.pointplot(legend=False,
             data=DF, x=xlab, y=ylab, hue=zlab,
             palette=palette, dodge=(0.8-0.8/len(self.unique)), errorbar=None,linestyle="none",
-            marker="_", markersize=20, markeredgewidth=self.def_line_w,
+            marker="_", markeredgewidth=self.def_line_w, markersize=50*capsize,
             ax=ax, **kwargs
         )
         self.hatches_and_colors(locals())
