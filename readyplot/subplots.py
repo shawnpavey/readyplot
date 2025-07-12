@@ -234,8 +234,8 @@ class SubPlots(BasePlotter):
         try:
             os.mkdir(dir_name)
         except FileExistsError:
-            print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
-        print(f"Directory '{dir_name}' created successfully.")
+            pass#print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
+        #print(f"Directory '{dir_name}' created successfully.")
 
         # SAVE FIGURE
         self.fig.savefig(save_name, bbox_inches='tight', **kwargs) #transparent=self.transparent, **kwargs)
