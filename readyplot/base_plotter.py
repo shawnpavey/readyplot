@@ -107,8 +107,8 @@ class BasePlotter:
 
         # TRY TO MAKE A DIRECTORY OR USE THE CURRENT ONE
         try: os.mkdir(dir_name)
-        except FileExistsError: print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
-        print(f"Directory '{dir_name}' created successfully.")
+        except FileExistsError: pass#print(f"Directory '{dir_name}' already exists, overwriting and/or adding data.")
+        #print(f"Directory '{dir_name}' created successfully.")
 
         # SAVE FIGURE
         self.fig.savefig(save_name, bbox_inches='tight',transparent=self.transparent, **kwargs)
@@ -423,7 +423,7 @@ class BasePlotter:
         err_yvars = [self.yerror_vals, self.hi_yerror_vals, self.low_yerror_vals]
         err_vars = err_xvars.copy()
         err_vars.extend(err_yvars)
-        print(err_vars)
+        #print(err_vars)
 
         x_ticks = self.ax.get_xticks()
         x_labels = self.ax.get_xticklabels()
