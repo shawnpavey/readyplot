@@ -225,7 +225,7 @@ class SubPlots(BasePlotter):
 
         # IF A '.' IS IN THE FOLDER NAME, JUST USE THAT AS THE ENTIRE SAVE
         else:
-            self.folder_name = self.folder_name.split(os.sep)[:-1]
+            self.dir_name = self.folder_name.split(os.sep)[:-1]
             self.dir_name = os.path.join(os.sep, *self.dir_name) if self.folder_name[0] == os.sep else os.path.join('',
                                                                                                                     *self.dir_name)
             save_name, dir_name = self.folder_name, self.dir_name
